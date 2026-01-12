@@ -107,26 +107,6 @@ export const ERROR_LABELS: Record<ActionErrorCode, { en: string; zh: string }> =
     en: 'This feature is currently disabled',
     zh: '此功能目前已停用',
   },
-  [API_ERROR_CODES.PRODUCT_NOT_FOUND]: {
-    en: 'Product not found',
-    zh: '找不到商品',
-  },
-  [API_ERROR_CODES.VARIANT_NOT_FOUND]: {
-    en: 'Product variant not found',
-    zh: '找不到商品規格',
-  },
-  [API_ERROR_CODES.OUT_OF_STOCK]: {
-    en: 'Item is out of stock',
-    zh: '商品缺貨中',
-  },
-  [API_ERROR_CODES.NOT_VISIBLE]: {
-    en: 'Item is not available',
-    zh: '商品不可購買',
-  },
-  [API_ERROR_CODES.INVALID_ITEMS]: {
-    en: 'Invalid items in cart',
-    zh: '購物車中有無效商品',
-  },
   [API_ERROR_CODES.COMMENT_NOT_FOUND]: {
     en: 'Comment not found',
     zh: '找不到留言',

@@ -41,7 +41,6 @@ export interface SimilarItemsTypeResult {
 }
 
 export interface SimilarItemsUpdateResult {
-  products: SimilarItemsTypeResult;
   posts: SimilarItemsTypeResult;
   galleryItems: SimilarItemsTypeResult;
   totalProcessed: number;
@@ -191,19 +190,17 @@ export async function updateAllSimilarItems(): Promise<SimilarItemsUpdateResult>
   }
 
   // Process each type (comments excluded per spec)
-  const [products, posts, galleryItems] = await Promise.all([
-    updateSimilarItemsForType('product'),
+  const [posts, galleryItems] = await Promise.all([
     updateSimilarItemsForType('post'),
     updateSimilarItemsForType('gallery_item'),
   ]);
 
   const result: SimilarItemsUpdateResult = {
-    products,
     posts,
     galleryItems,
-    totalProcessed: products.processed + posts.processed + galleryItems.processed,
-    totalUpdated: products.updated + posts.updated + galleryItems.updated,
-    totalErrors: products.errors + posts.errors + galleryItems.errors,
+    totalProcessed: posts.processed + galleryItems.processed,
+    totalUpdated: posts.updated + galleryItems.updated,
+    totalErrors: posts.errors + galleryItems.errors,
   };
 
   console.log(

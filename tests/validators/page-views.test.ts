@@ -27,7 +27,7 @@ test('isValidPageViewPath: valid paths', () => {
   assert.ok(isValidPageViewPath('/blog'));
   assert.ok(isValidPageViewPath('/blog/my-post'));
   assert.ok(isValidPageViewPath('/gallery/category/item'));
-  assert.ok(isValidPageViewPath('/shop/electronics/laptop-2025'));
+  assert.ok(isValidPageViewPath('/portfolio/my-project'));
   assert.ok(isValidPageViewPath('/a/b/c/d/e'));
   assert.ok(isValidPageViewPath('/path_with_underscores'));
   assert.ok(isValidPageViewPath('/path-with-dashes'));
@@ -91,7 +91,7 @@ test('isExcludedPath: non-excluded paths', () => {
   assert.ok(!isExcludedPath('/'));
   assert.ok(!isExcludedPath('/blog'));
   assert.ok(!isExcludedPath('/gallery/item'));
-  assert.ok(!isExcludedPath('/shop/product'));
+  assert.ok(!isExcludedPath('/contact'));
 });
 
 // =============================================================================

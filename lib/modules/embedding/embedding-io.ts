@@ -30,7 +30,6 @@ export type {
   EmbeddingStats,
   EmbeddingTypeStats,
   EnqueueEmbeddingRequest,
-  ProductEmbeddingData,
   PostEmbeddingData,
   GalleryItemEmbeddingData,
   CommentEmbeddingData,

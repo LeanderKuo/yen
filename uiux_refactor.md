@@ -94,7 +94,7 @@ app/[locale]/admin/<module>/
 
 **修復步驟（照順序做）**
 
-1. 確認這段 query 的 domain（blog/gallery/shop/comment/...），並在 `lib/modules/<domain>/` 補齊對應 IO 檔案：
+1. 確認這段 query 的 domain（blog/gallery/comment/content/landing/...），並在 `lib/modules/<domain>/` 補齊對應 IO 檔案：
    - Public reads：`io.ts`（anon client, server-only）＋必要時 `cached.ts`（`cachedQuery`）
    - Admin reads/writes：`admin-io.ts`（cookie-based server client; RLS）
    - 系統/金流/需要 service role：`*-io.ts`（`createAdminClient()`；檔案首行必須 `import 'server-only';`）
@@ -102,7 +102,7 @@ app/[locale]/admin/<module>/
 3. app layer 只保留：`parse/validate → call lib → revalidate`，不要在 app/components 留任何 `.from()`。
 4. Public SSR 的讀取一律改呼叫 `lib/modules/<domain>/cached.ts`（避免把 cookie-based client 的結果錯誤快取，造成跨使用者資料污染）。
 5. 寫入後必做 revalidate（依 domain 選擇 tag/path）：
-   - `revalidateTag('<domain>')`（例如 `blog`/`gallery`/`shop`/`site-content`）
+   - `revalidateTag('<domain>')`（例如 `blog`/`gallery`/`comment`/`site-content`）
    - `revalidatePath('/sitemap.xml')`（任何會影響 sitemap 的變更都要做）
 6. 驗證（必做）：
    - `npm test`（含 `tests/architecture-boundaries.test.ts`）
@@ -120,7 +120,7 @@ app/[locale]/admin/<module>/
 **修復步驟**
 
 1. 把 public 讀取函數保留在 `lib/modules/<domain>/io.ts`（使用 `lib/infrastructure/supabase/anon.ts`；檔案 `import 'server-only';`）。
-2. 在 `lib/modules/<domain>/cached.ts` 用 `cachedQuery` 包裝（tag 對齊 domain，例：`['blog']` / `['gallery']` / `['shop']`）。
+2. 在 `lib/modules/<domain>/cached.ts` 用 `cachedQuery` 包裝（tag 對齊 domain，例：`['blog']` / `['gallery']` / `['comment']`）。
 3. page/layout/sitemap/canonical resolve 改用 cached 版本（`*Cached`）。
 4. 確保 cached fetcher **不讀 cookies/headers**，也不使用 cookie-based client（避免跨使用者快取污染）。
 5. 寫入端（server actions/admin-io）完成後：`revalidateTag('<domain>')` + 必要 `revalidatePath()`。
@@ -196,7 +196,7 @@ app/[locale]/admin/<module>/
 1. 先盤點 `app/[locale]/admin/**` 內所有 server action 檔案（包含 `*-action(s).ts`）：
    - `rg -n "^'use server'" app/[locale]/admin`
 2. 選定唯一命名規則：**每個 route directory 一律使用 `actions.ts`**（與本檔 §1 範本對齊）。
-3. 對每個 route directory（含 `shop/*`、`content/*` 等）新增 `actions.ts`，內容只做 re-export（避免一次改太大）：
+3. 對每個 route directory（含 `blog/*`、`gallery/*`、`content/*` 等）新增 `actions.ts`，內容只做 re-export（避免一次改太大）：
    - `export { someAction } from './old-action-file';`
    - 確保最終被 import 的檔案（實際宣告 action 的檔案）具有 `'use server';`
 4. 逐一把 `page.tsx`/client component 中的 import，改成只從同層 `./actions` 匯入（固定入口、便於 grep）。
@@ -214,13 +214,13 @@ app/[locale]/admin/<module>/
 
 **拆分步驟（建議採「可回滾、可逐步」）**
 
-1. 選定拆分目標檔案（例如 `lib/modules/shop/admin-io.ts`），先做「責任切片」清單：
+1. 選定拆分目標檔案（例如 `lib/modules/blog/admin-io.ts`），先做「責任切片」清單：
    - Config / Settings
-   - CRUD（products/orders/coupons/members/...）
+   - CRUD（posts/categories/comments/...）
    - Reporting / Dashboard
-   - Payment / Webhook
+   - Integrations / Webhook
 2. 以 capability 建立新檔（命名必須語意化）：
-   - 例：`products-admin-io.ts`, `orders-admin-io.ts`, `coupons-admin-io.ts`, `members-admin-io.ts`
+   - 例：`posts-admin-io.ts`, `categories-admin-io.ts`, `comments-admin-io.ts`
 3. 每次只搬一個 cohesive 區塊（1~3 個 functions）：
    - 保持 function signature 不變
    - 原檔改成 re-export 或 thin wrapper（避免一次性大改造成 diff 難 review）
@@ -331,13 +331,13 @@ app/[locale]/admin/<module>/
 
 - C.1 Server actions + RBAC gate → `app/[locale]/admin/(data)/import-export/actions.ts`
 
-#### 6.1.3 Phase 2–3: Gallery/Shop/Content/Comments（ARCHIVED; keep anchors like Phase 2/3）
+#### 6.1.3 Phase 2–3: Gallery/Content/Comments（ARCHIVED; keep anchors like Phase 2/3）
 
-- Phase 2（Gallery/Shop）：`lib/modules/import-export/*gallery*`, `lib/modules/import-export/*shop*`
+- Phase 2（Gallery）：`lib/modules/import-export/*gallery*`
 - Phase 3（Content/Comments）：`lib/modules/import-export/*content*`, `lib/modules/import-export/export-comments-io.ts`
 - Code map：`doc/specs/completed/import-export-spec.md`
 
-#### 6.1.4 JSON Import UI (Gallery/Shop/Content)（ARCHIVED）
+#### 6.1.4 JSON Import UI (Gallery/Content)（ARCHIVED）
 
 - UI entrypoint：`app/[locale]/admin/(data)/import-export/ImportExportClient.tsx`
 

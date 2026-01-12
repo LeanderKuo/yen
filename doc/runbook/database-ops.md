@@ -35,13 +35,6 @@ SUPABASE_DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:54
 
 #### 3. Enable Required Extensions
 
-For shop/payment features, enable in Supabase Dashboard -> Database -> Extensions:
-
-- `pg_cron`
-- `vault`
-
-Without these, you'll see errors like `schema "cron" does not exist`.
-
 For Embeddings (pgvector):
 
 - `supabase/COMBINED_ADD.sql` includes `CREATE EXTENSION IF NOT EXISTS vector;`
@@ -103,11 +96,10 @@ npm run db -- reset --feature <feature>
 | gallery          | main                                      |
 | reactions        | main + comments + gallery                 |
 | feature_settings | main                                      |
-| shop             | main + feature_settings + pg_cron + vault |
 | landing_sections | gallery                                   |
 | theme            | main                                      |
 | users            | main                                      |
-| ai_analysis      | main + users + shop (includes templates)  |
+| ai_analysis      | main + users (includes templates)         |
 | embedding        | main + feature_settings + theme + vector  |
 | page_views       | main                                      |
 
@@ -154,21 +146,13 @@ After add/seed, run these queries:
 -- Theme singleton must exist
 select * from public.site_config where id = 1;
 
--- Feature toggles should have 3+ rows
+-- Feature toggles should include at least blog/gallery rows
 select feature_key, is_enabled from public.feature_settings order by display_order;
 
 -- Landing sections should have default rows
 select section_key, section_type, sort_order, is_visible
 from public.landing_sections
 order by sort_order;
-```
-
-For shop:
-
-```sql
-select public.is_shop_visible();
-select * from public.shop_settings limit 1;
-select count(*) from public.products;
 ```
 
 ---
@@ -178,8 +162,6 @@ select count(*) from public.products;
 | Error                           | Solution                        |
 | ------------------------------- | ------------------------------- |
 | `psql` not found                | Install PostgreSQL client tools |
-| `schema "cron" does not exist`  | Enable pg_cron extension        |
-| `schema "vault" does not exist` | Enable vault extension          |
 | `permission denied for table`   | Re-run `npm run db:add`         |
 | `violates row-level security`   | Complete Admin RBAC Setup above |
 
@@ -189,7 +171,6 @@ select count(*) from public.products;
 
 - [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture constraints
 - [ROADMAP.md](../ROADMAP.md) - Pending items
-- Payments (webhooks): see [Payments](payments.md)
 - AI enablement: see [AI Analysis](ai-analysis.md) and [Embeddings + Preprocessing](embeddings-preprocessing.md)
 
 ---

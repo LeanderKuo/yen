@@ -13,8 +13,8 @@ import { z } from 'zod';
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const EMBEDDING_TARGET_TYPES = ['product', 'post', 'gallery_item', 'comment'] as const;
-export const SIMILAR_ITEM_TARGET_TYPES = ['product', 'post', 'gallery_item'] as const;
+export const EMBEDDING_TARGET_TYPES = ['post', 'gallery_item', 'comment'] as const;
+export const SIMILAR_ITEM_TARGET_TYPES = ['post', 'gallery_item'] as const;
 export const EMBEDDING_PRIORITIES = ['high', 'normal', 'low'] as const;
 
 /**

@@ -1,7 +1,7 @@
 /**
  * Admin User Detail Page (Server Component)
  *
- * Displays user details with profile, orders, comments, and appointments.
+ * Displays user details with profile and comments.
  * Supports optional Markdown preview via ?notesPreview=1 query param.
  *
  * @see uiux_refactor.md §6.1 - Admin Notes Preview
@@ -11,7 +11,6 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { isSiteAdmin, isOwner } from '@/lib/modules/auth';
 import { getUserById } from '@/lib/modules/user/users-admin-io';
-import { getOrdersByUserId } from '@/lib/modules/user/user-orders-io';
 import { getCommentsByUserId } from '@/lib/modules/user/user-comments-io';
 import { markdownToHtml } from '@/lib/markdown/server';
 import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
@@ -51,9 +50,8 @@ export default async function UserDetailPage({
   const adminMessages = { admin: allMessages.admin } as AbstractIntlMessages;
 
   // Fetch user detail and cross-domain data in parallel
-  const [userDetail, orders, comments] = await Promise.all([
+  const [userDetail, comments] = await Promise.all([
     getUserById(userId),
-    getOrdersByUserId(userId),
     getCommentsByUserId(userId),
   ]);
 
@@ -64,7 +62,6 @@ export default async function UserDetailPage({
   // Merge cross-domain data into userDetail
   const enrichedUserDetail = {
     ...userDetail,
-    orders,
     comments,
   };
 

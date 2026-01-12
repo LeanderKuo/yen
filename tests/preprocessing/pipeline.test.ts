@@ -20,8 +20,8 @@ import type { PreprocessingInput } from '@/lib/modules/preprocessing/types';
 // Config Getter Tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('getCleaningConfig returns config for product', () => {
-  const config = getCleaningConfig('product');
+test('getCleaningConfig returns config for post', () => {
+  const config = getCleaningConfig('post');
   assert.ok(config.removeHtml);
   assert.ok(config.removeMarkdown);
 });
@@ -49,9 +49,9 @@ test('getPreprocessingConfig returns full config', () => {
 // Full Pipeline Tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('preprocessContent processes product content', () => {
+test('preprocessContent processes HTML content for post', () => {
   const input: PreprocessingInput = {
-    targetType: 'product',
+    targetType: 'post',
     rawContent: '<p>This is a <b>product description</b> with HTML.</p>\n\nIt has multiple paragraphs.',
   };
   
@@ -105,7 +105,7 @@ test('preprocessContent processes comment content', () => {
 
 test('preprocessContent returns cleaning metadata', () => {
   const input: PreprocessingInput = {
-    targetType: 'product',
+    targetType: 'post',
     rawContent: '<div>Product content here with lots of text to clean.</div>',
   };
   
@@ -132,7 +132,7 @@ test('preprocessContent returns chunking metadata', () => {
 
 test('preprocessContent returns quality metadata', () => {
   const input: PreprocessingInput = {
-    targetType: 'product',
+    targetType: 'post',
     rawContent: 'Product description with enough content to pass quality checks.',
   };
   
@@ -163,7 +163,7 @@ test('preprocessAndFilter excludes failed chunks', () => {
 
 test('preprocessAndFilter preserves metadata', () => {
   const input: PreprocessingInput = {
-    targetType: 'product',
+    targetType: 'post',
     rawContent: 'Product content for testing.',
   };
   
@@ -179,7 +179,7 @@ test('preprocessAndFilter preserves metadata', () => {
 
 test('preprocessContent handles empty content', () => {
   const input: PreprocessingInput = {
-    targetType: 'product',
+    targetType: 'post',
     rawContent: '',
   };
   

@@ -33,7 +33,7 @@ export default async function LocaleLayout({
   // Fetch site config (Theme v2)
   const siteConfig = await getSiteConfigCached();
 
-  // Resolve global theme key (note: home/blog/gallery/shop overrides are applied by ThemeScope wrappers)
+  // Resolve global theme key (note: home/blog/gallery overrides are applied by ThemeScope wrappers)
   const themeKey: ThemeKey = siteConfig?.global_theme && isValidThemeKey(siteConfig.global_theme)
     ? (siteConfig.global_theme as ThemeKey)
     : DEFAULT_THEME_KEY;

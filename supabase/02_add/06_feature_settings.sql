@@ -5,7 +5,7 @@
 -- ============================================
 --
 -- This table provides centralized control for enabling/disabling
--- major site features (blog, gallery, shop).
+-- major site features (blog, gallery).
 --
 -- Security: Only 'owner' role can modify feature settings.
 -- Default: All features disabled until explicitly enabled.
@@ -14,7 +14,7 @@
 
 -- Create feature_settings table
 CREATE TABLE IF NOT EXISTS public.feature_settings (
-  feature_key TEXT PRIMARY KEY,                -- 'blog', 'gallery', 'shop'
+  feature_key TEXT PRIMARY KEY,                -- 'blog', 'gallery'
   is_enabled BOOLEAN NOT NULL DEFAULT false,   -- All features disabled by default
   display_order INTEGER NOT NULL DEFAULT 0,    -- Order in admin UI
   description_en TEXT,                         -- Description for admin UI

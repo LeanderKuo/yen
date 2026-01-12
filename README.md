@@ -31,7 +31,6 @@ Modern bilingual corporate website (EN / zh-Hant) built with Next.js (App Router
 - **Bilingual**: EN / zh-Hant, SEO-friendly (`hreflang`)
 - **Blog**: Markdown editor (GFM + code highlight + math), categories, SEO metadata
 - **Gallery**: masonry layout, infinite scroll, anonymous reactions
-- **Shop**: products/variants/cart/coupons + payment webhooks (checkout wiring: `doc/ROADMAP.md`)
 - **Admin CMS**: content/landing/theme/features/users + data modules (Import/Export, AI Analysis, Preprocessing)
 - **Security**: Google OAuth, Supabase RLS, admin allowlist, server-only secrets
 

@@ -284,11 +284,8 @@ export function deidentifyData(
  * Higher priority = more important to keep in sample.
  */
 const DATA_TYPE_PRIORITY: Record<string, number> = {
-  purchase: 3,
-  order: 3,
-  orders: 3,
-  comment: 2,
-  comments: 2,
+  comment: 3,
+  comments: 3,
   reaction: 1,
   reactions: 1,
   like: 1,
@@ -309,7 +306,7 @@ export function getDataPriority(dataType: string): number {
 
 /**
  * Sample data while preserving high-priority records.
- * Purchases are always kept, lower priority data is sampled.
+ * High-priority records are always kept first; lower priority data may be sampled.
  *
  * @param data - Array of records with a 'type' field
  * @param maxCount - Maximum records to return
@@ -378,7 +375,7 @@ export interface SamplingResult<T> {
   originalCount: number;
   /** Final record count after sampling */
   sampledCount: number;
-  /** Count of high-priority records kept (orders/purchases) */
+  /** Count of high-priority records kept */
   highPriorityKept: number;
   /** Whether sampling was actually applied */
   wasSampled: boolean;
@@ -448,8 +445,7 @@ export function seededShuffle<T>(array: T[], seed: number): T[] {
  * Uses seed-based selection for reproducibility (same seed = same output).
  *
  * Priority rules (per PRD §4.3):
- * - High priority (3): orders/purchases - kept first, truncated by recency if over limit
- * - Medium priority (2): comments - kept after high priority
+ * - High priority (3): comments - kept first, truncated by recency if over limit
  * - Low priority (1): reactions/likes - sampled if needed
  * - Lowest priority (0): views - sampled last
  *
@@ -509,7 +505,7 @@ export function seededPrioritizedSample<T extends Record<string, unknown>>(
   for (const priority of priorities) {
     let records = byPriority.get(priority)!;
 
-    // For high-priority (orders/purchases), sort by date and truncate if needed
+    // For high-priority records, sort by date and truncate if needed
     if (priority >= 3 && records.length > 0) {
       // Sort by date descending (most recent first)
       records = [...records].sort((a, b) => {

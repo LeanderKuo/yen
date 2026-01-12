@@ -73,7 +73,7 @@ export function transformCommentToExportData(
   options: CommentExportOptions = {}
 ): CommentExportData {
   const data: CommentExportData = {
-    target_type: comment.targetType as 'post' | 'gallery_item' | 'product',
+    target_type: comment.targetType,
     target_slug: targetSlugMap.get(comment.targetId) ?? 'unknown',
     user_display_name: comment.userDisplayName,
     content: comment.content,

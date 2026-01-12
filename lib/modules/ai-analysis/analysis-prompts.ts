@@ -51,27 +51,12 @@ export function getTemplatePrompt(templateId: AnalysisTemplateId): string {
 - User engagement trends over time
 - Recommendations for improving engagement`,
 
-    sales: `Analyze sales performance:
-- Top 10 best-selling products
-- Average order value and distribution
-- Sales trends over time (daily/weekly patterns)
-- Slow-moving inventory identification
-- Pricing optimization opportunities
-- Recommendations for increasing sales`,
-
-    rfm: `Perform RFM (Recency, Frequency, Monetary) customer segmentation:
-- Calculate RFM scores for each customer segment
-- Identify VIP customers (high value)
-- Identify at-risk customers (churning)
-- Identify new customers with growth potential
-- Segment distribution (percentage in each group)
-- Personalized marketing recommendations per segment`,
-
-    content_recommendation: `Analyze content-to-purchase correlations:
-- Which content types drive the most conversions?
-- "Customers who viewed X also bought Y" patterns
-- Content engagement before purchase behavior
-- Recommendations for content strategy to boost sales`,
+    content_recommendation: `Generate content recommendations based on engagement signals:
+- Identify high-engagement topics/themes from comments
+- Summarize frequent questions/feedback themes
+- Suggest follow-up posts/gallery items to create next
+- Recommend internal links between related content
+- Propose moderation or UX improvements to increase quality engagement`,
   };
 
   return prompts[templateId];

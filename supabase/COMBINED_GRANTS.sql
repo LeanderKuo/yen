@@ -20,7 +20,6 @@
 -- - Webhooks / cron jobs / system tasks
 --
 -- Without these grants you'll see errors like:
--- - `permission denied for table products`
 -- - `permission denied for table embeddings`
 --
 -- ✅ Grant full access to all current public tables (and future ones via default privileges).
@@ -105,40 +104,6 @@ GRANT INSERT, UPDATE, DELETE ON public.gallery_pins TO authenticated;
 GRANT SELECT ON public.feature_settings TO anon, authenticated;
 GRANT UPDATE ON public.feature_settings TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_feature_enabled(TEXT) TO anon, authenticated;
-
--- ============================================
--- Shop (07_shop.sql / 08_shop_functions.sql)
--- ============================================
-
-GRANT EXECUTE ON FUNCTION public.get_shop_settings_public() TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.is_shop_visible() TO anon, authenticated;
-
-GRANT SELECT ON public.products TO anon, authenticated;
-GRANT SELECT ON public.product_variants TO anon, authenticated;
-
-GRANT SELECT ON public.shop_settings TO authenticated;
-GRANT SELECT ON public.orders TO authenticated;
-GRANT SELECT ON public.order_items TO authenticated;
-GRANT SELECT ON public.coupons TO authenticated;
-GRANT SELECT ON public.coupon_redemptions TO authenticated;
-GRANT SELECT ON public.payment_provider_configs TO authenticated;
-GRANT SELECT ON public.customer_profiles TO authenticated;
-
-GRANT INSERT, UPDATE, DELETE ON public.shop_settings TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.products TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.product_variants TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.orders TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.coupons TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.payment_provider_configs TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.customer_profiles TO authenticated;
-
-GRANT EXECUTE ON FUNCTION public.read_payment_secret(UUID) TO service_role;
-GRANT EXECUTE ON FUNCTION public.store_payment_secret(TEXT, TEXT, TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION public.update_payment_secret(UUID, TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION public.process_payment_success(UUID, TEXT, TEXT, JSONB) TO service_role;
-GRANT EXECUTE ON FUNCTION public.create_order_with_reservation(UUID, TEXT, TEXT, JSONB, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, JSONB, TEXT, TEXT, INTEGER) TO service_role;
-GRANT EXECUTE ON FUNCTION public.redeem_coupon(TEXT, UUID, UUID, INTEGER) TO service_role;
-GRANT EXECUTE ON FUNCTION public.release_expired_reservations() TO service_role;
 
 -- ============================================
 -- Landing Sections (09_landing_sections.sql)

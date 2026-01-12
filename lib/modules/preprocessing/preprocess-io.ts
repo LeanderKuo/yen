@@ -40,7 +40,7 @@ export interface PreprocessAndEnqueueResult {
  * 3. Run preprocessing pipeline (clean → chunk → quality gate) with config
  * 4. Enqueue qualified chunks (passed/incomplete) to embedding_queue
  *
- * @param targetType - Type of content (product, post, gallery_item, comment)
+ * @param targetType - Type of content (post, gallery_item, comment)
  * @param targetId - UUID of the target item
  * @param priority - Queue priority (default: normal)
  * @returns Result with chunk counts and success status

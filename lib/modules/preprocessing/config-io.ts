@@ -78,7 +78,7 @@ export async function getConfigForType(
  * Useful for Admin UI display.
  */
 export async function getAllConfigs(): Promise<Record<EmbeddingTargetType, TypeConfigResult>> {
-  const targetTypes: EmbeddingTargetType[] = ['product', 'post', 'gallery_item', 'comment'];
+  const targetTypes: EmbeddingTargetType[] = ['post', 'gallery_item', 'comment'];
   const result = await getPreprocessingConfig();
 
   const configs: Record<EmbeddingTargetType, TypeConfigResult> = {} as Record<

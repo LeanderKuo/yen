@@ -4,7 +4,7 @@
  * @see uiux_refactor.md §6.1
  *
  * Types for bulk data import/export operations.
- * Covers Blog, Gallery, Shop, Content, Comments (see doc/specs/completed/IMPORT_EXPORT.md for PRD).
+ * Covers Blog, Gallery, Content, Comments (see doc/specs/completed/IMPORT_EXPORT.md for PRD).
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,9 +70,6 @@ export type ExportEntity =
   | 'posts'
   | 'categories'
   | 'gallery_items'
-  | 'products'
-  | 'orders'
-  | 'customers'
   | 'comments';
 
 /** Export job request */
@@ -315,169 +312,6 @@ export interface GalleryCategoryImportData {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shop Export/Import Types (Phase 2)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Product variant export data (PRD §2.5) */
-export interface ProductVariantExportData {
-  variant_key: string;
-  option_values: Record<string, string>;
-  sku: string | null;
-  price_cents: number;
-  compare_at_price_cents: number | null;
-  stock: number;
-  is_enabled: boolean;
-}
-
-/** Product export data (PRD §2.5, with variants) */
-export interface ProductExportData {
-  slug: string;
-  category: string | null;
-  name_en: string | null;
-  name_zh: string | null;
-  description_short_en: string | null;
-  description_short_zh: string | null;
-  description_full_en: string | null;
-  description_full_zh: string | null;
-  cover_image_url: string | null;
-  media_urls: string[];
-  tags_en: string[];
-  tags_zh: string[];
-  is_visible: boolean;
-  sort_order: number;
-  variants: ProductVariantExportData[];
-}
-
-/** Products JSON export envelope */
-export interface ProductsExport {
-  exportedAt: string;
-  type: 'products';
-  data: ProductExportData[];
-}
-
-/** Product variant data ready for import */
-export interface ProductVariantImportData {
-  variant_key: string;
-  option_values: Record<string, string>;
-  sku: string | null;
-  price_cents: number;
-  compare_at_price_cents: number | null;
-  stock: number;
-  is_enabled: boolean;
-}
-
-/** Product data ready for import (validated) */
-export interface ProductImportData {
-  slug: string;
-  category: string | null;
-  name_en: string | null;
-  name_zh: string | null;
-  description_short_en: string | null;
-  description_short_zh: string | null;
-  description_full_en: string | null;
-  description_full_zh: string | null;
-  cover_image_url: string | null;
-  media_urls: string[];
-  tags_en: string[];
-  tags_zh: string[];
-  is_visible: boolean;
-  sort_order: number;
-  variants: ProductVariantImportData[];
-}
-
-/** Coupon export data (PRD §2.6) */
-export interface CouponExportData {
-  code: string;
-  discount_type: 'amount' | 'percentage';
-  discount_value: number;
-  min_order_cents: number | null;
-  max_uses: number | null;
-  used_count: number;
-  starts_at: string | null;
-  expires_at: string | null;
-  is_active: boolean;
-}
-
-/** Coupons JSON export envelope */
-export interface CouponsExport {
-  exportedAt: string;
-  type: 'coupons';
-  data: CouponExportData[];
-}
-
-/** Coupon data ready for import (validated) */
-export interface CouponImportData {
-  code: string;
-  discount_type: 'amount' | 'percentage';
-  discount_value: number;
-  min_order_cents: number | null;
-  max_uses: number | null;
-  starts_at: string | null;
-  expires_at: string | null;
-  is_active: boolean;
-}
-
-/** Order item export data (PRD §2.7) */
-export interface OrderItemExportData {
-  product_slug: string;
-  variant_key: string | null;
-  quantity: number;
-  unit_price_cents: number;
-}
-
-/** Order export data (PRD §2.7, export-only) */
-export interface OrderExportData {
-  order_number: string;
-  status: string;
-  gateway: string;
-  subtotal_cents: number;
-  discount_cents: number;
-  total_cents: number;
-  currency: string;
-  coupon_code: string | null;
-  created_at: string;
-  paid_at: string | null;
-  items: OrderItemExportData[];
-  // Sensitive fields (optional)
-  recipient_name?: string;
-  recipient_phone?: string;
-  recipient_address?: string;
-  invoice_data?: Record<string, unknown>;
-  gateway_transaction_id?: string;
-}
-
-/** Orders JSON export envelope */
-export interface OrdersExport {
-  exportedAt: string;
-  type: 'orders';
-  includeSensitive: boolean;
-  data: OrderExportData[];
-}
-
-/** Member export data (PRD §2.8, export-only) */
-export interface MemberExportData {
-  display_name: string | null;
-  order_count: number;
-  ltv_cents: number;
-  first_order_at: string | null;
-  last_order_at: string | null;
-  tags: string[];
-  is_blocked: boolean;
-  // Sensitive fields (optional)
-  email?: string;
-  phone?: string;
-  address_json?: Record<string, unknown>;
-}
-
-/** Members JSON export envelope */
-export interface MembersExport {
-  exportedAt: string;
-  type: 'members';
-  includeSensitive: boolean;
-  data: MemberExportData[];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Site Content Export/Import Types (Phase 3)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -554,7 +388,7 @@ export interface CommentReplyExportData {
 
 /** Comment export data (PRD §2.11, export-only) */
 export interface CommentExportData {
-  target_type: 'post' | 'gallery_item' | 'product';
+  target_type: 'post' | 'gallery_item';
   target_slug: string;
   user_display_name: string;
   content: string;

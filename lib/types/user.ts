@@ -92,8 +92,6 @@ export interface UserDetail {
   directory: UserDirectorySummary;
   adminProfile: UserAdminProfileDetail | null;
   appointments: UserAppointmentSummary[];
-  /** Optional: orders from shop domain (cross-domain query) */
-  orders?: import('@/lib/types/shop').OrderSummary[];
   /** Optional: comments from comment domain (cross-domain query) */
   comments?: import('@/lib/modules/comment/moderation-transform').AdminComment[];
 }

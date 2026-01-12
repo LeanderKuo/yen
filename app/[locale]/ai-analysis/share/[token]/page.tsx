@@ -88,8 +88,6 @@ export default async function SharedReportPage({ params }: PageProps) {
   // Template display names
   const templateNames: Record<string, { en: string; zh: string }> = {
     user_behavior: { en: 'User Behavior Analysis', zh: '用戶行為分析' },
-    sales: { en: 'Sales Analysis', zh: '銷售分析' },
-    rfm: { en: 'RFM Segmentation', zh: '會員分群 RFM' },
     content_recommendation: { en: 'Content Recommendation', zh: '內容推薦' },
     custom: { en: 'Custom Analysis', zh: '自訂分析' },
   };

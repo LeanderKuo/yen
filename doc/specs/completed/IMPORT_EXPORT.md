@@ -34,7 +34,7 @@
 
 ### In Scope
 
-- Admin-only 匯出（Blog/Gallery/Shop/Content/Comments 等）
+- Admin-only 匯出（Blog/Gallery/Content/Comments 等）
 - Admin-only 匯入（Blog ZIP + JSON 匯入）
 - Dry Run preview + validation（避免誤操作）
 

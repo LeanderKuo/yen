@@ -32,7 +32,7 @@
 
 ## Ops / Reference
 
-- Deployment / DB / Payments / AI enablement: [`RUNBOOK.md`](RUNBOOK.md) (index; details in `runbook/*`)
+- Deployment / DB / AI enablement: [`RUNBOOK.md`](RUNBOOK.md) (index; details in `runbook/*`)
 - External blockers (provider keys/approvals): [`BLOCKERS.md`](BLOCKERS.md)
 - Actionable tasks (PR-ready steps, agent-facing): [`TASKS.md`](TASKS.md)
 

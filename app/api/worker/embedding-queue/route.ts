@@ -100,7 +100,7 @@ async function validateWorkerAuth(request: Request, rawBody: string): Promise<Au
 // Input Validation
 // =============================================================================
 
-const VALID_TARGET_TYPES: EmbeddingTargetType[] = ['product', 'post', 'gallery_item', 'comment'];
+const VALID_TARGET_TYPES: EmbeddingTargetType[] = ['post', 'gallery_item', 'comment'];
 
 interface WorkerInput {
   targetType: EmbeddingTargetType;

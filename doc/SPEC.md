@@ -21,7 +21,6 @@ This document describes **implemented** behavior and its technical details.
 - [Gallery](#gallery)
 - [Comments](#comments)
 - [Reactions](#reactions)
-- [Shop (Storefront)](#shop-storefront)
 - [Users (Admin)](#users-admin)
 - [Theme System](#theme-system)
 - [Admin CMS](#admin-cms)
@@ -165,68 +164,16 @@ This document describes **implemented** behavior and its technical details.
 
 ---
 
-## Shop (Storefront)
-
-### Features
-
-- Product listing and details
-- Product variants (color, size, etc.)
-- Shopping cart (localStorage + API validation)
-- Coupon system (data model + admin management + pricing engine; cart/checkout wiring is pending Stripe Checkout Session — see [Known Gaps](#known-gaps-roadmap-links))
-- Checkout flow (server-side validation + inventory checks; closeable pattern — does not create orders unless a payment session is created; see [Known Gaps](#known-gaps-roadmap-links))
-
-### Routes
-
-| Route                              | Description    |
-| ---------------------------------- | -------------- |
-| `/[locale]/shop`                   | Shop list      |
-| `/[locale]/shop/[category]`        | Category list  |
-| `/[locale]/shop/[category]/[slug]` | Product detail |
-| `/[locale]/shop/cart`              | Cart           |
-| `/[locale]/shop/checkout`          | Checkout       |
-
-### API Endpoints
-
-| Route                   | Method | Description               |
-| ----------------------- | ------ | ------------------------- |
-| `/api/cart/items`       | POST   | Get cart product data     |
-| `/api/webhooks/stripe`  | POST   | Stripe webhook receiver   |
-| `/api/webhooks/ecpay`   | POST   | ECPay webhook receiver    |
-| `/api/webhooks/linepay` | POST   | LINE Pay webhook receiver |
-
-### Cart lookupKey Strategy
-
-- Problem: When client sends `variantKey=null`, server may fallback to default variant
-- Solution: API response includes `lookupKey` (echo request) and `resolvedVariantKey` (server choice)
-- Client uses `lookupKey` for Map, updates state with `resolvedVariantKey`
-
-### Data Model
-
-- `products` - Products
-- `product_variants` - Product variants
-- `orders` - Orders
-- `order_items` - Order items
-- `inventory_reservations` - Inventory reservations
-- `coupons` - Coupons
-
-### Implementation Notes
-
-- Cart lookupKey strategy is defined above; implementation files are tracked in [Module Inventory](#module-inventory-single-source).
-- Coupon code is stored in cart state, but cart/checkout currently do not apply discounts yet (wiring is pending checkout session work; see [Known Gaps](#known-gaps-roadmap-links)).
-
----
-
 ## Users (Admin)
 
 ### Features
 
 - Users list (SSOT: `user_directory`, synced from `auth.users`)
-- Customer short ID for AI Analysis (from `customer_profiles.short_id`, e.g. `C1`)
 - User detail:
   - Directory info (id/email/created/updated)
   - Admin notes (Owner-only write): bilingual markdown (`description_*_md`) + tags (`tags_*`)
   - Schedule (Owner-only write): appointment calendar (DB stores UTC; UI edits in local time)
-  - Cross-domain read: order history + comment history
+  - Comment history (read-only)
 
 ### Routes
 
@@ -235,14 +182,13 @@ This document describes **implemented** behavior and its technical details.
 | Route               | Description                                         |
 | ------------------- | --------------------------------------------------- |
 | `/admin/users`      | Users list                                          |
-| `/admin/users/[id]` | User detail (notes/tags/schedule + orders/comments) |
+| `/admin/users/[id]` | User detail (notes/tags/schedule + comments)        |
 
 ### Data Model
 
 - `user_directory` - Users list/email SSOT (admin-only read)
 - `user_admin_profiles` - Owner-only admin notes + tags (admin read; owner write)
 - `user_appointments` - Owner-only calendar events (admin read; owner write)
-- `customer_profiles` - CRM profile (short_id + order aggregates; used by AI Analysis)
 
 ### Security Notes
 
@@ -267,7 +213,7 @@ This document describes **implemented** behavior and its technical details.
 ### Current Status (v2)
 
 - 4 layout presets (ThemeKey): Tech Pro, Japanese Airy, Glassmorphism, Scrollytelling
-- Per-page theme assignment (home/blog/gallery/shop) via `site_config.page_themes`
+- Per-page theme assignment (home/blog/gallery) via `site_config.page_themes`
 - Per-layout token overrides via `site_config.theme_overrides` (allowlist in `lib/types/theme.ts`)
 - SSR inline CSS variable injection (FOUC-free)
 - Admin preview fixed (2025-12-24): iframe injects CSS vars to the same targets as runtime SSR
@@ -303,7 +249,7 @@ This document describes **implemented** behavior and its technical details.
 
 - `site_config` (singleton, id=1)
   - `global_theme`: ThemeKey
-  - `page_themes`: JSONB `{ home?, blog?, gallery?, shop? }`
+  - `page_themes`: JSONB `{ home?, blog?, gallery? }`
   - `theme_overrides`: JSONB `{ [ThemeKey]: { [CustomizableCssVar]: string | null } }`
   - `updated_at`, `updated_by`
 
@@ -373,25 +319,6 @@ This document describes **implemented** behavior and its technical details.
 | `/admin/gallery`            | Gallery items             |
 | `/admin/gallery/categories` | Gallery categories        |
 | `/admin/gallery/featured`   | Featured items management |
-
-**Shop**
-
-| Route                       | Description                                     |
-| --------------------------- | ----------------------------------------------- |
-| `/admin/shop`               | Shop dashboard                                  |
-| `/admin/shop/orders`        | Order list                                      |
-| `/admin/shop/orders/[id]`   | Order detail                                    |
-| `/admin/shop/products`      | Product list                                    |
-| `/admin/shop/products/new`  | Create product                                  |
-| `/admin/shop/products/[id]` | Edit product                                    |
-| `/admin/shop/coupons`       | Coupon management                               |
-| `/admin/shop/members`       | Member management                               |
-| `/admin/shop/members/[id]`  | Legacy route (redirects to `/admin/users/[id]`) |
-| `/admin/shop/access`        | Access control                                  |
-| `/admin/shop/settings`      | Shop settings                                   |
-| `/admin/shop/payments`      | Payment providers                               |
-
-> Note: `/admin/shop/members` 目前仍為 V1（由 `orders` 聚合）；members list 的 Details 會導向 `/admin/users/[id]`，且 `/admin/shop/members/[id]` 會 redirect 到 `/admin/users/[id]`（Users 為共通入口）。
 
 **Users**
 
@@ -517,13 +444,13 @@ All admin modules use `adminLocale` for UI text:
 - AdminSidebar + Admin Dashboard
 - Theme / Features / Landing / Portfolio / Settings
 - Blog / Gallery / Content / Users
-- Shop / Data Intelligence (Control Center / AI Analysis / Preprocessing / Embeddings / Import/Export)
+- Data Intelligence (Control Center / AI Analysis / Preprocessing / Embeddings / Import/Export)
 - Reports / History
 
 #### Translation Keys Structure
 
 - Namespace: `admin.*` (under existing `messages/en.json` and `messages/zh.json`)
-- Key naming: `admin.<module>.<element>` (e.g., `admin.sidebar.dashboard`, `admin.shop.orders.title`)
+- Key naming: `admin.<module>.<element>` (e.g., `admin.sidebar.dashboard`, `admin.comments.title`)
 - Technical terms preserved in English: Embedding, RAG, Vector, Token, Prompt, API, Webhook, Slug, etc.
 
 #### Evidence Paths
@@ -571,11 +498,6 @@ All admin modules use `adminLocale` for UI text:
 
 > 目的：避免把「未完成/刻意 gated」敘述散落在各 feature 章節，造成讀者誤以為本文件描述的是「全功能已完成」狀態。
 
-### Shop
-
-- Stripe Checkout Session 尚未完成（checkout 目前會先做 server-side 驗證，但不建立訂單並回傳 `stripe_not_configured`）：[ROADMAP → Stripe Checkout Session](ROADMAP.md#stripe-checkout-session)
-- LINE Pay / ECPay request flow 尚未完成（已具備 webhook + provider config，但缺少 request/confirm）：[ROADMAP → LINE Pay / ECPay Request Flow](ROADMAP.md#line-pay--ecpay-request-flow)
-
 ### Data Intelligence (Admin-only)
 
 - Data Intelligence Platform：
@@ -602,7 +524,6 @@ All admin modules use `adminLocale` for UI text:
 | Gallery   | `lib/modules/gallery/io.ts` | `lib/modules/gallery/cached.ts` | `lib/modules/gallery/admin-io.ts` | `lib/types/gallery.ts`   |
 | Comments  | `lib/modules/comment/io.ts` | —                               | `lib/modules/comment/admin-io.ts` | `lib/types/comments.ts`  |
 | Reactions | `lib/reactions/io.ts`       | —                               | —                                 | `lib/types/reactions.ts` |
-| Shop      | `lib/modules/shop/io.ts`    | `lib/modules/shop/cached.ts`    | `lib/modules/shop/admin-io.ts`    | `lib/types/shop.ts`      |
 | Users     | —                           | —                               | `lib/modules/user/*-admin-io.ts`  | `lib/types/user.ts`      |
 | Theme     | `lib/modules/theme/io.ts`   | `lib/modules/theme/cached.ts`   | `lib/modules/theme/admin-io.ts`   | `lib/types/theme.ts`     |
 | Content   | `lib/modules/content/io.ts` | `lib/modules/content/cached.ts` | —                                 | —                        |
@@ -633,5 +554,4 @@ All admin modules use `adminLocale` for UI text:
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - Architecture constraints
 - [SECURITY.md](SECURITY.md) - Security policies
 - [ROADMAP.md](ROADMAP.md) - Pending/planned items
-- Payments (webhooks): `runbook/payments.md`
 - [uiux_refactor.md](../uiux_refactor.md) - Drift tracking / remediation steps

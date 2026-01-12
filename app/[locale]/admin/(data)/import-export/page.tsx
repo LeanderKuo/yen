@@ -4,7 +4,7 @@
  * @see uiux_refactor.md §6.1
  *
  * Server component for bulk data import/export admin UI.
- * Provides Export (Blog/Gallery/Shop/Content/Comments) and Import (Blog ZIP/Gallery/Shop/Content JSON).
+ * Provides Export (Blog/Gallery/Content/Comments) and Import (Blog ZIP/Gallery/Content JSON).
  */
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";

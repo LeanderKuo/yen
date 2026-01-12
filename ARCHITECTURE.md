@@ -35,9 +35,9 @@
 - `lib/` 不放 React hooks；hooks 僅存在於 `hooks/`。
 - Pure modules 僅做純計算 (no fetch/DB/Next/console/browser APIs)。
 - Public UI 不得 import `components/admin/*` 或 admin-only dependencies。
-- Feature visibility (blog/gallery/shop) 必須走 `feature_settings` + `lib/features/cached.ts`。
+- Feature visibility (blog/gallery) 必須走 `feature_settings` + `lib/features/cached.ts`。
 - Public SSR 讀取必須使用 `cachedQuery` 包裝的 cached modules（例如 `lib/modules/*/cached.ts`、`lib/features/cached.ts`）。
-- Secrets 僅能存在 server；payment webhook 必須驗簽 + 冪等 + 審計日誌。
+- Secrets 僅能存在 server；任何 cron/worker/system endpoints 必須驗證 shared secret。
 - AI/LLM/Embeddings：SDK 不得進 client bundle；OpenAI SDK 僅允許存在於 `supabase/functions/**`（Edge Functions），OpenRouter API access 僅允許存在於 server-only `lib/infrastructure/openrouter/**`；任何送往 AI 的資料必須先去識別化（避免 PII 外洩；具體落地/grep 守門見 `uiux_refactor.md` §2、導入步驟見 `uiux_refactor.md` §6.2）。
 - RLS 為最終安全邊界；UI gate 只做 UX。
 
@@ -78,14 +78,14 @@ doc/           # documentation
 - 路由與資料讀取集中在 server components。
 - API routes 一律使用資料夾結構 `app/api/<domain>/route.ts`。
 - admin 寫入必須透過 server actions。
-- Theme 套用點：`app/[locale]/layout.tsx` 注入全域主題；`app/[locale]/page.tsx` 與 `app/[locale]/{blog,gallery,shop}/layout.tsx` 透過 `components/theme/ThemeScope.tsx` 套用 scope 主題覆寫。
+- Theme 套用點：`app/[locale]/layout.tsx` 注入全域主題；`app/[locale]/page.tsx` 與 `app/[locale]/{blog,gallery}/layout.tsx` 透過 `components/theme/ThemeScope.tsx` 套用 scope 主題覆寫。
 
 ### 3.2 components/
 
 - Public UI 與 Admin UI 完全分離。
 - `components/admin/*` 必須是 client component（允許 admin-only dependencies）。
 - Theme scope wrappers 放在 `components/theme/*`：
-  - `components/theme/ThemeScope.tsx`（server）：套用分頁主題（home/blog/gallery/shop），並提供 `.theme-scope` 背景/字體/濾鏡等一致性。
+  - `components/theme/ThemeScope.tsx`（server）：套用分頁主題（home/blog/gallery），並提供 `.theme-scope` 背景/字體/濾鏡等一致性。
   - `components/theme/ThemePreviewScope.tsx`（server）：admin preview 專用，接受 themeKey 作為 prop，包含動畫 mount 判斷（用於 layout-level preview）。
   - `components/theme/ScrollytellingClient.tsx`（client）：僅在 preset `enableAnimations=true` 時才掛載，避免不必要 public client bundle。
 - Admin Theme Preview Route：`app/[locale]/admin/theme/preview/page.tsx`（server）用於 iframe 預覽，接收 `path` + `theme` searchParams，強制 `noindex`，不污染 public cache。
@@ -98,13 +98,13 @@ doc/           # documentation
 ### 3.4 lib/
 
 - Domain 模組分為 `io.ts` / `cached.ts` / `admin-io.ts` / `*-io.ts` / pure modules。
-- 任何 DB / 外部 API I/O 僅能在 `io.ts` 或 `*-io.ts`（包含 `admin-io.ts` / `payment-io.ts` / `cache-io.ts` / `<feature>-io.ts`）。
+- 任何 DB / 外部 API I/O 僅能在 `io.ts` 或 `*-io.ts`（包含 `admin-io.ts` / `<feature>-io.ts`）。
 - Public SSR 讀取只能走 `cached.ts` (使用 `cachedQuery`)。
 - **IO 模組不可變成雜物抽屜**：當任一 `*-io.ts` / `admin-io.ts` / `io.ts` 符合下列條件時，必須拆分為更語意化的 submodules（仍維持 `*-io.ts` 命名）：
   - 檔案行數 > **300** 行，或
   - `export` 的 functions > **12** 個
-  - 拆分命名範例：`payment-config-io.ts`, `payment-webhook-io.ts`, `checkout-order-io.ts`, `reports-export-io.ts`
-  - 拆分後允許保留一個薄的 aggregator（例如 `payment-io.ts` 只 re-export 或只保留 orchestration），避免跨檔案循環依賴
+  - 拆分命名範例：`embedding-search-io.ts`, `preprocessing-monitoring-io.ts`, `reports-run-io.ts`
+  - 拆分後允許保留一個薄的 aggregator（例如 `lib/modules/embedding/io.ts` 只 re-export 或只保留 orchestration），避免跨檔案循環依賴
   - 現存巨石檔案若暫時無法一次拆完，必須在 `uiux_refactor.md` 建立 drift 項目與分階段拆分步驟（避免永遠不還技術債）
 
 ### 3.5 檔案結構與命名規則 (硬性)
@@ -119,7 +119,7 @@ doc/           # documentation
 
 ### 3.6 API 介面契約 (Phase 1 完成)
 
-- **types 定義位置**：所有 API request/response types 必須定義在 `lib/types/*`（如 `lib/types/shop.ts`），不得在 `app/api/*/route.ts` 中 export。
+- **types 定義位置**：所有 API request/response types 必須定義在 `lib/types/*`（如 `lib/types/comments.ts`），不得在 `app/api/*/route.ts` 中 export。
 - **Client import 規則**：client components 不得直接 import `app/api/*/route.ts`；應從 `lib/types/*` 取得 types。
 - **API route 實作**：API route 應 import types from `lib/types/*`，僅 export HTTP handler functions (GET/POST/PATCH/DELETE)。
 - **目標**：避免 client → route.ts 的耦合，使 types 成為 single source of truth，便於後續重構 DB 邏輯到 `lib/*/io.ts`。
@@ -128,7 +128,6 @@ doc/           # documentation
 
 | Domain    | Type File                | 主要 Types                                                                                                                         |
 | --------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Shop      | `lib/types/shop.ts`      | `CartItemRequest`, `CartItemResponse`, `CartItemsResponseBody`                                                                     |
 | Gallery   | `lib/types/gallery.ts`   | `GalleryItemsApiResponse`, `GalleryItemWithLikedByMe`                                                                              |
 | Comments  | `lib/types/comments.ts`  | `CommentPublic`, `CommentRow`, `AdminCommentListItem`, `CommentBlacklistItem`, `CommentSettingsResponse`, `CommentFeedbackRequest` |
 | Reactions | `lib/types/reactions.ts` | `ReactionToggleRequest`, `ReactionToggleResult`                                                                                    |
@@ -139,7 +138,7 @@ doc/           # documentation
 
 - 所有 API endpoint 應使用 `lib/validators/*` 進行輸入驗證。
 - Validators 為純函式（pure functions），遵循 `lib/validators/api-common.ts` 的 `ValidationResult<T>` 模式。
-- 驗證器清單：`api-common.ts`（UUID/分頁）、`cart.ts`、`comments.ts`、`gallery-api.ts`、`reactions.ts`、`reports.ts`。
+- 驗證器清單：`api-common.ts`（UUID/分頁）、`comments.ts`、`gallery-api.ts`、`reactions.ts`、`reports.ts`。
 
 #### 錯誤回應格式 (統一)
 
@@ -150,12 +149,6 @@ interface ApiErrorResponse {
   message?: string; // Debug 用的詳細訊息
 }
 ```
-
-#### Cart API lookupKey 策略
-
-- **問題**：當 client 傳入 `variantKey=null`，server 可能 fallback 到預設 variant，回傳不同的 variantKey。
-- **解法**：API response 包含 `lookupKey`（echo request key）和 `resolvedVariantKey`（server 最終選擇）。
-- Client 一律以 `lookupKey` 建 Map，使用 `resolvedVariantKey` 更新 cart state。
 
 ### 3.7 API Route IO 收斂規則 (Phase 2 完成)
 
@@ -168,7 +161,6 @@ interface ApiErrorResponse {
 
 | Domain    | IO File                         | 主要功能                                         |
 | --------- | ------------------------------- | ------------------------------------------------ |
-| Shop      | `lib/modules/shop/io.ts`        | 商品列表、購物車資料查詢                         |
 | Gallery   | `lib/modules/gallery/io.ts`     | Gallery items 分頁查詢                           |
 | Comments  | `lib/modules/comment/io.ts`     | Public comments CRUD、permalink、public settings |
 | Comments  | `lib/modules/comment/admin-io.ts` | Admin settings、blacklist、feedback 操作       |
@@ -187,12 +179,10 @@ interface ApiErrorResponse {
 
 | Hook                          | API Endpoint           | 用途                                     |
 | ----------------------------- | ---------------------- | ---------------------------------------- |
-| `hooks/useCartProductData.ts` | `POST /api/cart/items` | Cart/Checkout 商品資料抓取（唯一呼叫點） |
 
 #### 設計原則
 
 1. **唯一呼叫點**：多個 components 需要相同 API 資料時，使用共同 hook 而非各自呼叫。
-2. **lookupKey 策略**：`computeLookupKey` 函式集中於 `lib/validators/cart.ts`，不在 components 內重複定義。
 3. **Hydration 安全**：hook 需接收 `isHydrated` 參數，避免 SSR/CSR mismatch。
 4. **Bundle 保護**：hook 只使用 `lib/types/*` 的 types，不引入 server-only 依賴。
 
@@ -201,7 +191,6 @@ interface ApiErrorResponse {
 - **一致性原則**：feature disabled 時，UI、sitemap、API 都必須一致收斂。
 - **API routes 必須檢查 feature status**：
   - `GET /api/gallery/items` → 檢查 `isGalleryEnabled()`
-  - `POST /api/cart/items` → 檢查 `isShopEnabled()`
   - `POST /api/reactions` → 根據 `targetType` 檢查對應 feature（`gallery_item` → gallery gate）
 - **回應規則**：feature disabled 時回傳 404，不是 403。
 - **使用非快取版本**：API routes 使用 `lib/features/io.ts` 的直接函式（不走 SSR cache）。
@@ -214,23 +203,6 @@ interface ApiErrorResponse {
 - **禁止硬編網域**：所有需要完整 URL 的地方（SEO、Akismet、webhook URL 展示等）必須使用 `SITE_URL`，不得硬編網域字串。
 - **JSON-LD siteName**：首頁 JSON-LD 的 `siteName` 必須從 `company_settings.company_name_short` 讀取，不得硬編品牌名。
 - **Akismet 配置**：`lib/spam/akismet-io.ts` 的 `AKISMET_BLOG_URL` 必須 fallback 到 `SITE_URL`，不得使用其他硬編 URL。
-
-### 3.10 Payment Gateway Architecture (Phase 5 完成)
-
-- **Server-only 約束**：所有金流 SDK (Stripe/LINE Pay/ECPay) 必須 server-only，禁止進入 client bundle。
-- **可關閉架構 (Closeable Pattern)**：
-  - Checkout action 必須在 Stripe Checkout Session 建立成功後才建立訂單（避免孤兒訂單）。
-  - 當金流 provider 未設定完成時，checkout action 回傳 `stripe_not_configured` 錯誤。
-  - Provider configs 由 `payment_provider_configs` 表控制 enabled/test_mode。
-- **Webhook 處理流程**：驗簽（pure）→ 冪等檢查（`webhook_events`）→ 審計日誌（`payment_audit_logs`）→ 業務處理（RPC）。
-- **模組分離**：
-  - `lib/modules/shop/payment-pure.ts`：純函式（簽章驗證、事件 ID 生成、payload 解析）。
-  - `lib/modules/shop/payment-io.ts`：IO 函式（config 讀取、冪等記錄、審計日誌、RPC 呼叫）。
-  - `lib/modules/shop/payment-config.ts`：純函式（格式驗證、遮罩顯示）。
-- **審計日誌規則**：
-  - `payment_audit_logs.order_id` 允許 `NULL`（例如 `order_id_missing` 事件）。
-  - 必須記錄：`signature_invalid`, `order_id_missing`, `received`, `payment_success`, `payment_failed`。
-- **密鑰安全**：Secrets 由 Supabase Vault 存儲，透過 `read_payment_secret` RPC 讀取，前端只顯示遮罩值。
 
 ### 3.12 Comments API Sensitive Data Protection (Phase 5 完成)
 
@@ -325,28 +297,15 @@ interface ApiErrorResponse {
 - lib/utils/cloudinary-url.ts
 - lib/security/ip.ts
 - lib/utils/anon-id.ts
-- lib/modules/shop/variants.ts
-- lib/modules/shop/pricing.ts
-- lib/modules/shop/order-status.ts
-- lib/modules/shop/invoice-schema.ts
-- lib/modules/shop/payment-config.ts
 - lib/modules/theme/presets.ts
 - lib/modules/theme/resolve.ts
 - lib/modules/theme/fonts.ts
 
 新增 pure 模組時需同步更新 `tests/architecture-boundaries.test.ts`。
 
-### 4.4 Shop Client 邊界
-
-Client components 禁止 import:
-
-- `next/cache`
-- `@/lib/modules/shop`
-
 ### 4.5 Bundle / Dependency Guardrails
 
 - Public UI 禁止引入重型/管理端依賴：`react-image-crop`, `recharts`, `exceljs`, `papaparse`, `jszip`, `gray-matter`。
-- 金流 SDK (Stripe/LINE Pay/ECPay) 必須 server-only，不可進 client bundle。
 - Admin 端重型依賴必須 dynamic import，且只在 admin routes 使用。
 - 禁止在 root layout 增加新的全域 provider，避免擴大 client bundle。
 - `use client` 只允許在必要互動元件，不允許在 page/layout 濫用。
@@ -366,13 +325,13 @@ Client components 禁止 import:
 | Browser | `lib/infrastructure/supabase/client.ts` | client component 即時互動                   | Enabled |
 | Server  | `lib/infrastructure/supabase/server.ts` | server component / action with user session | Enabled |
 | Anon    | `lib/infrastructure/supabase/anon.ts`   | public cached reads                         | Enabled |
-| Admin   | `lib/infrastructure/supabase/admin.ts`  | service role (webhooks/system ops)          | Bypass  |
+| Admin   | `lib/infrastructure/supabase/admin.ts`  | service role (system ops)                   | Bypass  |
 
 ## 6. Cache 與 Revalidation
 
 - Public SSR 必須使用 `cachedQuery` (`lib/cache/wrapper.ts`)，自動附加 `global-system` tag。
 - 全域快取版本由 `system_settings.cache_version` 控制，透過 `increment_cache_version()` 失效。
-- 常用 tag: `site-config`, `site-content`, `blog`, `gallery`, `shop`, `landing-sections`, `features`, `portfolio`。
+- 常用 tag: `site-config`, `site-content`, `blog`, `gallery`, `landing-sections`, `features`, `portfolio`。
 - 內容變更後必須 `revalidateTag()` + 必要 `revalidatePath()`，sitemap 必須更新。
 
 ## 7. Feature Visibility 與 SEO
@@ -401,18 +360,6 @@ Client components 禁止 import:
     - 需聯繫 Owner 同步角色到 `site_admins` 表格
 - DB 物件必須同時更新 `supabase/02_add/*` 與 `supabase/01_drop/*`。
 - RLS policy 名稱不可任意變更 (以利審計與追蹤)。
-- Payment:
-  - `webhook_events` 作為冪等性表。
-  - `payment_audit_logs.order_id` 必須可為 `NULL`。
-  - webhook 必須驗簽、記錄 `signature_invalid` 與 `order_id_missing`。
-  - Vault 金鑰讀取必須使用 `public.read_payment_secret(uuid)` RPC。
-  - 訂單建立必須在 Stripe Checkout Session 建立後才執行（避免孤兒訂單）。
-
-## 11. Shop/Payment 資料完整性 (重要不變條件)
-
-- 商品路由以 `/shop/[category]/[slug]` 為主；`products.category` 必須 NOT NULL 且符合 slug-safe 格式 (`^[a-z0-9]+(?:-[a-z0-9]+)*$`)。
-- 訂單狀態必須使用 `lib/modules/shop/order-status.ts` 統一映射。
-- 金額計算必須使用 `lib/modules/shop/pricing.ts`。
 
 ## 12. 必跑測試
 
@@ -445,11 +392,9 @@ lib/
 │   ├── supabase/      # Supabase client factories
 │   ├── openrouter/    # OpenRouter LLM client
 │   ├── cloudinary/    # Cloudinary SDK (placeholder)
-│   ├── stripe/        # Stripe payment SDK
 │   ├── akismet/       # Akismet spam API
 │   └── sentry/        # Sentry monitoring
 ├── modules/           # 業務領域模組
-│   ├── shop/          # 電商 (products, cart, orders, payments)
 │   ├── blog/          # 部落格文章
 │   ├── gallery/       # 圖庫
 │   ├── theme/         # 主題預設與解析

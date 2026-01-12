@@ -38,10 +38,10 @@ Embedding 是用數字表示內容「意義」的方法：
 | 能力           | 說明                             | 應用場景                               |
 | -------------- | -------------------------------- | -------------------------------------- |
 | **語意搜尋**   | 用自然語言搜尋，不需要精確關鍵字 | 用戶搜「輕便好攜帶」→ 找到「摺疊水壺」 |
-| **相似度匹配** | 找出內容最相似的項目             | 商品詳情頁的「相似商品」               |
-| **RAG 檢索**   | 為 AI 分析提供相關上下文         | 分析銷售趨勢時，自動找相關訂單         |
-| **智能分類**   | 根據語意自動歸類                 | 偵測重複商品、相似文章                 |
-| **叢集分析**   | 找出資料中的群組                 | 發現商品的自然分類                     |
+| **相似度匹配** | 找出內容最相似的項目             | 文章/作品詳情頁的「相似內容」          |
+| **RAG 檢索**   | 為 AI 分析提供相關上下文         | 分析內容表現時，自動找相關片段         |
+| **智能分類**   | 根據語意自動歸類                 | 偵測重複內容、相似文章/作品            |
+| **叢集分析**   | 找出資料中的群組                 | 發現內容的自然分類                     |
 
 ### 1.4 不能做什麼
 
@@ -64,7 +64,7 @@ Embedding 是用數字表示內容「意義」的方法：
 
 **估算你的網站**：
 
-假設：100 篇文章 + 50 個商品 + 500 則留言 = 650 筆
+假設：100 篇文章 + 50 個作品 + 500 則留言 = 650 筆
 
 - 首次建立全部 embedding：約 $0.30 USD
 - 每月新增 50 筆：約 $0.03 USD
@@ -86,7 +86,7 @@ Embedding 是用數字表示內容「意義」的方法：
 ```sql
 CREATE TABLE embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  target_type VARCHAR(50) NOT NULL,  -- 'product' | 'post' | 'gallery_item' | 'comment'
+  target_type VARCHAR(50) NOT NULL,  -- 'post' | 'gallery_item' | 'comment'
   target_id UUID NOT NULL,
   chunk_index INT DEFAULT 0,          -- 第幾個 chunk（0 = 單一/完整內容）
   chunk_total INT DEFAULT 1,          -- 總共幾個 chunks
@@ -123,10 +123,9 @@ CREATE INDEX idx_embeddings_quality ON embeddings(quality_status, quality_score)
 
 | 資料類型         | 組合欄位                                              | 範例                                                                                               |
 | ---------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Product**      | name + description_en + description_zh + tags         | "Handmade Leather Bag 手工皮革包 A beautiful handmade bag... 精美手工包... leather, handmade, bag" |
 | **Post**         | title_en + title_zh + excerpt_en + excerpt_zh         | "My First Post 我的第一篇文章 Introduction to... 介紹..."                                          |
 | **Gallery Item** | title_en + title_zh + description_en + description_zh | "Sunset Photography 夕陽攝影 Captured at... 拍攝於..."                                             |
-| **Comment**      | content（單一語言）                                   | "This product is amazing! Love the quality."                                                       |
+| **Comment**      | content（單一語言）                                   | "This post is amazing! Love the writing."                                                          |
 
 ### 2.3 重要決策
 
@@ -135,15 +134,11 @@ CREATE INDEX idx_embeddings_quality ON embeddings(quality_status, quality_score)
 | **Post 內容**     | 只取標題 + 摘要  | 文章內容可能很長，摘要已足夠表達語意 |
 | **HTML/Markdown** | 移除標籤         | 標籤干擾語意理解                     |
 | **空值處理**      | 跳過空欄位       | 避免無意義的空白                     |
-| **訂單資料**      | 不建立 embedding | 隱私考量 + 結構化資料適合傳統查詢    |
 
 ### 2.4 不建立 Embedding 的資料
 
 | 資料類型         | 原因                              |
 | ---------------- | --------------------------------- |
-| Orders           | 結構化資料，用傳統 SQL 查詢更合適 |
-| Members          | 隱私考量                          |
-| Coupons          | 結構化資料                        |
 | Site Content     | 固定區塊，不需語意搜尋            |
 | Landing Sections | 固定區塊，不需語意搜尋            |
 
@@ -191,7 +186,7 @@ CREATE INDEX idx_embeddings_quality ON embeddings(quality_status, quality_score)
 | ------------ | --------------------------- | ------ | ----------------------------- |
 | 相似度閾值   | 0.7（70%）                  | ✓      | `/admin/settings` AI 設定區塊 |
 | 結果數量上限 | 20 筆                       | ✓      | `/admin/settings` AI 設定區塊 |
-| 搜尋範圍     | Product, Post, Gallery Item | ✓      | Data Control Center 即時選擇  |
+| 搜尋範圍     | Post, Gallery Item, Comment | ✓      | Data Control Center 即時選擇  |
 
 **搜尋範例**：
 
@@ -209,13 +204,13 @@ CREATE INDEX idx_embeddings_quality ON embeddings(quality_status, quality_score)
 // lib/modules/embedding/embedding-search-io.ts
 export async function semanticSearch(params: {
   query: string;
-  targetTypes?: ("product" | "post" | "gallery_item")[];
+  targetTypes?: ("post" | "gallery_item" | "comment")[];
   limit?: number; // default: 20
   threshold?: number; // default: 0.7
 }): Promise<SemanticSearchResult[]>;
 
 interface SemanticSearchResult {
-  targetType: "product" | "post" | "gallery_item";
+  targetType: "post" | "gallery_item" | "comment";
   targetId: string;
   similarity: number; // 0-1, higher = more similar
   // 不回傳完整內容，由 caller 自行查詢
@@ -226,16 +221,16 @@ interface SemanticSearchResult {
 
 ```typescript
 const results = await semanticSearch({
-  query: "輕便好攜帶",
-  targetTypes: ["product", "gallery_item"],
+  query: "易讀的摘要",
+  targetTypes: ["post", "gallery_item"],
   threshold: 0.7,
 });
-// → [{ targetType: 'product', targetId: 'uuid-1', similarity: 0.89 }, ...]
+// → [{ targetType: 'post', targetId: 'uuid-1', similarity: 0.89 }, ...]
 ```
 
 ### 3.2 相似推薦
 
-**使用場景**：商品/文章詳情頁顯示「相似項目」
+**使用場景**：文章/作品詳情頁顯示「相似項目」
 
 #### 3.2.0 similar_items 預計算表
 
@@ -244,7 +239,7 @@ const results = await semanticSearch({
 ```sql
 CREATE TABLE similar_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  source_type VARCHAR(50) NOT NULL,    -- 'product' | 'post' | 'gallery_item'
+  source_type VARCHAR(50) NOT NULL,    -- 'post' | 'gallery_item'
   source_id UUID NOT NULL,
   target_type VARCHAR(50) NOT NULL,    -- Phase 1-5: 同類型；Phase 6+: 可跨類型
   target_id UUID NOT NULL,
@@ -263,9 +258,9 @@ CREATE INDEX idx_similar_items_computed ON similar_items(computed_at);
 
 | 項目 | 決定 | 理由 |
 |------|------|------|
-| Top-N 數量 | 10 | 足夠滿足「相似商品」「相關文章」等 UI 需求 |
-| Phase 1-5 推薦類型 | 同類型 | 降低計算量，商品推薦商品、文章推薦文章 |
-| Phase 6+ 推薦類型 | Owner 可選開啟跨類型 | 如「買這包的人也看過這篇保養文」|
+| Top-N 數量 | 10 | 足夠滿足「相似作品」「相關文章」等 UI 需求 |
+| Phase 1-5 推薦類型 | 同類型 | 降低計算量，作品推薦作品、文章推薦文章 |
+| Phase 6+ 推薦類型 | Owner 可選開啟跨類型 | 如「看這篇文章的人也看過這個作品」|
 | 更新策略 | UPSERT | 僅更新有變更的項目，減少 DB 寫入 |
 
 **Cron Job 計算流程**：
@@ -276,7 +271,7 @@ CREATE INDEX idx_similar_items_computed ON similar_items(computed_at);
        ▼
 ┌──────────────────┐
 │  掃描 embeddings │  找出所有 target
-│  表              │  （product, post, gallery_item）
+│  表              │  （post, gallery_item）
 └────────┬─────────┘
          │
          ▼
@@ -331,19 +326,9 @@ CREATE INDEX idx_similar_items_computed ON similar_items(computed_at);
 
 **Fallback 順序**：
 
-1. **同分類熱門**：該分類中的熱門商品（預先計算）
-2. **同分類也無商品**：全站熱門商品（預先計算）
-3. **全站也無商品**：不顯示「相似商品」區塊
-
-**「熱門」計算方式（效能優化）**：
-
-| 項目         | 方式                                                     |
-| ------------ | -------------------------------------------------------- |
-| 計算時機     | 每日凌晨 Cron Job（不即時計算）                          |
-| 儲存位置     | `products.popularity_rank`、`posts.popularity_rank` 欄位 |
-| 商品熱門公式 | 過去 30 天銷量                                           |
-| 文章熱門公式 | 過去 30 天（留言數 × 2 + 按讚數）                        |
-| Client 查詢  | 直接 `ORDER BY popularity_rank LIMIT 4`，無需計算        |
+1. **同分類熱門**：該分類中的熱門文章/作品（若有）
+2. **同分類也無**：全站熱門文章/作品（若有）
+3. **無可用資料**：不顯示「相似內容」區塊
 
 **UI 設計（文章頁）**：
 
@@ -466,7 +451,6 @@ CREATE INDEX idx_similar_items_computed ON similar_items(computed_at);
 │                                                                           │
 │  狀態：                                                                   │
 │  ┌────────────────────────────────────────────────────────────────────┐  │
-│  │ Products: 50/50 ✓                                                   │  │
 │  │ Posts: 98/100 (2 筆失敗)                                            │  │
 │  │ Gallery Items: 30/30 ✓                                              │  │
 │  │ Comments: 470/500 (進行中...)                                       │  │

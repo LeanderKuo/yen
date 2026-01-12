@@ -23,7 +23,7 @@ interface JudgeRequest {
   chunkContent: string;
   title?: string;
   category?: string;
-  targetType?: 'product' | 'post' | 'gallery_item' | 'comment';
+  targetType?: 'post' | 'gallery_item' | 'comment';
 }
 
 interface JudgeResponse {

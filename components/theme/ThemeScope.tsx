@@ -2,7 +2,7 @@
  * Theme Scope Component (Server Component)
  *
  * Wraps page content with scoped theme CSS variables.
- * Used by page layouts (blog/gallery/shop) to apply per-page themes.
+ * Used by page layouts (blog/gallery) to apply per-page themes.
  *
  * @module components/theme/ThemeScope
  * @see ARCHITECTURE.md §3.2 - ThemeScope component
@@ -16,7 +16,7 @@ import { ScrollytellingClient } from '@/components/theme/ScrollytellingClient';
 interface ThemeScopeProps {
   /**
    * Page scope key for theme resolution.
-   * Must be one of: 'blog' | 'gallery' | 'shop'
+   * Must be one of: 'blog' | 'gallery'
    * Note: 'home' is handled by the root layout, not ThemeScope.
    */
   scope: ThemeScopeKey;

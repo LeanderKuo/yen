@@ -48,7 +48,6 @@ const DEBOUNCE_DELAY = 300;
 
 /** Target type display names */
 const TARGET_TYPE_LABELS: Record<EmbeddingTargetType, string> = {
-  product: 'Products',
   post: 'Blog Posts',
   gallery_item: 'Gallery Items',
   comment: 'Comments',
@@ -71,8 +70,6 @@ const SEARCH_MODE_DESCRIPTIONS: Record<SearchMode, string> = {
 /** Get admin route for target type */
 function getAdminRoute(targetType: EmbeddingTargetType, targetId: string): string {
   switch (targetType) {
-    case 'product':
-      return `/admin/shop/products?id=${targetId}`;
     case 'post':
       return `/admin/blog?id=${targetId}`;
     case 'gallery_item':
@@ -137,9 +134,12 @@ export function ControlCenterClient({ initialData }: ControlCenterClientProps) {
   // Search state
   const [query, setQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<EmbeddingTargetType[]>(
-    initialData.targetTypes.filter((t): t is EmbeddingTargetType => 
-      t !== 'comment' // Exclude comments by default
-    )
+    initialData.targetTypes
+      .filter(
+        (t): t is EmbeddingTargetType =>
+          t === 'post' || t === 'gallery_item' || t === 'comment'
+      )
+      .filter((t) => t !== 'comment') // Exclude comments by default
   );
   const [results, setResults] = useState<SearchResult[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -609,9 +609,7 @@ export function ControlCenterClient({ initialData }: ControlCenterClientProps) {
                       <div className="flex items-center gap-3">
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            result.targetType === 'product'
-                              ? 'bg-purple-100 text-purple-800'
-                              : result.targetType === 'post'
+                            result.targetType === 'post'
                               ? 'bg-blue-100 text-blue-800'
                               : result.targetType === 'gallery_item'
                               ? 'bg-green-100 text-green-800'

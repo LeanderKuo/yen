@@ -269,7 +269,7 @@ test('validatePreprocessingConfig handles null/undefined gracefully', () => {
 
 test('validatePreprocessingConfig returns error for invalid values', () => {
   const config = {
-    product: {
+    post: {
       chunking: { targetSize: -100 }, // Invalid: negative
     },
   };
@@ -277,7 +277,7 @@ test('validatePreprocessingConfig returns error for invalid values', () => {
   const result = validatePreprocessingConfig(config);
   assert.equal(result.success, false);
   assert.ok(result.error);
-  assert.ok(result.error.includes('product'));
+  assert.ok(result.error.includes('post'));
 });
 
 test('validatePreprocessingConfig returns error for invalid target type', () => {
@@ -325,12 +325,12 @@ test('validateChunkingConfig rejects out-of-bounds values', () => {
 // ============================================================
 
 test('mergeChunkingWithDefaults returns defaults when dbConfig is undefined', () => {
-  const result = mergeChunkingWithDefaults('product', undefined);
-  assert.deepEqual(result, DEFAULT_CHUNKING_CONFIGS.product);
+  const result = mergeChunkingWithDefaults('post', undefined);
+  assert.deepEqual(result, DEFAULT_CHUNKING_CONFIGS.post);
 });
 
 test('mergeChunkingWithDefaults returns defaults for each target type', () => {
-  const targetTypes = ['product', 'post', 'gallery_item', 'comment'] as const;
+  const targetTypes = ['post', 'gallery_item', 'comment'] as const;
 
   for (const targetType of targetTypes) {
     const result = mergeChunkingWithDefaults(targetType, undefined);
@@ -340,17 +340,17 @@ test('mergeChunkingWithDefaults returns defaults for each target type', () => {
 
 test('mergeChunkingWithDefaults overrides with dbConfig values', () => {
   const dbConfig = { targetSize: 400, overlap: 60 };
-  const result = mergeChunkingWithDefaults('product', dbConfig);
+  const result = mergeChunkingWithDefaults('post', dbConfig);
 
   assert.equal(result.targetSize, 400);
   assert.equal(result.overlap, 60);
   // Other values should come from defaults
-  assert.equal(result.splitBy, DEFAULT_CHUNKING_CONFIGS.product.splitBy);
-  assert.equal(result.minSize, DEFAULT_CHUNKING_CONFIGS.product.minSize);
-  assert.equal(result.maxSize, DEFAULT_CHUNKING_CONFIGS.product.maxSize);
+  assert.equal(result.splitBy, DEFAULT_CHUNKING_CONFIGS.post.splitBy);
+  assert.equal(result.minSize, DEFAULT_CHUNKING_CONFIGS.post.minSize);
+  assert.equal(result.maxSize, DEFAULT_CHUNKING_CONFIGS.post.maxSize);
   assert.equal(
     result.useHeadingsAsBoundary,
-    DEFAULT_CHUNKING_CONFIGS.product.useHeadingsAsBoundary
+    DEFAULT_CHUNKING_CONFIGS.post.useHeadingsAsBoundary
   );
 });
 
@@ -382,13 +382,12 @@ test('mergeChunkingWithDefaults respects all overridable fields', () => {
 });
 
 test('mergeChunkingWithDefaults preserves type-specific defaults', () => {
-  // Product and post have different default targetSize
-  const productResult = mergeChunkingWithDefaults('product', undefined);
   const postResult = mergeChunkingWithDefaults('post', undefined);
+  const commentResult = mergeChunkingWithDefaults('comment', undefined);
 
-  assert.notEqual(productResult.targetSize, postResult.targetSize);
-  assert.equal(productResult.targetSize, 300);
+  assert.notEqual(postResult.targetSize, commentResult.targetSize);
   assert.equal(postResult.targetSize, 500);
+  assert.equal(commentResult.targetSize, 128);
 });
 
 // ============================================================
@@ -442,7 +441,7 @@ test('mergeQualityWithDefaults handles single field override', () => {
 // ============================================================
 
 test('DEFAULT_CHUNKING_CONFIGS are all valid', () => {
-  const targetTypes = ['product', 'post', 'gallery_item', 'comment'] as const;
+  const targetTypes = ['post', 'gallery_item', 'comment'] as const;
 
   for (const targetType of targetTypes) {
     const config = DEFAULT_CHUNKING_CONFIGS[targetType];
@@ -457,7 +456,7 @@ test('DEFAULT_QUALITY_CONFIG is valid', () => {
 });
 
 test('DEFAULT_CHUNKING_CONFIGS have sensible relationships', () => {
-  const targetTypes = ['product', 'post', 'gallery_item', 'comment'] as const;
+  const targetTypes = ['post', 'gallery_item', 'comment'] as const;
 
   for (const targetType of targetTypes) {
     const config = DEFAULT_CHUNKING_CONFIGS[targetType];

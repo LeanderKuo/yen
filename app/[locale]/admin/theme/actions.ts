@@ -112,8 +112,7 @@ export async function updatePageThemesAction(
     revalidatePath('/zh/blog', 'layout');
     revalidatePath('/en/gallery', 'layout');
     revalidatePath('/zh/gallery', 'layout');
-    revalidatePath('/en/shop', 'layout');
-    revalidatePath('/zh/shop', 'layout');
+
 
     return { success: true };
   } catch (error) {
@@ -248,8 +247,7 @@ export async function updateThemeOverridesAction(
     revalidatePath('/zh/blog', 'layout');
     revalidatePath('/en/gallery', 'layout');
     revalidatePath('/zh/gallery', 'layout');
-    revalidatePath('/en/shop', 'layout');
-    revalidatePath('/zh/shop', 'layout');
+
 
     return { success: true };
   } catch (error) {

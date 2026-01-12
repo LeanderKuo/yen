@@ -18,13 +18,13 @@
  * Entities that can have embeddings.
  * @see SUPABASE_AI.md §2.2 for content composition per type
  */
-export type EmbeddingTargetType = 'product' | 'post' | 'gallery_item' | 'comment';
+export type EmbeddingTargetType = 'post' | 'gallery_item' | 'comment';
 
 /**
  * Entities that can have similar items (excludes comments).
  * @see SUPABASE_AI.md §3.2
  */
-export type SimilarItemTargetType = 'product' | 'post' | 'gallery_item';
+export type SimilarItemTargetType = 'post' | 'gallery_item';
 
 /**
  * Quality status for embedding verification.
@@ -253,7 +253,6 @@ export interface HybridSearchResult {
  * @see SUPABASE_AI.md §4.2
  */
 export interface EmbeddingStats {
-  products: EmbeddingTypeStats;
   posts: EmbeddingTypeStats;
   galleryItems: EmbeddingTypeStats;
   comments: EmbeddingTypeStats;
@@ -282,17 +281,6 @@ export interface EnqueueEmbeddingRequest {
 // ─────────────────────────────────────────────────────────────────────────────
 // Content Composition Types
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Product data for embedding composition.
- * @see SUPABASE_AI.md §2.2
- */
-export interface ProductEmbeddingData {
-  name: string;
-  description_en?: string | null;
-  description_zh?: string | null;
-  tags?: string[];
-}
 
 /**
  * Post data for embedding composition.

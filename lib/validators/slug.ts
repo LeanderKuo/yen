@@ -2,7 +2,7 @@
  * Slug Validation (Pure Functions)
  *
  * Single source of truth for slug format validation across the application.
- * Used by: Blog Categories, Blog Posts, Shop Products, and any future modules.
+ * Used by: Blog Categories, Blog Posts, Gallery Categories, and any future modules.
  *
  * @see lib/utils/slug.ts - For slug generation (different from validation)
  * @see lib/validators/api-common.ts - For common validation patterns

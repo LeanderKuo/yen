@@ -1,6 +1,6 @@
 ﻿import Link from 'next/link';
 import { getPublishedSiteContentCached } from '@/lib/modules/content/cached';
-import { isBlogEnabledCached, isGalleryEnabledCached, isShopEnabledCached } from '@/lib/features/cached';
+import { isBlogEnabledCached, isGalleryEnabledCached } from '@/lib/features/cached';
 import { getVisibleLandingSectionsCached } from '@/lib/modules/landing/cached';
 import { getTranslations } from 'next-intl/server';
 import { pickLocaleContent } from '@/lib/i18n/pick-locale';
@@ -13,7 +13,6 @@ interface NavContent {
   product_design: string;
   portfolio: string;
   gallery?: string;
-  shop?: string;
   contact: string;
   blog: string;
 }
@@ -53,15 +52,13 @@ export default async function Header({ locale }: HeaderProps) {
     let siteContents: Awaited<ReturnType<typeof getPublishedSiteContentCached>> = [];
     let isBlogEnabled = false;
     let isGalleryEnabled = false;
-    let isShopEnabled = false;
     let landingSections: Awaited<ReturnType<typeof getVisibleLandingSectionsCached>> = [];
 
     try {
-      [siteContents, isBlogEnabled, isGalleryEnabled, isShopEnabled, landingSections] = await Promise.all([
+      [siteContents, isBlogEnabled, isGalleryEnabled, landingSections] = await Promise.all([
         getPublishedSiteContentCached(),
         isBlogEnabledCached(),
         isGalleryEnabledCached(),
-        isShopEnabledCached(),
         getVisibleLandingSectionsCached(),
       ]);
     } catch (dataError) {
@@ -103,7 +100,7 @@ export default async function Header({ locale }: HeaderProps) {
         label: sectionLabelMap[s.section_key] || s.section_key,
       }));
 
-    // Page links (blog, gallery, shop) - only show if feature is enabled
+    // Page links (blog, gallery) - only show if feature is enabled
     const pageNavItems = [
       ...(isBlogEnabled ? [{
         key: 'blog',
@@ -114,11 +111,6 @@ export default async function Header({ locale }: HeaderProps) {
         key: 'gallery', 
         href: `/${locale}/gallery`, 
         label: nav?.gallery || tNav('gallery')
-      }] : []),
-      ...(isShopEnabled ? [{ 
-        key: 'shop', 
-        href: `/${locale}/shop`, 
-        label: nav?.shop || tNav('shop')
       }] : []),
     ];
 

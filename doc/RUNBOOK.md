@@ -11,7 +11,6 @@
 - [AI Analysis](#ai-analysis)
 - [Embeddings + Preprocessing](#embeddings-preprocessing)
 - [Error Monitoring](#error-monitoring)
-- [Payments](#payments)
 - [References](#references)
 
 ---
@@ -61,14 +60,6 @@ Canonical enablement guide: [`runbook/embeddings-preprocessing.md`](runbook/embe
 ## Error Monitoring (Sentry)
 
 Canonical configuration + verification: [`runbook/error-monitoring.md`](runbook/error-monitoring.md)
-
----
-
-<a id="payments"></a>
-
-## Payments (Architecture & Webhooks)
-
-Canonical webhook architecture: [`runbook/payments.md`](runbook/payments.md)
 
 ---
 

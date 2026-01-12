@@ -61,9 +61,6 @@ interface AIAnalysisClientProps {
     models: ModelPricing[];
     cronStatus: CronStatus;
     ragEnabled: boolean;
-    // Pre-fill member filter from URL (?memberShortId=C1)
-    memberShortId?: string | null;
-    memberId?: string | null;
     // Initial schedules for owner (pre-fetched by server to avoid useEffect load)
     initialSchedules?: AnalysisScheduleListItem[];
   };
@@ -79,10 +76,10 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
 
   // Form state
   const [selectedTemplate, setSelectedTemplate] =
-    useState<AnalysisTemplateId>("sales");
+    useState<AnalysisTemplateId>("user_behavior");
   const [selectedDataTypes, setSelectedDataTypes] = useState<
     AnalysisDataType[]
-  >(["products", "orders"]);
+  >(["comments"]);
   const [selectedModel, setSelectedModel] = useState<string>(
     initialData.models[0]?.modelId ?? "openai/gpt-4o-mini"
   );
@@ -91,12 +88,6 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
   // RAG mode state (Phase 6+)
   const [selectedMode, setSelectedMode] = useState<AnalysisMode>("standard");
   const [ragTopK, setRagTopK] = useState<number>(RAG_DEFAULTS.TOP_K);
-
-  // Member filter state (from URL via Users list entrypoint)
-  const [memberShortId] = useState<string | null>(
-    initialData.memberShortId ?? null
-  );
-  const [memberId] = useState<string | null>(initialData.memberId ?? null);
 
   // Get current model pricing for cost estimation
   const currentModelPricing =
@@ -134,10 +125,10 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
   // Schedule form state
   const [scheduleFormName, setScheduleFormName] = useState("");
   const [scheduleFormTemplate, setScheduleFormTemplate] =
-    useState<AnalysisTemplateId>("sales");
+    useState<AnalysisTemplateId>("user_behavior");
   const [scheduleFormDataTypes, setScheduleFormDataTypes] = useState<
     AnalysisDataType[]
-  >(["products", "orders"]);
+  >(["comments"]);
   const [scheduleFormModel, setScheduleFormModel] = useState(
     initialData.models[0]?.modelId ?? "openai/gpt-4o-mini"
   );
@@ -283,8 +274,6 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
         filters: {
           dateRange:
             dateFrom && dateTo ? { from: dateFrom, to: dateTo } : undefined,
-          // Include member filter if set from URL
-          memberIds: memberId ? [memberId] : undefined,
         },
         ragConfig:
           selectedMode === "rag"
@@ -409,8 +398,8 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
   // Reset schedule form
   const resetScheduleForm = useCallback(() => {
     setScheduleFormName("");
-    setScheduleFormTemplate("sales");
-    setScheduleFormDataTypes(["products", "orders"]);
+    setScheduleFormTemplate("user_behavior");
+    setScheduleFormDataTypes(["comments"]);
     setScheduleFormModel(
       initialData.models[0]?.modelId ?? "openai/gpt-4o-mini"
     );
@@ -582,28 +571,6 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
         </div>
       )}
 
-      {/* Member Filter Badge (from URL via Users list entrypoint) */}
-      {memberShortId && (
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                {memberShortId}
-              </span>
-              <p className="text-purple-800 text-sm">
-                Analysis will target this specific user
-                {!memberId && " (user not found in customer profiles)"}
-              </p>
-            </div>
-            <a
-              href={window.location.pathname}
-              className="text-purple-600 hover:text-purple-800 text-sm underline">
-              Clear filter
-            </a>
-          </div>
-        </div>
-      )}
-
       {/* Cron Status Warning */}
       {!initialData.cronStatus.cronConfigured && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
@@ -677,7 +644,7 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
               Required types are auto-selected based on template.
             </p>
             <div className="flex flex-wrap gap-2">
-              {(["products", "orders", "members", "comments"] as const).map(
+              {(["comments"] as const).map(
                 (dataType) => {
                   const isSelected = selectedDataTypes.includes(dataType);
                   const isRequired =
@@ -1353,7 +1320,7 @@ export function AIAnalysisClient({ initialData }: AIAnalysisClientProps) {
                   type="text"
                   value={scheduleFormName}
                   onChange={(e) => setScheduleFormName(e.target.value)}
-                  placeholder="e.g., Weekly Sales Report"
+                  placeholder="e.g., Weekly Comment Insights"
                   className="w-full border rounded-lg px-3 py-2"
                 />
               </div>

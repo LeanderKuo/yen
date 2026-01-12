@@ -17,9 +17,9 @@ import { ScrollytellingClient } from '@/components/theme/ScrollytellingClient';
 interface ThemePreviewScopeProps {
   /**
    * Page scope key for theme application.
-   * 'home' | 'blog' | 'gallery' | 'shop'
+   * 'home' | 'blog' | 'gallery'
    */
-  scope: ThemeScopeKey | 'home';
+  scope: ThemeScopeKey;
   /**
    * Theme key to apply (overrides DB config).
    */

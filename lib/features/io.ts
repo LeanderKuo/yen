@@ -4,7 +4,7 @@
  * Provides public access to feature visibility settings.
  * Uses anon client (no cookies) for cacheable reads.
  *
- * Features: blog, gallery, shop (all disabled by default)
+ * Features: blog, gallery (all disabled by default)
  */
 
 import 'server-only';
@@ -67,5 +67,4 @@ export async function getAllFeatureSettings(): Promise<FeatureSetting[]> {
 // Convenience functions for specific features
 export const isBlogEnabled = () => isFeatureEnabled('blog');
 export const isGalleryEnabled = () => isFeatureEnabled('gallery');
-export const isShopEnabled = () => isFeatureEnabled('shop');
 

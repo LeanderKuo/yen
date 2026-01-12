@@ -1,6 +1,6 @@
 ﻿import Link from 'next/link';
 import { getPublishedSiteContentCached } from '@/lib/modules/content/cached';
-import { isBlogEnabledCached, isGalleryEnabledCached, isShopEnabledCached } from '@/lib/features/cached';
+import { isBlogEnabledCached, isGalleryEnabledCached } from '@/lib/features/cached';
 import { getTranslations } from 'next-intl/server';
 import { pickLocaleContent } from '@/lib/i18n/pick-locale';
 
@@ -13,7 +13,6 @@ interface FooterContent {
 interface NavContent {
   blog: string;
   gallery?: string;
-  shop?: string;
   contact: string;
   privacy: string;
 }
@@ -55,14 +54,12 @@ export default async function Footer({ locale }: FooterProps) {
     let siteContents: Awaited<ReturnType<typeof getPublishedSiteContentCached>> = [];
     let isBlogEnabled = false;
     let isGalleryEnabled = false;
-    let isShopEnabled = false;
 
     try {
-      [siteContents, isBlogEnabled, isGalleryEnabled, isShopEnabled] = await Promise.all([
+      [siteContents, isBlogEnabled, isGalleryEnabled] = await Promise.all([
         getPublishedSiteContentCached(),
         isBlogEnabledCached(),
         isGalleryEnabledCached(),
-        isShopEnabledCached(),
       ]);
     } catch (dataError) {
       console.error('[Footer] Error fetching data:', dataError);
@@ -97,11 +94,6 @@ export default async function Footer({ locale }: FooterProps) {
         key: 'gallery', 
         href: `/${locale}/gallery`, 
         label: nav?.gallery || tNav('gallery')
-      }] : []),
-      ...(isShopEnabled ? [{ 
-        key: 'shop', 
-        href: `/${locale}/shop`, 
-        label: nav?.shop || tNav('shop')
       }] : []),
       { key: 'contact', href: `/${locale}/contact`, label: nav?.contact || tNav('contact') },
       { key: 'privacy', href: `/${locale}/privacy`, label: nav?.privacy || tNav('privacy') },

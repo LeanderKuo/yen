@@ -19,7 +19,6 @@
 -- │   ├── 04_gallery.sql           -- 刪除畫廊表格
 -- │   ├── 05_reactions.sql         -- 刪除反應系統表格
 -- │   ├── 06_feature_settings.sql  -- 刪除功能開關設定
--- │   ├── 07_shop.sql              -- 刪除電商表格
 -- │   ├── 09_landing_sections.sql  -- 刪除首頁區塊表格
 -- │   └── 10_theme.sql             -- 刪除主題配置表格
 -- │
@@ -31,15 +30,12 @@
 -- │   ├── 05_reactions.sql         -- 反應系統表格
 -- │   ├── 06_cross_triggers.sql    -- 跨表觸發器
 -- │   ├── 06_feature_settings.sql  -- 功能開關設定
--- │   ├── 07_shop.sql              -- 電商核心表格
--- │   ├── 08_shop_functions.sql    -- 電商函數
 -- │   ├── 09_landing_sections.sql  -- 首頁區塊表格
 -- │   └── 10_theme.sql             -- 主題配置表格（Singleton）
 -- │
 -- └── 03_seed/                      -- 步驟 3: 插入預設資料
 --     ├── 01_main.sql              -- 主網站預設資料
 --     ├── 02_comments.sql          -- 留言系統預設資料
---     ├── 03_shop.sql              -- 電商預設資料
 --     ├── 04_features_landing.sql  -- 功能開關與 Landing 預設資料
 --     ├── 05_gallery.sql           -- 畫廊預設資料
 --     ├── 06_blog.sql              -- 部落格預設資料
@@ -80,19 +76,16 @@
 --    ⑤ 02_add/05_reactions.sql
 --    ⑥ 02_add/06_cross_triggers.sql
 --    ⑦ 02_add/06_feature_settings.sql
---    ⑧ 02_add/07_shop.sql
---    ⑨ 02_add/08_shop_functions.sql
---    ⑩ 02_add/09_landing_sections.sql
---    ⑪ 02_add/10_theme.sql
+--    ⑧ 02_add/09_landing_sections.sql
+--    ⑨ 02_add/10_theme.sql
 --
 -- 【步驟 3 - SEED】插入預設資料（按順序）
 --    ① 03_seed/01_main.sql
 --    ② 03_seed/02_comments.sql
---    ③ 03_seed/03_shop.sql
---    ④ 03_seed/04_features_landing.sql
---    ⑤ 03_seed/05_gallery.sql
---    ⑥ 03_seed/06_blog.sql
---    ⑦ 03_seed/07_theme.sql
+--    ③ 03_seed/04_features_landing.sql
+--    ④ 03_seed/05_gallery.sql
+--    ⑤ 03_seed/06_blog.sql
+--    ⑥ 03_seed/07_theme.sql
 --
 -- 【步驟 4 - 新增第一位 Admin】
 --    執行以下 SQL（替換 email）：
@@ -111,13 +104,12 @@
 -- 【步驟 1 - DROP】刪除舊表格（反向順序）
 --    ① 01_drop/10_theme.sql
 --    ② 01_drop/09_landing_sections.sql
---    ③ 01_drop/07_shop.sql
---    ④ 01_drop/06_feature_settings.sql
---    ⑤ 01_drop/05_reactions.sql
---    ⑥ 01_drop/04_gallery.sql
---    ⑦ 01_drop/03_reports.sql
---    ⑧ 01_drop/02_comments.sql
---    ⑨ 01_drop/01_main.sql
+--    ③ 01_drop/06_feature_settings.sql
+--    ④ 01_drop/05_reactions.sql
+--    ⑤ 01_drop/04_gallery.sql
+--    ⑥ 01_drop/03_reports.sql
+--    ⑦ 01_drop/02_comments.sql
+--    ⑧ 01_drop/01_main.sql
 --
 -- 【步驟 2, 3】同上「全新安裝」
 --
@@ -131,11 +123,9 @@
 -- 3. gallery 依賴 comments (需要 site_admins 表)
 -- 4. reactions 依賴 gallery, comments
 -- 5. cross_triggers 依賴 posts, gallery_items, comments, reactions
--- 6. feature_settings 獨立（但 shop 的 is_shop_visible() 會讀取它）
--- 7. shop 依賴 main + feature_settings (需要 auth.users + feature_settings)
--- 8. shop_functions 依賴 shop + extensions (pg_cron, vault)
--- 9. landing_sections 依賴 gallery (gallery_categories 外鍵)
--- 10. theme 獨立 (Singleton 表，無依賴)
+-- 6. feature_settings 獨立
+-- 7. landing_sections 依賴 gallery (gallery_categories 外鍵)
+-- 8. theme 獨立 (Singleton 表，無依賴)
 --
 -- ⚠️ 請務必按照編號順序執行！
 --
@@ -144,8 +134,8 @@
 -- ============================================
 --
 -- site_admins 表支援兩種角色：
--- - owner: 最高權限，可管理金流設定與財務數據
--- - editor: 一般管理員，可管理商品/訂單/內容
+-- - owner: 最高權限，可管理網站設定與所有內容
+-- - editor: 一般管理員，可管理內容
 --
 -- 角色透過 JWT app_metadata.role 傳遞，無需每次查詢資料庫。
 -- Trigger 會自動同步 site_admins 變更到 auth.users。

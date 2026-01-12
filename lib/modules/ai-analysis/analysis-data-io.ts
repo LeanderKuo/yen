@@ -21,18 +21,6 @@ import {
 
 // Import individual fetchers
 import {
-  fetchProductsForAnalysis,
-  type ProductAnalysisShape,
-} from './analysis-products-io';
-import {
-  fetchOrdersForAnalysis,
-  type OrderAnalysisShape,
-} from './analysis-orders-io';
-import {
-  fetchMembersForAnalysis,
-  type MemberAnalysisShape,
-} from './analysis-members-io';
-import {
   fetchCommentsForAnalysis,
   type CommentAnalysisShape,
 } from './analysis-comments-io';
@@ -46,9 +34,6 @@ import {
  * Maps each requested data type to its AI-safe data array.
  */
 export interface AnalysisDataset {
-  products?: ProductAnalysisShape[];
-  orders?: OrderAnalysisShape[];
-  members?: MemberAnalysisShape[];
   comments?: CommentAnalysisShape[];
 }
 
@@ -63,13 +48,7 @@ export type AnalysisDataRecord = Record<string, unknown>;
 // =============================================================================
 
 export {
-  fetchProductsForAnalysis,
-  fetchOrdersForAnalysis,
-  fetchMembersForAnalysis,
   fetchCommentsForAnalysis,
-  type ProductAnalysisShape,
-  type OrderAnalysisShape,
-  type MemberAnalysisShape,
   type CommentAnalysisShape,
 };
 
@@ -98,30 +77,6 @@ export async function fetchAnalysisData(
 
   // Fetch each requested data type in parallel
   const fetchPromises: Promise<void>[] = [];
-
-  if (dataTypes.includes('products')) {
-    fetchPromises.push(
-      fetchProductsForAnalysis(filters).then((data) => {
-        result.products = data;
-      })
-    );
-  }
-
-  if (dataTypes.includes('orders')) {
-    fetchPromises.push(
-      fetchOrdersForAnalysis(filters).then((data) => {
-        result.orders = data;
-      })
-    );
-  }
-
-  if (dataTypes.includes('members')) {
-    fetchPromises.push(
-      fetchMembersForAnalysis(filters).then((data) => {
-        result.members = data;
-      })
-    );
-  }
 
   if (dataTypes.includes('comments')) {
     fetchPromises.push(
@@ -153,24 +108,6 @@ export async function fetchAnalysisDataFlattened(
   // Flatten all data types into single array with type marker
   const flattened: AnalysisDataRecord[] = [];
 
-  if (dataset.products) {
-    flattened.push(
-      ...dataset.products.map((p) => ({ ...p, _dataType: 'products' }))
-    );
-  }
-
-  if (dataset.orders) {
-    flattened.push(
-      ...dataset.orders.map((o) => ({ ...o, _dataType: 'orders' }))
-    );
-  }
-
-  if (dataset.members) {
-    flattened.push(
-      ...dataset.members.map((m) => ({ ...m, _dataType: 'members' }))
-    );
-  }
-
   if (dataset.comments) {
     flattened.push(
       ...dataset.comments.map((c) => ({ ...c, _dataType: 'comments' }))
@@ -197,9 +134,6 @@ export async function getAnalysisDataCounts(
   const dataset = await fetchAnalysisData(dataTypes, filters);
 
   return {
-    products: dataset.products?.length ?? 0,
-    orders: dataset.orders?.length ?? 0,
-    members: dataset.members?.length ?? 0,
     comments: dataset.comments?.length ?? 0,
   };
 }
@@ -247,9 +181,7 @@ export async function fetchAnalysisDataWithSampling(
       data: allData,
       originalCount: allData.length,
       sampledCount: allData.length,
-      highPriorityKept: allData.filter(
-        (r) => r._dataType === 'orders'
-      ).length,
+      highPriorityKept: 0,
       wasSampled: false,
     };
 

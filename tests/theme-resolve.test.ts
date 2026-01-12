@@ -226,7 +226,7 @@ describe('resolveThemeKey', () => {
       global_theme: 'japanese-airy',
       page_themes: {},
     });
-    assert.equal(resolveThemeKey(config, 'shop'), 'japanese-airy');
+    assert.equal(resolveThemeKey(config, 'gallery'), 'japanese-airy');
   });
 
   test('should fall back to default if no valid config', () => {

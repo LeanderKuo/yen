@@ -40,8 +40,8 @@ export const DEFAULT_CLEANER_CONFIG: CleanerConfig = {
 /** Patterns for visual noise that should be removed */
 const NOISE_PATTERNS: RegExp[] = [
   // Navigation patterns
-  /^(Home|About|Contact|Products|Services)(\s*\|\s*[\w\s]+)+$/gim,
-  /^\s*(首頁|關於|聯絡|產品|服務)(\s*[\|｜]\s*[\u4e00-\u9fff\w\s]+)+$/gim,
+  /^(Home|About|Blog|Gallery|Contact)(\s*\|\s*[\w\s]+)+$/gim,
+  /^\s*(首頁|關於|部落格|圖廊|聯絡)(\s*[\|｜]\s*[\u4e00-\u9fff\w\s]+)+$/gim,
   // Copyright notices
   /©\s*\d{4}.*$/gim,
   /Copyright\s*©?\s*\d{4}.*$/gim,

@@ -110,37 +110,18 @@
 
 ---
 
-## 4. 金流安全
-
-> 本節只保留「安全規則」，避免重複抄流程/契約造成 drift。  
-> Webhook/ops 入口：`runbook/payments.md`；initiation contracts：`specs/proposed/payments-initiation-spec.md`；全域約束：`../ARCHITECTURE.md` §3.10
-
-### 4.1 密鑰管理
-
-- **儲存**：Supabase Vault（加密）
-- **讀取**：透過 `read_payment_secret(uuid)` RPC
-- **前端顯示**：僅遮罩值（`sk-***abc`）
-
-### 4.2 Server-Only 約束
-
-- 金流 SDK（Stripe/LINE Pay/ECPay）必須 server-only
-- 禁止進入 client bundle
-
----
-
 ## 5. XSS 與輸入驗證
 
 ### 5.1 輸入清理
 
 - 使用 `lib/security/sanitize.ts` 清理使用者輸入
-- Markdown 內容渲染前必須經過 sanitize
+- User-submitted Markdown 內容渲染前必須經過 sanitize
 
 ### 5.2 Validators
 
 所有 API endpoint 使用 `lib/validators/*` 進行輸入驗證：
 
 - `api-common.ts` — UUID、分頁驗證
-- `cart.ts` — 購物車驗證
 - `comments.ts` — 評論 API 驗證
 - `gallery-api.ts` — Gallery API 驗證
 - `reactions.ts` — Reactions 驗證

@@ -40,7 +40,6 @@ interface EmbeddingsClientProps {
 
 /** Target type display labels */
 const TYPE_LABELS: Record<EmbeddingTargetType, string> = {
-  product: "Products",
   post: "Blog Posts",
   gallery_item: "Gallery Items",
   comment: "Comments",
@@ -248,13 +247,7 @@ export function EmbeddingsClient({ initialData }: EmbeddingsClientProps) {
       )}
 
       {/* Stats Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          title="Products"
-          total={stats.products.total}
-          withEmbedding={stats.products.withEmbedding}
-          failed={stats.products.failed}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard
           title="Blog Posts"
           total={stats.posts.total}
@@ -469,11 +462,7 @@ export function EmbeddingsClient({ initialData }: EmbeddingsClientProps) {
               <h4 className="text-sm font-medium text-blue-800 mb-2">
                 Initialization Result
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-blue-700">
-                <div>
-                  Products: {initResult.products.queued} queued,{" "}
-                  {initResult.products.skipped} skipped
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-blue-700">
                 <div>
                   Posts: {initResult.posts.queued} queued,{" "}
                   {initResult.posts.skipped} skipped

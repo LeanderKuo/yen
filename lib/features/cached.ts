@@ -44,11 +44,6 @@ export const isBlogEnabledCached = () => isFeatureEnabledCached('blog');
 export const isGalleryEnabledCached = () => isFeatureEnabledCached('gallery');
 
 /**
- * Cached shop feature check
- */
-export const isShopEnabledCached = () => isFeatureEnabledCached('shop');
-
-/**
  * Cached all feature settings
  * Used by Header/Footer to show/hide navigation links
  */

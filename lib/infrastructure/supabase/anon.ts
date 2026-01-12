@@ -7,7 +7,7 @@
  * - SSR cached reads in lib/*-cached.ts modules (unstable_cache compatible)
  * - Public data fetching without user cookies
  * - Sitemap generation
- * - Shop visibility checks (is_shop_visible RPC)
+ * - Feature visibility checks (is_feature_enabled RPC)
  *
  * RESTRICTIONS:
  * - Server-only (uses anon key, no cookies)

@@ -12,8 +12,5 @@
 - Cron endpoints + secrets (`CRON_SECRET`, `WORKER_SECRET`): see `../SECURITY.md` §3.5.
 - AI Analysis enablement (OpenRouter + cron): see [AI Analysis](ai-analysis.md).
 - Embeddings + Preprocessing enablement (Edge Functions + cron/worker): see [Embeddings + Preprocessing](embeddings-preprocessing.md).
-- Payments readiness:
-  - Webhook architecture: see [Payments](payments.md).
-  - External dependencies / provider keys: see `../BLOCKERS.md`.
 
 ---

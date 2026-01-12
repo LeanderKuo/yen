@@ -10,7 +10,6 @@
 import { createHash } from 'crypto';
 import type {
   EmbeddingTargetType,
-  ProductEmbeddingData,
   PostEmbeddingData,
   GalleryItemEmbeddingData,
   CommentEmbeddingData,
@@ -173,26 +172,6 @@ export function hashContent(text: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Compose embedding content from product data.
- * @see SUPABASE_AI.md §2.2 - "name + description_en + description_zh + tags"
- */
-export function composeProductContent(data: ProductEmbeddingData): string {
-  const parts: string[] = [data.name];
-  
-  if (data.description_en) {
-    parts.push(stripHtmlAndMarkdown(data.description_en));
-  }
-  if (data.description_zh) {
-    parts.push(stripHtmlAndMarkdown(data.description_zh));
-  }
-  if (data.tags && data.tags.length > 0) {
-    parts.push(data.tags.join(', '));
-  }
-  
-  return normalizeWhitespace(parts.join(' '));
-}
-
-/**
  * Compose embedding content from post data.
  * @see SUPABASE_AI.md §2.2 - "title_en + title_zh + excerpt_en + excerpt_zh"
  */
@@ -235,11 +214,9 @@ export function composeCommentContent(data: CommentEmbeddingData): string {
  */
 export function composeEmbeddingContent(
   targetType: EmbeddingTargetType,
-  data: ProductEmbeddingData | PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
+  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
 ): string {
   switch (targetType) {
-    case 'product':
-      return composeProductContent(data as ProductEmbeddingData);
     case 'post':
       return composePostContent(data as PostEmbeddingData);
     case 'gallery_item':
@@ -256,7 +233,7 @@ export function composeEmbeddingContent(
  */
 export function prepareContentForEmbedding(
   targetType: EmbeddingTargetType,
-  data: ProductEmbeddingData | PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
+  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
 ): { content: string; contentHash: string; truncated: boolean } {
   const composed = composeEmbeddingContent(targetType, data);
   const originalTokens = estimateTokenCount(composed);

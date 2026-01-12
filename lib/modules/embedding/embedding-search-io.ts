@@ -70,7 +70,7 @@ export async function semanticSearch(
   const queryEmbedding = embeddingResult.embedding as number[];
 
   // 2. Build type filter
-  const targetTypes = params.targetTypes ?? ['product', 'post', 'gallery_item'];
+  const targetTypes = params.targetTypes ?? ['post', 'gallery_item'];
 
   // 3. Query similar embeddings using pgvector
   // Note: We use a raw query for vector similarity as Supabase client doesn't have native pgvector support
@@ -207,7 +207,7 @@ export async function keywordSearch(
   const supabase = createAdminClient();
   
   const limit = params.limit ?? SEMANTIC_SEARCH_DEFAULTS.limit;
-  const targetTypes = params.targetTypes ?? ['product', 'post', 'gallery_item'];
+  const targetTypes = params.targetTypes ?? ['post', 'gallery_item'];
 
   const { data, error } = await supabase.rpc('search_embeddings_keyword', {
     query_text: params.query,

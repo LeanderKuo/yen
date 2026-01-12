@@ -19,8 +19,6 @@
  */
 export type AnalysisTemplateId =
   | 'user_behavior'
-  | 'sales'
-  | 'rfm'
   | 'content_recommendation'
   | 'custom';
 
@@ -28,7 +26,7 @@ export type AnalysisTemplateId =
  * Data types that can be analyzed.
  * Different templates require different combinations.
  */
-export type AnalysisDataType = 'products' | 'orders' | 'members' | 'comments';
+export type AnalysisDataType = 'comments';
 
 /**
  * Analysis mode selection.
@@ -64,8 +62,6 @@ export interface AnalysisDateRange {
  * Filters applied to analysis data.
  */
 export interface AnalysisFilters {
-  productIds?: string[];
-  memberIds?: string[];
   dateRange?: AnalysisDateRange;
 }
 
@@ -212,37 +208,17 @@ export const ANALYSIS_TEMPLATES: readonly AnalysisTemplate[] = [
       en: 'Analyze how users interact with content',
       zh: '分析用戶如何與內容互動',
     },
-    requiredDataTypes: ['comments', 'orders'],
-    optionalDataTypes: ['products'],
-  },
-  {
-    id: 'sales',
-    name: { en: 'Sales Analysis', zh: '銷售分析' },
-    description: {
-      en: 'Analyze product sales and trends',
-      zh: '分析商品銷售與趨勢',
-    },
-    requiredDataTypes: ['products', 'orders'],
-    optionalDataTypes: ['members'],
-  },
-  {
-    id: 'rfm',
-    name: { en: 'RFM Segmentation', zh: '會員分群 RFM' },
-    description: {
-      en: 'Segment customers by Recency, Frequency, Monetary',
-      zh: '依最近購買、頻率、金額分群',
-    },
-    requiredDataTypes: ['members', 'orders'],
+    requiredDataTypes: ['comments'],
     optionalDataTypes: [],
   },
   {
     id: 'content_recommendation',
     name: { en: 'Content Recommendation', zh: '內容推薦' },
     description: {
-      en: 'Find content-to-purchase correlations',
-      zh: '找出內容與購買的關聯',
+      en: 'Generate content recommendations based on engagement signals',
+      zh: '根據互動信號產生內容推薦',
     },
-    requiredDataTypes: ['products', 'orders', 'comments'],
+    requiredDataTypes: ['comments'],
     optionalDataTypes: [],
   },
 ] as const;
@@ -368,9 +344,6 @@ export interface AnalysisSchedule {
   filters: AnalysisFilters;
   ragConfig?: RAGConfig;
   
-  // Target member (nullable = all members)
-  memberId: string | null;
-  
   // Schedule configuration
   scheduleCron: string;
   timezone: string;
@@ -413,7 +386,6 @@ export interface CreateScheduleRequest {
   modelId: string;
   filters?: AnalysisFilters;
   ragConfig?: RAGConfig;
-  memberId?: string | null;
   scheduleCron: string;
   timezone?: string;
 }
@@ -431,7 +403,6 @@ export interface UpdateScheduleRequest {
   modelId?: string;
   filters?: AnalysisFilters;
   ragConfig?: RAGConfig;
-  memberId?: string | null;
   scheduleCron?: string;
   timezone?: string;
   isEnabled?: boolean;

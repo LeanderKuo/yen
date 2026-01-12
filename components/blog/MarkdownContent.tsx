@@ -23,13 +23,13 @@ interface MarkdownContentProps {
  *
  * 1. The `html` prop MUST only come from `markdownToHtml()` in
  *    `lib/markdown/server.ts`, which processes admin-trusted content.
- *
- * 2. All markdown sources are protected by RLS (admin-only writes):
- *    - Blog posts, product descriptions, landing page content
- *
- * ⚠️  NEVER pass user-submitted content directly to this component.
- *     If user content needs rendering, use a sanitized pipeline.
- *
+  *
+  * 2. All markdown sources are protected by RLS (admin-only writes):
+  *    - Blog posts, landing page content
+  *
+  * ⚠️  NEVER pass user-submitted content directly to this component.
+  *     If user content needs rendering, use a sanitized pipeline.
+  *
  * Last audited: 2025-12-21
  * ============================================================================
  */

@@ -27,7 +27,7 @@
 
 ### P1（上線必需）
 
-- Stripe Checkout Session（checkout initiation wiring）：In Progress（但多數依賴被 BLOCK）→ [`specs/proposed/payments-initiation-spec.md#stripe-checkout-session`](specs/proposed/payments-initiation-spec.md#stripe-checkout-session), [`BLOCKERS.md#stripe`](BLOCKERS.md#stripe)
+- （目前無 P1 項目）
 
 ---
 

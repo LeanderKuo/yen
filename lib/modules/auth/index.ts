@@ -69,8 +69,8 @@ export async function isSiteAdmin(supabase: SupabaseClient): Promise<boolean> {
 
 /**
  * User role type for RBAC
- * - 'owner': Full access including payment config and revenue
- * - 'admin': Can manage products, orders, coupons (mapped from 'editor' role)
+ * - 'owner': Full access to admin features
+ * - 'admin': Can manage content/data admin features (mapped from 'editor' role)
  * - 'authenticated': Logged in user without admin privileges
  * - 'visitor': Not logged in
  */

@@ -22,12 +22,6 @@ import type { EmbeddingTargetType } from '@/lib/types/embedding';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const QUALITY_GATE_CONFIGS: Record<EmbeddingTargetType, QualityGateConfig> = {
-  product: {
-    minLength: 20, // characters
-    maxLength: 5000,
-    minQualityScore: 0.6,
-    maxNoiseRatio: 0.3,
-  },
   post: {
     minLength: 50, // characters for posts
     maxLength: 10000,

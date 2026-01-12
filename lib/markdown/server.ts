@@ -18,7 +18,6 @@ import 'server-only';
  *
  * 1. ALL markdown sources are admin-controlled:
  *    - Blog posts (`posts` table) - protected by site_admins RLS
- *    - Product descriptions (`products` table) - protected by site_admins RLS
  *    - Landing page content (`site_content` table) - protected by site_admins RLS
  *
  * 2. There is NO user-submitted markdown in this system.
@@ -32,7 +31,7 @@ import 'server-only';
  *     - NEVER pass user content through this function
  *
  * Last audited: 2025-12-21
- * Audited sources: posts, products, site_content, landing_sections
+ * Audited sources: posts, site_content, landing_sections
  * ============================================================================
  */
 

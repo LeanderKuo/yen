@@ -60,18 +60,12 @@ export {
 export {
   type AnalysisDataset,
   type AnalysisDataRecord,
-  type ProductAnalysisShape,
-  type OrderAnalysisShape,
-  type MemberAnalysisShape,
   type CommentAnalysisShape,
   type FetchWithSamplingResult,
   fetchAnalysisData,
   fetchAnalysisDataFlattened,
   fetchAnalysisDataWithSampling,
   getAnalysisDataCounts,
-  fetchProductsForAnalysis,
-  fetchOrdersForAnalysis,
-  fetchMembersForAnalysis,
   fetchCommentsForAnalysis,
 } from './analysis-data-io';
 

@@ -71,13 +71,11 @@ export interface AnalysisRequest {
 }
 
 export interface DataFilters {
-  productIds?: string[]; // UUID[]
-  memberIds?: string[]; // UUID[]
   dateRange?: { from: string; to: string }; // ISO date strings
   includeSensitive?: boolean;
 }
 
-export type DataType = "products" | "orders" | "members" | "comments";
+export type DataType = "comments";
 
 // ===== Module A → Module C =====
 
@@ -89,13 +87,13 @@ export interface EmbeddingQueueRequest {
 
 /**
  * priority 使用場景：
- * - "high"：單筆編輯（Admin 編輯單一商品/文章/Gallery 後立即觸發）
+ * - "high"：單筆編輯（Admin 編輯單一文章/作品/留言後立即觸發）
  * - "normal"：批量操作（匯入 100 筆、批次初始化、Cron Job 重建）
  *
  * 處理優先順序：high 優先於 normal（Edge Function 每批先處理 high）
  */
 export interface EmbeddingTargetItem {
-  targetType: "product" | "post" | "gallery_item" | "comment";
+  targetType: "post" | "gallery_item" | "comment";
   targetId: string; // UUID
 }
 
@@ -103,7 +101,7 @@ export interface EmbeddingTargetItem {
 
 /** RAG 檢索結果 */
 export interface RagRetrievalResult {
-  targetType: "product" | "post" | "gallery_item";
+  targetType: "post" | "gallery_item" | "comment";
   targetId: string;
   similarity: number; // 0-1
   contentSnippet: string; // 用於組合 prompt 的摘要
@@ -114,7 +112,7 @@ export interface RagRetrievalResult {
 /** 匯出資料的統一信封格式 */
 export interface ExportEnvelope<T> {
   exportedAt: string; // ISO timestamp
-  type: string; // e.g. 'products', 'orders'
+  type: string; // e.g. 'comments'
   filters?: DataFilters;
   includeSensitive?: boolean;
   data: T[];

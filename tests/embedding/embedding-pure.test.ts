@@ -14,7 +14,6 @@ import {
   estimateTokenCount,
   truncateToTokenLimit,
   hashContent,
-  composeProductContent,
   composePostContent,
   composeGalleryItemContent,
   composeCommentContent,
@@ -135,26 +134,6 @@ test('hashContent produces 64-char hex string', () => {
 // Content Composition Tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('composeProductContent combines name and descriptions', () => {
-  const result = composeProductContent({
-    name: 'Product Name',
-    description_en: 'English description',
-    description_zh: '中文描述',
-    tags: ['tag1', 'tag2'],
-  });
-  assert.ok(result.includes('Product Name'));
-  assert.ok(result.includes('English description'));
-  assert.ok(result.includes('中文描述'));
-  assert.ok(result.includes('tag1, tag2'));
-});
-
-test('composeProductContent handles missing fields', () => {
-  const result = composeProductContent({
-    name: 'Product Name',
-  });
-  assert.equal(result, 'Product Name');
-});
-
 test('composePostContent combines title and excerpt', () => {
   const result = composePostContent({
     title_en: 'English Title',
@@ -185,9 +164,6 @@ test('composeCommentContent strips HTML from content', () => {
 });
 
 test('composeEmbeddingContent dispatches to correct function', () => {
-  const productResult = composeEmbeddingContent('product', { name: 'Test Product' });
-  assert.ok(productResult.includes('Test Product'));
-
   const postResult = composeEmbeddingContent('post', { title_en: 'Test Post' });
   assert.ok(postResult.includes('Test Post'));
 });
@@ -197,11 +173,11 @@ test('composeEmbeddingContent dispatches to correct function', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('prepareContentForEmbedding returns content and hash', () => {
-  const result = prepareContentForEmbedding('product', {
-    name: 'Test Product',
-    description_en: 'Description',
+  const result = prepareContentForEmbedding('post', {
+    title_en: 'Test Post',
+    excerpt_en: 'Description',
   });
-  assert.ok(result.content.includes('Test Product'));
+  assert.ok(result.content.includes('Test Post'));
   assert.equal(result.contentHash.length, 64);
   assert.equal(result.truncated, false);
 });

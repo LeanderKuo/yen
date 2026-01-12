@@ -61,7 +61,7 @@
 | AI / ML 術語  | Embedding、RAG、Vector、Token、Prompt、Fine-tuning、LLM、Chunk |
 | 技術術語      | API、SDK、Webhook、Endpoint、JSON、Markdown、SEO、SSL、Cache   |
 | 資料庫/後端   | Schema、Query、Index、Migration                                |
-| 產品/服務名稱 | Supabase、OpenAI、Stripe、PayPal、Vercel                       |
+| 產品/服務名稱 | Supabase、OpenAI、Sentry、Vercel                               |
 | 狀態碼        | HTTP 404、500、Rate Limit 等                                   |
 | 程式相關      | Slug、Metadata、Cron、Worker、Queue                            |
 | 縮寫          | CRUD、UUID、URL、CDN                                           |

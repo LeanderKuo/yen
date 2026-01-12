@@ -41,7 +41,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS public.embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('product', 'post', 'gallery_item', 'comment')),
+  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('post', 'gallery_item', 'comment')),
   target_id UUID NOT NULL,
   chunk_index INT NOT NULL DEFAULT 0,
   chunk_total INT NOT NULL DEFAULT 1,
@@ -93,7 +93,7 @@ CREATE INDEX IF NOT EXISTS idx_embeddings_tsv ON public.embeddings USING GIN(chu
 
 CREATE TABLE IF NOT EXISTS public.embedding_queue (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('product', 'post', 'gallery_item', 'comment')),
+  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('post', 'gallery_item', 'comment')),
   target_id UUID NOT NULL,
   priority VARCHAR(10) NOT NULL DEFAULT 'normal' CHECK (priority IN ('high', 'normal', 'low')),
   status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
@@ -134,9 +134,9 @@ CREATE INDEX IF NOT EXISTS idx_embedding_queue_claimable
 
 CREATE TABLE IF NOT EXISTS public.similar_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  source_type VARCHAR(50) NOT NULL CHECK (source_type IN ('product', 'post', 'gallery_item')),
+  source_type VARCHAR(50) NOT NULL CHECK (source_type IN ('post', 'gallery_item')),
   source_id UUID NOT NULL,
-  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('product', 'post', 'gallery_item')),
+  target_type VARCHAR(50) NOT NULL CHECK (target_type IN ('post', 'gallery_item')),
   target_id UUID NOT NULL,
   similarity_score DECIMAL(4,3) NOT NULL CHECK (similarity_score >= 0 AND similarity_score <= 1),
   rank INT NOT NULL CHECK (rank >= 1 AND rank <= 10),
@@ -213,12 +213,12 @@ CREATE POLICY "Admins can manage embedding queue"
 -- PART 7: RLS Policies - similar_items
 -- ============================================
 --
--- Public read (for product/article pages).
+-- Public read (for post/gallery pages).
 -- Admin-only write (computed by Cron).
 --
 -- ============================================
 
--- Public SELECT (for similar products/articles)
+-- Public SELECT (for similar posts/gallery items)
 CREATE POLICY "Anyone can read similar items"
   ON public.similar_items FOR SELECT
   TO anon, authenticated

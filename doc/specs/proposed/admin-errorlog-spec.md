@@ -74,10 +74,10 @@ See also:
 | `timestamp` | ISO 8601 string | ✓ | 錯誤發生的精確時間 |
 | `errorCode` | ActionErrorCode \| `'unknown_error'` | ✓ | 系統定義的錯誤代碼（legacy actions fallback: `unknown_error`） |
 | `severity` | 'critical' \| 'error' \| 'warning' | ✓ | 嚴重程度等級 |
-| `module` | string | ✓ | 來源模組（如 'Blog', 'Shop'） |
-| `subModule` | string | | 子模組（如 'Posts', 'Products'） |
+| `module` | string | ✓ | 來源模組（如 'Blog', 'Gallery'） |
+| `subModule` | string | | 子模組（如 'Posts', 'Embeddings'） |
 | `action` | string | ✓ | 觸發錯誤的 Action 名稱 |
-| `targetType` | string | | 操作對象類型（如 'post', 'product'） |
+| `targetType` | string | | 操作對象類型（如 'post', 'gallery_item'） |
 | `targetId` | string | | 操作對象 ID |
 | `targetName` | string | | 操作對象名稱（如文章標題，方便識別） |
 | `userEmail` | string | | 當前登入的管理員 Email |
@@ -162,9 +162,6 @@ See also:
 | **Blog** | `admin/(blog)/posts/actions.ts` | createPostAction, updatePostAction, deletePostAction |
 | | `admin/(blog)/categories/actions.ts` | createCategory, updateCategory, deleteCategory |
 | | `admin/(blog)/comments/actions.ts` | approveComment, rejectComment, deleteComment |
-| **Shop** | `admin/shop/products/actions.ts` | createProduct, updateProduct, deleteProduct |
-| | `admin/shop/orders/actions.ts` | updateOrderStatus, refundOrder |
-| | `admin/shop/coupons/actions.ts` | createCoupon, updateCoupon, deleteCoupon |
 | **Gallery** | `admin/gallery/actions.ts` | uploadGalleryItem, deleteGalleryItem, updateGalleryItem |
 | | `admin/gallery/categories/actions.ts` | createGalleryCategory, deleteGalleryCategory |
 | **Data** | `admin/(data)/embeddings/actions.ts` | initializeAllEmbeddingsAction, retryFailedEmbeddingsAction |
@@ -285,8 +282,8 @@ See also:
 │ │                                         │ │
 │ │ 🟠 14:25:12 · validation_error    [···]│ │
 │ │    輸入格式錯誤                         │ │
-│ │    Shop › Products                      │ │
-│ │    product_xyz789                       │ │
+│ │    Gallery › Items                      │ │
+│ │    gallery_item_xyz789                  │ │
 │ │                                         │ │
 │ └─────────────────────────────────────────┘ │
 │                                             │
@@ -333,7 +330,6 @@ See also:
 |------|------|
 | 全部模組 | 所有模組 |
 | Blog | 文章、分類、留言 |
-| Shop | 商品、訂單、優惠券、會員 |
 | Gallery | 圖廊、圖廊分類 |
 | Data | Embedding、Preprocessing、AI Analysis |
 | Settings | 網站設定、主題、功能開關 |
@@ -490,8 +486,6 @@ See also:
 | `/admin/posts/*` | module: Blog, subModule: Posts |
 | `/admin/categories/*` | module: Blog, subModule: Categories |
 | `/admin/comments/*` | module: Blog, subModule: Comments |
-| `/admin/shop/products/*` | module: Shop, subModule: Products |
-| `/admin/shop/orders/*` | module: Shop, subModule: Orders |
 | `/admin/gallery/*` | module: Gallery |
 | `/admin/embeddings/*` | module: Data, subModule: Embeddings |
 | `/admin/preprocessing/*` | module: Data, subModule: Preprocessing |
@@ -746,7 +740,7 @@ Total:       3 errors
 #### Error Log Panel — 篩選與搜尋 **(Phase 2)**
 - [ ] 可依時間範圍篩選（1 小時 / 今天 / 7 天 / 全部）
 - [ ] 可依嚴重等級篩選（Critical / Error / Warning）
-- [ ] 可依模組篩選（Blog / Shop / Gallery / Data 等）
+- [ ] 可依模組篩選（Blog / Gallery / Data / Settings / Users / Content 等）
 - [ ] 可輸入關鍵字搜尋錯誤訊息或代碼
 - [ ] 篩選結果即時更新
 - [ ] 無結果時顯示空狀態提示
@@ -810,7 +804,7 @@ Total:       3 errors
 #### 篩選功能
 - [ ] 時間範圍篩選器正常運作（1 小時 / 今天 / 昨天 / 7 天 / 全部）
 - [ ] 等級篩選器正常運作（Critical / Error / Warning / 全部）
-- [ ] 模組篩選器正常運作（Blog / Shop / Gallery / Data / Settings / Users）
+- [ ] 模組篩選器正常運作（Blog / Gallery / Data / Settings / Users / Content）
 - [ ] 多重篩選可正確組合（如：今天 + Error + Blog）
 - [ ] 篩選結果即時更新，無需手動刷新
 - [ ] 無結果時顯示對應空狀態提示
@@ -936,14 +930,6 @@ Total:       3 errors
 | Blog | Posts | `/admin/posts/*` | createPostAction, updatePostAction, deletePostAction |
 | Blog | Categories | `/admin/categories/*` | createCategory, updateCategory, deleteCategory |
 | Blog | Comments | `/admin/comments/*` | approveComment, rejectComment, deleteComment |
-| Shop | Dashboard | `/admin/shop` | — |
-| Shop | Products | `/admin/shop/products/*` | createProduct, updateProduct, deleteProduct |
-| Shop | Orders | `/admin/shop/orders/*` | updateOrderStatus, refundOrder |
-| Shop | Coupons | `/admin/shop/coupons/*` | createCoupon, updateCoupon, deleteCoupon |
-| Shop | Members | `/admin/shop/members/*` | updateMember |
-| Shop | Access | `/admin/shop/access/*` | updateAccess |
-| Shop | Settings | `/admin/shop/settings/*` | updateShopSettings |
-| Shop | Payments | `/admin/shop/payments/*` | updatePaymentSettings |
 | Gallery | Gallery | `/admin/gallery` | uploadGalleryItem, deleteGalleryItem |
 | Gallery | Categories | `/admin/gallery/categories/*` | createGalleryCategory, deleteGalleryCategory |
 | Gallery | Featured | `/admin/gallery/featured/*` | updateFeatured |

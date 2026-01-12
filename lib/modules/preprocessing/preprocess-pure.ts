@@ -29,15 +29,6 @@ import { qualityGateChunks, QUALITY_GATE_CONFIGS, DEFAULT_QUALITY_CONFIG, getQua
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TYPE_CONFIGS: Record<EmbeddingTargetType, TypePreprocessingConfig> = {
-  product: {
-    cleaning: {
-      ...DEFAULT_CLEANER_CONFIG,
-      removeMarkdown: true,
-      preserveHeadingStructure: true,
-    },
-    chunking: CHUNKING_CONFIGS.product,
-    quality: QUALITY_GATE_CONFIGS.product,
-  },
   post: {
     cleaning: {
       ...DEFAULT_CLEANER_CONFIG,

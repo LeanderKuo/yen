@@ -48,22 +48,11 @@ For stable technical specs, see [`specs/README.md`](specs/README.md).
 
 ## P1 - High (Required for Release)
 
-### Stripe Checkout Session
-
-- **Status**: In Progress
-- **Why**: checkout initiation must be wired (webhook layer exists)
-- **Dependencies**: Stripe account approval + production keys in Vault
-- **Links**: [`specs/proposed/payments-initiation-spec.md#stripe-checkout-session`](specs/proposed/payments-initiation-spec.md#stripe-checkout-session), [`BLOCKERS.md#stripe`](BLOCKERS.md#stripe), [`runbook/payments.md`](runbook/payments.md)
+- (No active P1 roadmap items.)
 
 ---
 
 ## P2 - Medium (Post-Release)
-
-### LINE Pay / ECPay Request Flow
-
-- **Status**: Not Started
-- **Why**: complete payment initiation flows
-- **Links**: [`specs/proposed/payments-initiation-spec.md#line-pay-request-confirm`](specs/proposed/payments-initiation-spec.md#line-pay-request-confirm), [`specs/proposed/payments-initiation-spec.md#ecpay-request-flow`](specs/proposed/payments-initiation-spec.md#ecpay-request-flow), [`BLOCKERS.md#line-pay`](BLOCKERS.md#line-pay), [`BLOCKERS.md#ecpay`](BLOCKERS.md#ecpay), [`runbook/payments.md`](runbook/payments.md)
 
 ### Local Dev Environment
 
@@ -88,7 +77,6 @@ For stable technical specs, see [`specs/README.md`](specs/README.md).
 | Risk                    | Impact                    | Mitigation                       |
 | ----------------------- | ------------------------- | -------------------------------- |
 | Production DB drift     | Security/feature issues   | follow `runbook/database-ops.md` |
-| Payment flow incomplete | Orders created but unpaid | follow `specs/proposed/payments-initiation-spec.md` + `runbook/payments.md` |
 
 ---
 
@@ -105,4 +93,3 @@ For stable technical specs, see [`specs/README.md`](specs/README.md).
 - Implemented behavior: `SPEC.md`
 - Security: `SECURITY.md`
 - Ops runbook: `RUNBOOK.md`
-- Payments: `runbook/payments.md`

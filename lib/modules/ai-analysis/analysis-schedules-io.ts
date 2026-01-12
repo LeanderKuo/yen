@@ -34,7 +34,6 @@ interface ScheduleRow {
   model_id: string;
   filters: Record<string, unknown>;
   rag_config: Record<string, unknown> | null;
-  member_id: string | null;
   schedule_cron: string;
   timezone: string;
   is_enabled: boolean;
@@ -57,7 +56,6 @@ function mapRowToSchedule(row: ScheduleRow): AnalysisSchedule {
     modelId: row.model_id,
     filters: row.filters as AnalysisFilters,
     ragConfig: row.rag_config ? (row.rag_config as unknown as RAGConfig) : undefined,
-    memberId: row.member_id,
     scheduleCron: row.schedule_cron,
     timezone: row.timezone,
     isEnabled: row.is_enabled,
@@ -167,7 +165,6 @@ export async function createSchedule(
       model_id: request.modelId,
       filters: request.filters ?? {},
       rag_config: request.ragConfig ?? null,
-      member_id: request.memberId ?? null,
       schedule_cron: request.scheduleCron,
       timezone: request.timezone ?? 'UTC',
       next_run_at: nextRunAt.toISOString(),
@@ -258,7 +255,6 @@ export async function updateSchedule(
   if (updates.modelId !== undefined) updateData.model_id = updates.modelId;
   if (updates.filters !== undefined) updateData.filters = updates.filters;
   if (updates.ragConfig !== undefined) updateData.rag_config = updates.ragConfig;
-  if (updates.memberId !== undefined) updateData.member_id = updates.memberId;
   if (updates.timezone !== undefined) updateData.timezone = updates.timezone;
   if (updates.isEnabled !== undefined) updateData.is_enabled = updates.isEnabled;
 

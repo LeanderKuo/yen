@@ -3,7 +3,7 @@
 /**
  * Import/Export Client Component
  * @see doc/specs/completed/IMPORT_EXPORT.md
- * @see uiux_refactor.md §6.1.4 JSON Import UI (Gallery/Shop/Content)
+ * @see uiux_refactor.md §6.1.4 JSON Import UI (Gallery/Content)
  *
  * Client component for bulk data import/export UI.
  * Client only handles file selection/upload and displays results.
@@ -29,15 +29,6 @@ import {
   applyGalleryItemsImportAction,
   previewGalleryCategoriesImportAction,
   applyGalleryCategoriesImportAction,
-  // Shop (job-tracked exports for history)
-  exportProductsWithJob,
-  exportCouponsWithJob,
-  exportOrdersWithJob,
-  exportMembersWithJob,
-  previewProductsImportAction,
-  applyProductsImportAction,
-  previewCouponsImportAction,
-  applyCouponsImportAction,
   // Content
   exportSiteContent,
   exportLandingSections,
@@ -69,8 +60,6 @@ import type { ImportExportJobListItem } from "@/lib/types/import-export";
 type JsonImportKey =
   | "galleryItems"
   | "galleryCategories"
-  | "products"
-  | "coupons"
   | "siteContent"
   | "landingSections";
 
@@ -101,8 +90,6 @@ function createInitialJsonImportState(): Record<
   return {
     galleryItems: { file: null, previewResult: null, importResult: null },
     galleryCategories: { file: null, previewResult: null, importResult: null },
-    products: { file: null, previewResult: null, importResult: null },
-    coupons: { file: null, previewResult: null, importResult: null },
     siteContent: { file: null, previewResult: null, importResult: null },
     landingSections: { file: null, previewResult: null, importResult: null },
   };
@@ -137,10 +124,6 @@ export function ImportExportClient({ role }: ImportExportClientProps) {
   const [exportFormats, setExportFormats] = useState<
     Record<string, ExportFormat>
   >({
-    products: "json",
-    coupons: "json",
-    orders: "json",
-    members: "json",
     comments: "json",
   });
 
@@ -153,8 +136,6 @@ export function ImportExportClient({ role }: ImportExportClientProps) {
   >({
     galleryItems: null,
     galleryCategories: null,
-    products: null,
-    coupons: null,
     siteContent: null,
     landingSections: null,
   });
@@ -425,124 +406,6 @@ export function ImportExportClient({ role }: ImportExportClientProps) {
           onClear={() => handleJsonClear("galleryCategories")}
           setInputRef={(el) => {
             jsonFileInputRefs.current.galleryCategories = el;
-          }}
-        />
-      </div>
-
-      {/* Shop Section */}
-      <SectionTitle>{ti("shop")}</SectionTitle>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
-        <ExportCardWithFormat
-          title={tc("products")}
-          description={ti("productsDesc")}
-          format={exportFormats.products}
-          onFormatChange={(f) =>
-            setExportFormats((prev) => ({ ...prev, products: f }))
-          }
-          onExport={() => {
-            const format = exportFormats.products;
-            startTransition(async () => {
-              setExportResults((prev) => ({ ...prev, products: null }));
-              const result = await exportProductsWithJob(format);
-              setExportResults((prev) => ({ ...prev, products: result }));
-            });
-          }}
-          isPending={isPending}
-          result={exportResults.products ?? null}
-          compact
-        />
-        <ExportCardWithFormat
-          title="Coupons"
-          description={ti("couponsDesc")}
-          format={exportFormats.coupons}
-          onFormatChange={(f) =>
-            setExportFormats((prev) => ({ ...prev, coupons: f }))
-          }
-          onExport={() => {
-            const format = exportFormats.coupons;
-            startTransition(async () => {
-              setExportResults((prev) => ({ ...prev, coupons: null }));
-              const result = await exportCouponsWithJob(format);
-              setExportResults((prev) => ({ ...prev, coupons: result }));
-            });
-          }}
-          isPending={isPending}
-          result={exportResults.coupons ?? null}
-          compact
-        />
-        <ExportCardWithFormat
-          title={tc("orders")}
-          description={ti("ordersDesc")}
-          format={exportFormats.orders}
-          onFormatChange={(f) =>
-            setExportFormats((prev) => ({ ...prev, orders: f }))
-          }
-          onExport={() => {
-            const format = exportFormats.orders;
-            startTransition(async () => {
-              setExportResults((prev) => ({ ...prev, orders: null }));
-              const result = await exportOrdersWithJob({ format });
-              setExportResults((prev) => ({ ...prev, orders: result }));
-            });
-          }}
-          isPending={isPending}
-          result={exportResults.orders ?? null}
-          compact
-        />
-        <ExportCardWithFormat
-          title={tc("members")}
-          description={ti("membersDesc")}
-          format={exportFormats.members}
-          onFormatChange={(f) =>
-            setExportFormats((prev) => ({ ...prev, members: f }))
-          }
-          onExport={() => {
-            const format = exportFormats.members;
-            startTransition(async () => {
-              setExportResults((prev) => ({ ...prev, members: null }));
-              const result = await exportMembersWithJob({ format });
-              setExportResults((prev) => ({ ...prev, members: result }));
-            });
-          }}
-          isPending={isPending}
-          result={exportResults.members ?? null}
-          compact
-        />
-      </div>
-      {/* Shop Import Cards (Products & Coupons only - Orders/Members are export-only) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <JsonImportCard
-          title={tc("products")}
-          description={ti("productsImportDesc")}
-          isOwner={isOwner}
-          isPending={isPending}
-          importKey="products"
-          state={jsonImportStates.products}
-          onFileChange={(file) => handleJsonFileChange("products", file)}
-          onPreview={() =>
-            handleJsonPreview("products", previewProductsImportAction)
-          }
-          onApply={() => handleJsonApply("products", applyProductsImportAction)}
-          onClear={() => handleJsonClear("products")}
-          setInputRef={(el) => {
-            jsonFileInputRefs.current.products = el;
-          }}
-        />
-        <JsonImportCard
-          title={ti("couponsDesc").split(".")[0]}
-          description={ti("couponsImportDesc")}
-          isOwner={isOwner}
-          isPending={isPending}
-          importKey="coupons"
-          state={jsonImportStates.coupons}
-          onFileChange={(file) => handleJsonFileChange("coupons", file)}
-          onPreview={() =>
-            handleJsonPreview("coupons", previewCouponsImportAction)
-          }
-          onApply={() => handleJsonApply("coupons", applyCouponsImportAction)}
-          onClear={() => handleJsonClear("coupons")}
-          setInputRef={(el) => {
-            jsonFileInputRefs.current.coupons = el;
           }}
         />
       </div>
@@ -930,7 +793,7 @@ function ImportCard({
 }
 
 // =============================================================================
-// JSON Import Card (for Gallery/Shop/Content)
+// JSON Import Card (for Gallery/Content)
 // =============================================================================
 
 interface JsonImportCardProps {

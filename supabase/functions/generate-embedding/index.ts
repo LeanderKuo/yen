@@ -21,7 +21,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 interface EmbeddingRequest {
   content: string;
-  targetType: 'product' | 'post' | 'gallery_item' | 'comment';
+  targetType: 'post' | 'gallery_item' | 'comment';
   targetId: string;
   chunkIndex?: number;
   chunkTotal?: number;
@@ -144,7 +144,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    if (!['product', 'post', 'gallery_item', 'comment'].includes(targetType)) {
+    if (!['post', 'gallery_item', 'comment'].includes(targetType)) {
       return jsonResponse(
         { success: false, error: 'Invalid targetType' },
         400

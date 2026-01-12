@@ -22,14 +22,6 @@ import type { EmbeddingTargetType } from '@/lib/types/embedding';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const CHUNKING_CONFIGS: Record<EmbeddingTargetType, ChunkingConfig> = {
-  product: {
-    targetSize: 300,
-    overlap: 45, // 15% overlap
-    splitBy: 'semantic',
-    minSize: 64,
-    maxSize: 600,
-    useHeadingsAsBoundary: true,
-  },
   post: {
     targetSize: 500,
     overlap: 75, // 15% overlap

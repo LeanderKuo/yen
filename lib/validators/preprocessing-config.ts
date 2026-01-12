@@ -99,7 +99,7 @@ export const typePreprocessingConfigSchema = z.object({
 
 /** Schema for the entire preprocessing_config JSONB */
 export const preprocessingConfigSchema = z.record(
-  z.enum(['product', 'post', 'gallery_item', 'comment']),
+  z.enum(['post', 'gallery_item', 'comment']),
   typePreprocessingConfigSchema
 );
 
@@ -167,14 +167,6 @@ export function validateChunkingConfig(
 
 /** Default chunking configs (copy from chunkers.ts for reference) */
 export const DEFAULT_CHUNKING_CONFIGS: Record<EmbeddingTargetType, ChunkingConfig> = {
-  product: {
-    targetSize: 300,
-    overlap: 45,
-    splitBy: 'semantic',
-    minSize: 64,
-    maxSize: 600,
-    useHeadingsAsBoundary: true,
-  },
   post: {
     targetSize: 500,
     overlap: 75,

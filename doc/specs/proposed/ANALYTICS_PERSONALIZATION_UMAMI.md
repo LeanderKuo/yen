@@ -6,7 +6,7 @@
 > **Owner**: Lijen / Leander  
 > **Parent Document**: `../completed/DATA_INTELLIGENCE.md`
 
-本 PRD 彙整目前專案與討論結論，目標是用「瀏覽/停留時間 + 文章/商品/Gallery + Likes」支援：
+本 PRD 彙整目前專案與討論結論，目標是用「瀏覽/停留時間 + 文章/Gallery + Likes」支援：
 
 1) **內容層級洞察**：挑出最值得做 LLM 分析/推薦的內容（先不用 LLM 也能產出可解釋理由）  
 2) **個人化**：未登入以 `anon_id`（cookie）識別、profile 存 localStorage；登入後合併到 `user_id`，做到跨裝置一致
@@ -23,7 +23,7 @@
 - **內容候選清單（最佳方案）**：採「多榜單並列（Multi-list Union）」取代單一加權分數；候選清單由 `Top Growth` / `High Stickiness` / `Low Interaction` 三榜 union 去重，並保留每篇被選中的原因標籤（可解釋）。
 - **內容 mapping**：tracking payload **直接帶** `content_type + content_id (UUID)`；不做 URL/slug mapping table、也不把 id 放進 URL。
 - **個人化**：browser-first（上限小檔案）+ 登入合併到 `user_id`（節流 + opt-out）。
-- **Likes（Reactions）**：posts/products/gallery 都支援 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕）；採 **Cloudflare Worker → Next API → Supabase**（edge gate + server 控制）。
+- **Likes（Reactions）**：posts/gallery/comments 都支援 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕）；採 **Cloudflare Worker → Next API → Supabase**（edge gate + server 控制）。
 - **AI Analysis（Admin-only）**：後台提供三種輸出模式（A 規則/特徵、B 雲端 LLM、C 離線本機 LLM）與三種 embeddings 模式（A 不用、B 重用 pgvector、C 離線產生），預設 A/A，並以「template default + per-report override」切換。
 - **DB reset**：`COMBINED_*.sql` 以「模組 SQL 生成」避免 drift/重複；Seed 拆 core+demo，且都必須 idempotent。
 - **Storage**：`content_engagement_daily` 與 `content_transition_daily` 日聚合保留 180 天；更舊 rollup 成月聚合後刪除日聚合。
@@ -89,8 +89,8 @@
 | Capability | Status（以 repo 現況為準） | Reuse paths（入口） | Notes / Gaps |
 | --- | --- | --- | --- |
 | Page view tracking（聚合寫入） | 已落地（寫入 + 驗證）；Dashboard UI 尚未實作 | `app/api/analytics/pageview/route.ts`, `components/analytics/PageViewTrackerClient.tsx`, `lib/analytics/pageviews-io.ts`, `supabase/02_add/16_page_views.sql`, `doc/specs/completed/page-views-analytics-spec.md` | 現況 key 是 `(day, path, locale)`；內容層級 join 走獨立 ingestion（本 PRD 決策：payload 帶 `content_type + content_id`）。 |
-| Reactions（匿名 likes + 限流） | 已落地（Next API + rate limit + service_role） | `app/api/reactions/route.ts`, `lib/reactions/io.ts`, `lib/utils/anon-id.ts`, `lib/security/ip.ts`, `supabase/02_add/05_reactions.sql` | 現況僅涵蓋 `gallery_item` + `comment`；DB 端 `anon` 有 `INSERT/DELETE` 且 delete policy 過鬆（`USING (true)`），必須收緊。PRD 決策：擴充到 `post`/`product` + Cloudflare Worker edge gate（Worker → Next API）。 |
-| AI Analysis（後台面板 + reports/schedules） | 已落地（核心流程）；部分 UI 能力仍在 roadmap（見 `doc/SPEC.md`） | `app/[locale]/admin/(data)/ai-analysis/*`, `lib/modules/ai-analysis/*`, `supabase/02_add/12_ai_analysis.sql`, `doc/specs/completed/ai-analysis-spec.md`, `doc/runbook/ai-analysis.md` | 現況 templates/dataTypes 偏 shop + comments；要做 pageviews/dwell 需要擴充 dataset/dataTypes。 |
+| Reactions（匿名 likes + 限流） | 已落地（Next API + rate limit + service_role） | `app/api/reactions/route.ts`, `lib/reactions/io.ts`, `lib/utils/anon-id.ts`, `lib/security/ip.ts`, `supabase/02_add/05_reactions.sql` | 現況僅涵蓋 `gallery_item` + `comment`；DB 端 `anon` 有 `INSERT/DELETE` 且 delete policy 過鬆（`USING (true)`），必須收緊。PRD 決策：擴充到 `post` + Cloudflare Worker edge gate（Worker → Next API）。 |
+| AI Analysis（後台面板 + reports/schedules） | 已落地（核心流程）；部分 UI 能力仍在 roadmap（見 `doc/SPEC.md`） | `app/[locale]/admin/(data)/ai-analysis/*`, `lib/modules/ai-analysis/*`, `supabase/02_add/12_ai_analysis.sql`, `doc/specs/completed/ai-analysis-spec.md`, `doc/runbook/ai-analysis.md` | 現況 templates/dataTypes 以 comments 為主；要做 pageviews/dwell 需要擴充 dataset/dataTypes。 |
 | OpenRouter（雲端 LLM 報告） | 已整合（AI Analysis 使用） | `doc/runbook/ai-analysis.md`, `lib/infrastructure/openrouter/*` | Free tier 50 req/day；只適合 admin on-demand + 快取/限流。 |
 | Embeddings / Similar items（語意相似） | 已落地（pgvector + worker + UI 顯示相似內容） | `supabase/02_add/13_embeddings.sql`, `app/api/worker/embedding-queue/route.ts`, `supabase/functions/generate-embedding/index.ts`, `components/blog/SimilarPosts.tsx` | 目前 embeddings 依賴雲端 API（`OPENAI_API_KEY`）；要維持零成本需改離線產生（或只對 Top 內容存）。 |
 | Import/Export jobs（工作追蹤/審計模式） | 已落地（可復用作 ETL/job 記錄） | `supabase/02_add/14_import_export_jobs.sql`, `lib/modules/import-export/*` | 用來追蹤 dwell 聚合、rollup、報告產生等批次 job（支援 idempotent）。 |
@@ -105,7 +105,7 @@
 - 內容層級聚合：用 views + dwell（日聚合）挑選內容候選清單與理由
 - 內容轉移（Next content）：用轉移統計表回答「看過 A 的人下一篇通常看什麼」（只存聚合；不存個人日記）
 - 個人化：未登入以 `anon_id`（cookie）識別 + localStorage profile 個人化；登入合併到 `user_id`（跨裝置一致），且有 opt-out
-- Likes：posts/products/gallery 都支援 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕），信號用於內容分析/個人化
+- Likes：posts/gallery/comments 都支援 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕），信號用於內容分析/個人化
 - AI Analysis（Admin-only）：提供內容層級分析 + 個人化洞察；後台內建輸出模式 A/B/C 與 embeddings 模式 A/B/C（template default + per-report override）
 - DB reset/seed：`COMBINED_*.sql` 可穩定 reset；seed 可重複執行（idempotent）
 
@@ -182,7 +182,7 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 - FR-2: AI Analysis 面板必須輸出候選清單與可解釋理由；每筆候選需帶 `reason_tags`（固定值域；可同時命中多榜）與對應指標（`growth_rate_wow`、`avg_dwell_seconds`、`like_rate`、`view_count`）。
 - FR-3: 未登入使用者可依匿名歷史得到個人化推薦（browser-first；不要求跨裝置）。
 - FR-4: 使用者登入後可把匿名歷史合併到 `user_id`（跨裝置一致），且合併有節流（`last_merge_at`）。
-- FR-5: posts/products/gallery 可 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕）；likes 信號用於內容層級分析/個人化。
+- FR-5: posts/gallery/comments 可 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕）；likes 信號用於內容層級分析/個人化。
 - FR-6: AI Analysis 輸出模式提供 A/B/C，後台必須提供選擇（template default + per-report override），預設模式為 A，且只在 Admin-only 流程中使用。
 - FR-7: Embeddings 模式提供 A/B/C，後台必須提供選擇（template default + per-report override），預設模式為 A。
 - FR-8: `npm run db:reset` 可成功執行；`npm run db:seed` 可連續執行至少 3 次都成功（idempotent）。
@@ -263,7 +263,6 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 **`content_last_updated_at`（用於 `is_stale`）**
 
 - `post`：`COALESCE(published_at, updated_at, created_at)`
-- `product`：`COALESCE(updated_at, created_at)`
 - `gallery_item`：`COALESCE(updated_at, created_at)`
 
 **Transition 定義（已選定；聚合、不存個人日記）**
@@ -302,7 +301,7 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 
 ---
 
-### 3) Reactions / Likes（posts + products + gallery；匿名可用）
+### 3) Reactions / Likes（posts + gallery + comment；匿名可用）
 
 **目標**
 
@@ -312,7 +311,7 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 
 **單一 reactions 系統（已選定）**
 
-- 擴充 `public.reaction_target_type`：新增 `post` / `product`（保留既有 `gallery_item` / `comment`）。
+- 擴充 `public.reaction_target_type`：新增 `post`（保留既有 `gallery_item` / `comment`）。
 - DB triggers 維護 `like_count`（讀多寫少；對列表/詳情頁更省 DB）。
 
 **請求路徑（已選定）**
@@ -375,7 +374,7 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 ### 2) Seed（已選定；必須 idempotent）
 
 - core seed：必需資料（settings/feature toggles/admin allowlist/templates 等），永遠執行，必須 idempotent（`INSERT ... ON CONFLICT ... DO UPDATE/DO NOTHING`）。
-- demo seed：示範資料（posts/products/gallery demo 等），必須「雙重鎖死」避免污染 production：
+- demo seed：示範資料（posts/gallery demo 等），必須「雙重鎖死」避免污染 production：
   - 指令鎖：`npm run db:seed` 只執行 core；`npm run db:seed:demo` 才會執行 demo。
   - 環境鎖：demo seed 只有在 `app.settings.env ∈ {local, preview}` 才會執行；在 `app.settings.env = production` 時必須 no-op。
   - demo seed 仍必須 idempotent（只補缺不覆蓋；以穩定 unique key upsert）。
@@ -396,7 +395,7 @@ Umami Cloud（Hobby，免費）只用於站務層觀測（PV、referrer/UTM、�
 - AC-2: `npm run db:seed` 可連續執行至少 3 次都成功，且 core seed 不重複、不漂移。
 - AC-3: `COMBINED_ADD.sql` 中不存在重複 policy 名稱，且關鍵模組只有單一版本（不重複收錄）。
 - AC-4: `content_engagement_daily` 可作為內容候選清單的 canonical 來源，且具備 retention + monthly rollup 策略（不會長期把 DB 撐爆）。
-- AC-5: posts/products/gallery 可 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕），且路徑為 Worker → Next API → Supabase，具備 edge gate + server rate limit。
+- AC-5: posts/gallery/comments 可 Like（同一顆按鈕再次點擊即取消；不做單獨 Unlike 按鈕），且路徑為 Worker → Next API → Supabase，具備 edge gate + server rate limit。
 - AC-6: 後台可設定 Template default 且單份報告可覆寫輸出模式（A/B/C）與 embeddings 模式（A/B/C）。
 - AC-7: 系統可產生 `content_transition_daily` 並在後台回答「看過 A 的人下一篇通常看什麼」，且資料不含 user/session identity（僅聚合 + retention + rollup）。
 - AC-8: AI Analysis 內容候選清單輸出為 `Top Growth` / `High Stickiness` / `Low Interaction` 三榜並列，並 union 去重；每筆候選包含 `reason_tags`（值域固定：`top_growth`/`high_stickiness`/`low_interaction`/`stale`/`trending`）與對應指標（`growth_rate_wow`/`avg_dwell_seconds`/`like_rate`/`view_count`），且 `Low Interaction` 選取規則為 OR（`like_rate` P10 或 `avg_dwell_seconds` P10），超過 10 筆時按 `view_count_7d` 取前 10。

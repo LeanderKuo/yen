@@ -25,7 +25,7 @@ import { deidentifyData } from './analysis-pure';
 export interface RAGChunk {
   /** Content of the retrieved chunk */
   content: string;
-  /** Source type (product/post/gallery_item) */
+  /** Source type (post/gallery_item/comment) */
   sourceType: string;
   /** Source ID for reference */
   sourceId: string;
@@ -63,9 +63,7 @@ function buildQueryForTemplate(templateId: AnalysisTemplateId): string {
 
   const queries: Record<Exclude<AnalysisTemplateId, 'custom'>, string> = {
     user_behavior: 'user behavior patterns engagement activity comments interactions',
-    sales: 'sales revenue products orders transactions pricing performance',
-    rfm: 'customer purchase frequency recency monetary value loyalty segmentation',
-    content_recommendation: 'content product correlation engagement conversion recommendation',
+    content_recommendation: 'content recommendation related topics themes engagement comments follow-up',
   };
 
   return queries[templateId];
@@ -99,7 +97,7 @@ export async function fetchRagContextForAnalysis(
     limit: topK,
     threshold,
     // Search across all types relevant to analysis
-    targetTypes: ['product', 'post', 'gallery_item'],
+    targetTypes: ['post', 'gallery_item', 'comment'],
   });
 
   // Apply re-ranking if configured (Phase 6.5+)

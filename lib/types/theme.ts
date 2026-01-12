@@ -16,16 +16,14 @@
  * - `home`: Homepage (`/${locale}`)
  * - `blog`: Blog section (`/${locale}/blog/*`)
  * - `gallery`: Gallery section (`/${locale}/gallery/*`)
- * - `shop`: Shop section (`/${locale}/shop/*`)
  */
-export type ThemeScopeKey = 'home' | 'blog' | 'gallery' | 'shop';
+export type ThemeScopeKey = 'home' | 'blog' | 'gallery';
 
 /** All valid scope keys for iteration */
 export const THEME_SCOPE_KEYS: readonly ThemeScopeKey[] = [
   'home',
   'blog',
   'gallery',
-  'shop',
 ] as const;
 
 // =============================================================================

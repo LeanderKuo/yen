@@ -197,11 +197,11 @@ test('chunkContent tracks positions', () => {
 test('chunkContentForType uses type-specific config', () => {
   const input = 'Product description content.';
   
-  const productResult = chunkContentForType(input, 'product');
+  const postResult = chunkContentForType(input, 'post');
   const commentResult = chunkContentForType(input, 'comment');
   
   // Both should work but may have different configs applied
-  assert.ok(productResult.chunks.length > 0);
+  assert.ok(postResult.chunks.length > 0);
   assert.ok(commentResult.chunks.length > 0);
 });
 

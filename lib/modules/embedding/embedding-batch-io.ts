@@ -29,7 +29,6 @@ export async function initializeEmbeddingsForType(
 
   // Get table and filter based on target type
   const tableConfig: Record<EmbeddingTargetType, { table: string; filter?: Record<string, unknown> }> = {
-    product: { table: 'products', filter: { is_visible: true } },
     post: { table: 'posts', filter: { visibility: 'public' } },
     gallery_item: { table: 'gallery_items', filter: { is_visible: true } },
     comment: { table: 'comments', filter: { is_approved: true, is_spam: false } },
@@ -95,23 +94,20 @@ export async function initializeEmbeddingsForType(
  * @see SUPABASE_AI.md §4.2
  */
 export async function initializeAllEmbeddings(): Promise<{
-  products: { queued: number; skipped: number };
   posts: { queued: number; skipped: number };
   galleryItems: { queued: number; skipped: number };
   comments: { queued: number; skipped: number };
   error?: string;
 }> {
-  const [products, posts, galleryItems, comments] = await Promise.all([
-    initializeEmbeddingsForType('product'),
+  const [posts, galleryItems, comments] = await Promise.all([
     initializeEmbeddingsForType('post'),
     initializeEmbeddingsForType('gallery_item'),
     initializeEmbeddingsForType('comment'),
   ]);
 
-  const errors = [products.error, posts.error, galleryItems.error, comments.error].filter(Boolean);
+  const errors = [posts.error, galleryItems.error, comments.error].filter(Boolean);
 
   return {
-    products: { queued: products.queued, skipped: products.skipped },
     posts: { queued: posts.queued, skipped: posts.skipped },
     galleryItems: { queued: galleryItems.queued, skipped: galleryItems.skipped },
     comments: { queued: comments.queued, skipped: comments.skipped },
@@ -158,13 +154,11 @@ export async function getEmbeddingStats(): Promise<EmbeddingStats> {
 
   // Query counts in parallel
   const [
-    productStats,
     postStats,
     galleryStats,
     commentStats,
     queueStats,
   ] = await Promise.all([
-    getTypeStats(supabase, 'product', 'products', { is_visible: true }),
     getTypeStats(supabase, 'post', 'posts', { visibility: 'public' }),
     getTypeStats(supabase, 'gallery_item', 'gallery_items', { is_visible: true }),
     getTypeStats(supabase, 'comment', 'comments', { is_approved: true, is_spam: false }),
@@ -172,7 +166,6 @@ export async function getEmbeddingStats(): Promise<EmbeddingStats> {
   ]);
 
   return {
-    products: productStats,
     posts: postStats,
     galleryItems: galleryStats,
     comments: commentStats,

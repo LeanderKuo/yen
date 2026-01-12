@@ -41,7 +41,7 @@ function printUsage(exitCode) {
     'Examples:',
     '  node scripts/db.mjs add',
     '  node scripts/db.mjs reset',
-    '  node scripts/db.mjs add --feature shop',
+    '  node scripts/db.mjs add --feature gallery',
     '  node scripts/db.mjs seed --feature theme',
     '',
     'DB URL env:',
@@ -50,7 +50,6 @@ function printUsage(exitCode) {
     '',
     'Notes:',
     '  - Requires `psql` in PATH.',
-    '  - `shop` add requires Supabase extensions: pg_cron + vault.',
     '',
   ];
   console.error(lines.join('\n'));
@@ -120,15 +119,6 @@ const PATHS = {
       add: ['supabase/02_add/06_feature_settings.sql'],
       seed: ['supabase/03_seed/04_features_landing.sql'],
       drop: ['supabase/01_drop/06_feature_settings.sql'],
-    },
-    shop: {
-      add: [
-        'supabase/02_add/06_feature_settings.sql',
-        'supabase/02_add/07_shop.sql',
-        'supabase/02_add/08_shop_functions.sql',
-      ],
-      seed: ['supabase/03_seed/03_shop.sql'],
-      drop: ['supabase/01_drop/07_shop.sql'],
     },
     landing_sections: {
       add: ['supabase/02_add/09_landing_sections.sql'],

@@ -3,34 +3,31 @@
 /**
  * User Section Tabs Component
  *
- * Navigation tabs for profile/orders/comments/schedule sections.
+ * Navigation tabs for profile/comments/schedule sections.
  * Route-local presentational component.
  * Uses admin i18n via useTranslations (parent provides NextIntlClientProvider).
  */
 
 import { useTranslations } from 'next-intl';
 
-export type UserSection = 'profile' | 'orders' | 'comments' | 'schedule';
+export type UserSection = 'profile' | 'comments' | 'schedule';
 
 interface UserSectionTabsProps {
   activeSection: UserSection;
   onSectionChange: (section: UserSection) => void;
-  ordersCount: number;
   commentsCount: number;
 }
 
 export default function UserSectionTabs({
   activeSection,
   onSectionChange,
-  ordersCount,
   commentsCount,
 }: UserSectionTabsProps) {
   const t = useTranslations('admin.users.detail');
-  const sections: UserSection[] = ['profile', 'orders', 'comments', 'schedule'];
+  const sections: UserSection[] = ['profile', 'comments', 'schedule'];
 
   const labels: Record<UserSection, string> = {
     profile: t('profile'),
-    orders: t('orders', { count: ordersCount }),
     comments: t('comments', { count: commentsCount }),
     schedule: t('schedule'),
   };

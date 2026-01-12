@@ -20,7 +20,6 @@ export {
   estimateTokenCount,
   truncateToTokenLimit,
   hashContent,
-  composeProductContent,
   composePostContent,
   composeGalleryItemContent,
   composeCommentContent,

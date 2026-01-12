@@ -135,7 +135,7 @@ myownwebsite/
 | `SPEC.md` | 已實作行為（feature、路由、資料模型、實作定位） | TODO/blocked、step-by-step、外部依賴 |
 | `ROADMAP.md` | what/why/status/risks + links | SQL/commands、實作步驟、檔案 code map |
 | `SECURITY.md` | auth/RLS/RBAC、secrets handling、安全期待 | 產品規格、部署步驟（改放 RUNBOOK） |
-| `RUNBOOK.md` | Ops 入口（index；細節在 `runbook/*`：部署/DB ops/驗證/Payments/AI） | 產品規格、長篇設計 rationale |
+| `RUNBOOK.md` | Ops 入口（index；細節在 `runbook/*`：部署/DB ops/驗證/AI） | 產品規格、長篇設計 rationale |
 | `../uiux_refactor.md` | drift tracker、修復手冊、stable `@see` index | roadmap backlog、任務清單（改 TASKS/BLOCKERS） |
 | `TASKS.md` | 可拆 PR 的「怎麼做」任務清單（unblocked） | 長期規格、已完成歷史（改 archive） |
 | `BLOCKERS.md` | 外部阻塞 + DoR/DoD + minimal links | 完整 implementation steps（改 TASKS/RUNBOOK） |

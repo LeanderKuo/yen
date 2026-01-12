@@ -32,18 +32,11 @@ import {
 
 const VALID_TEMPLATE_IDS: readonly AnalysisTemplateId[] = [
   'user_behavior',
-  'sales',
-  'rfm',
   'content_recommendation',
   'custom',
 ];
 
-const VALID_DATA_TYPES: readonly AnalysisDataType[] = [
-  'products',
-  'orders',
-  'members',
-  'comments',
-];
+const VALID_DATA_TYPES: readonly AnalysisDataType[] = ['comments'];
 
 const VALID_MODES: readonly AnalysisMode[] = ['standard', 'rag'];
 
@@ -489,12 +482,6 @@ export function validateAnalysisRequest(
     modelId: req.modelId as string,
     dataTypes: req.dataTypes as AnalysisDataType[],
     filters: {
-      productIds: Array.isArray(filters.productIds)
-        ? (filters.productIds as string[])
-        : undefined,
-      memberIds: Array.isArray(filters.memberIds)
-        ? (filters.memberIds as string[])
-        : undefined,
       dateRange: filters.dateRange
         ? (filters.dateRange as AnalysisDateRange)
         : undefined,
@@ -682,7 +669,6 @@ export function validateCreateScheduleRequest(
     timezone: (req.timezone as string) || 'UTC',
     filters: req.filters as CreateScheduleRequest['filters'],
     ragConfig: req.ragConfig as CreateScheduleRequest['ragConfig'],
-    memberId: req.memberId as string | null | undefined,
   };
 
   return validResult(validatedRequest);

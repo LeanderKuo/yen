@@ -72,7 +72,7 @@ Create a Cloudinary account and set env vars per the template in `../../README.m
    - Complete [Database Operations → Admin RBAC Setup](database-ops.md#admin-rbac-setup)
    - Logout/login to refresh JWT claims
 3. Enable features (if needed):
-   - `/<locale>/admin/features` → enable `blog`, `gallery`, `shop`
+   - `/<locale>/admin/features` → enable `blog`, `gallery`
 4. Run the go-live checklist: [Go-Live (P0)](go-live.md)
 
 ## 7. Custom Domain (Optional)

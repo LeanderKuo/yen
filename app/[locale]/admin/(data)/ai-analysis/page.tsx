@@ -3,7 +3,6 @@
  *
  * Server component for AI-powered analysis admin UI.
  * RBAC: Owner/Editor can access.
- * Supports ?memberShortId=C1 query param to pre-fill member filter.
  *
  * @see doc/specs/completed/AI_ANALYSIS_v2.md
  * @see uiux_refactor.md §6.2 - Data Intelligence Platform (Module B)
@@ -21,7 +20,6 @@ import {
   getCronStatus,
   isRagModeAvailable,
 } from "@/lib/modules/ai-analysis/io";
-import { getMemberIdByShortId } from "@/lib/modules/ai-analysis/analysis-members-io";
 import { listSchedules } from "@/lib/modules/ai-analysis/analysis-schedules-io";
 import {
   getAdminLocale,
@@ -32,12 +30,10 @@ import { AIAnalysisClient } from "./AIAnalysisClient";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ memberShortId?: string }>;
 }
 
 export default async function AIAnalysisPage({
   params,
-  searchParams,
 }: PageProps) {
   await params;
   const supabase = await createClient();
@@ -57,14 +53,6 @@ export default async function AIAnalysisPage({
 
   // Check if OpenRouter is configured
   const configured = isOpenRouterConfigured();
-
-  // Resolve memberShortId to memberId if provided
-  const resolvedParams = await searchParams;
-  const memberShortId = resolvedParams.memberShortId;
-  let memberId: string | null = null;
-  if (memberShortId) {
-    memberId = await getMemberIdByShortId(memberShortId);
-  }
 
   // Fetch initial data
   const [
@@ -98,9 +86,6 @@ export default async function AIAnalysisPage({
     models,
     cronStatus,
     ragEnabled,
-    // Pre-fill member filter from URL
-    memberShortId: memberShortId ?? null,
-    memberId: memberId,
     // Initial schedules for owner (avoids client-side useEffect load)
     initialSchedules: schedulesResult.schedules,
   };

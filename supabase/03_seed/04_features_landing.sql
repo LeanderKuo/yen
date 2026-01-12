@@ -19,8 +19,7 @@
 
 INSERT INTO feature_settings (feature_key, is_enabled, display_order, description_en, description_zh) VALUES
   ('blog', false, 1, 'Blog posts and articles section', '部落格文章區塊'),
-  ('gallery', false, 2, 'Pinterest-style image gallery', 'Pinterest 風格圖片畫廊'),
-  ('shop', false, 3, 'E-commerce storefront', '電商商城')
+  ('gallery', false, 2, 'Pinterest-style image gallery', 'Pinterest 風格圖片畫廊')
 ON CONFLICT (feature_key) DO NOTHING;
 
 

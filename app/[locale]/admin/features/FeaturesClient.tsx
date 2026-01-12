@@ -26,7 +26,7 @@ export default function FeaturesClient({ features, locale }: FeaturesClientProps
     setFeatureStates((prev) => ({ ...prev, [key]: newValue }));
 
     startTransition(async () => {
-      const result = await setFeatureEnabled(key as 'blog' | 'gallery' | 'shop', newValue);
+      const result = await setFeatureEnabled(key as FeatureSetting['feature_key'], newValue);
 
       if (!result.success) {
         // Revert on error

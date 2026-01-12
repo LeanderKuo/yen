@@ -74,7 +74,6 @@ export async function setFeatureEnabled(
   revalidateTag('features', { expire: 0 });
   revalidateTag('site-content', { expire: 0 });
   revalidateTag('gallery', { expire: 0 });
-  revalidateTag('shop', { expire: 0 });
   revalidatePath('/en', 'page');
   revalidatePath('/zh', 'page');
   revalidatePath(`/en/${key}`, 'page');

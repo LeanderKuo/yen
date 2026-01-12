@@ -6,7 +6,7 @@
  * public cache or affecting SEO.
  *
  * SearchParams:
- * - path: 'home' | 'blog' | 'gallery' | 'shop' (default: 'home')
+ * - path: 'home' | 'blog' | 'gallery' (default: 'home')
  * - theme: ThemeKey (default: from site_config)
  *
  * @module app/[locale]/admin/theme/preview/page
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 // Valid preview paths
-const VALID_PATHS = ['home', 'blog', 'gallery', 'shop'] as const;
+const VALID_PATHS = ['home', 'blog', 'gallery'] as const;
 type PreviewPath = (typeof VALID_PATHS)[number];
 
 function isValidPath(value: unknown): value is PreviewPath {
@@ -41,7 +41,7 @@ function isValidPath(value: unknown): value is PreviewPath {
  * Map preview path to ThemeScopeKey.
  * 'home' is a special case that uses 'home' scope in ThemeScope.
  */
-function pathToScope(path: PreviewPath): ThemeScopeKey | 'home' {
+function pathToScope(path: PreviewPath): ThemeScopeKey {
   return path;
 }
 

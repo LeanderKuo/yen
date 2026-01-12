@@ -1,14 +1,231 @@
-# Step-by-Step Execution Plan — Architecture & Docs Alignment Gate (`lib/` + Supabase)
+# Step-by-Step Execution Plan — Scope Reduction (Remove Shop/Payments)
 
-> Status: **ACTIVE**  
-> Last Updated: 2026-01-11  
+> Status: **COMPLETE**  
+> Last Updated: 2026-01-12  
 > Owner: Site Owner  
 > Audience: executor agent（照本檔逐 PR 執行；每個 PR merge 後更新本檔）  
-> Mode: **B — Alignment gate**（偵測 drift/歧義/衝突時：先對齊再規劃 PR）  
-> Scope:
+> Mode: **Execution**（本次目標是「去範圍 / 移除不用的 domain」，避免維護成本與 drift）  
+> Scope（keep / in-scope）:
 >
-> 1. **Docs/Test/Comments path drift cleanup**：統一專案對外文件與守門員測試的 canonical 路徑（`lib/infrastructure/*` + `lib/modules/*`），移除已不存在的 legacy 路徑敘述。
-> 2. **Supabase clean separation**：清楚區分 `supabase/`（DB migrations + Edge Functions）與 `lib/infrastructure/supabase/`（Next.js Supabase factories），避免混用造成耦合與資安風險。
+> - blog / comments / gallery
+> - embedding / rag / data preprocessing
+> - sentry
+> - seo
+> - user description（使用者資料/描述）
+>
+> Out of Scope（remove / delete）:
+>
+> - shop（products/cart/orders/coupons/members/admin shop pages）
+> - pay/payments（Stripe/LINE Pay/ECPay webhooks + payment configs + checkout initiation stubs）
+>
+> Guardrail:
+>
+> - **沒提到的先不要刪掉**：本次只移除 shop/payments 相關程式與文件；其他未提及的功能先保留（即使目前看起來用不到）。
+
+---
+
+## 0) TL;DR（執行順序）
+
+1. **PR-1【P1】Remove public shop**：刪除 `/${locale}/shop/*` 與 cart API；移除 Header/Footer/sitemap 的 shop 連結
+2. **PR-2【P1】Remove admin shop**：刪除 `/admin/shop/*`；移除 AdminSidebar shop 導覽；移除 user detail 的「訂單」區塊
+3. **PR-3【P1】Remove shop/payment modules**：刪除 `lib/modules/shop/*`、`lib/types/shop.ts`、webhooks、inventory-cleanup cron
+4. **PR-4【P1】Remove product domain from embedding/preprocessing/AI analysis**：因為 product 屬於 shop；移除 product targetType + 相關 worker/edge functions
+5. **PR-5【P1】Remove shop/payment Supabase SQL**：刪除 `supabase/*shop*.sql`，同步更新 `COMBINED_*.sql` + `scripts/db.mjs`
+6. **PR-6【P1】Docs/Test cleanup**：更新 README/ARCHITECTURE/doc/* 與測試，確保無 shop/payments 殘留引用
+
+---
+
+## PR-1 — Remove public shop（routes + UI + nav + sitemap）【P1】
+
+### Goal
+
+- 公開站點不再提供 Shop（/shop、cart、checkout、product pages）。
+
+### Delete（files / routes）
+
+- `app/[locale]/shop/layout.tsx`
+- `app/[locale]/shop/page.tsx`
+- `app/[locale]/shop/cart/page.tsx`
+- `app/[locale]/shop/checkout/page.tsx`
+- `app/[locale]/shop/checkout/checkout-action.ts`
+- `app/[locale]/shop/[category]/page.tsx`
+- `app/[locale]/shop/[category]/[slug]/layout.tsx`
+- `app/[locale]/shop/[category]/[slug]/page.tsx`
+- `components/shop/CartContent.tsx`
+- `components/shop/CheckoutForm.tsx`
+- `components/shop/SimilarProducts.tsx`
+- `hooks/useCart.ts`
+- `hooks/useCartProductData.ts`
+- `app/api/cart/items/route.ts`
+
+### Update（code）
+
+- `components/Header.tsx`：移除 shop 導覽項目（含 `NavContent.shop` / `isShopEnabledCached`）
+- `components/Footer.tsx`：移除 shop 導覽項目
+- `app/sitemap.ts`：移除 shop static page 與 shop sitemap entries
+- `lib/features/*`：移除 shop feature key 與 cached helper（避免殘留 feature gate）
+
+### Verification
+
+- `rg -n \"\\/shop|@/lib/modules/shop|qnl-shop-cart\" app components lib hooks -S` → 0 hits（非 archive/doc）
+- `npm run type-check`
+
+### Rollback
+
+- revert 本 PR
+
+---
+
+## PR-2 — Remove admin shop（routes + sidebar + user orders UI）【P1】
+
+### Goal
+
+- 後台不再出現 Shop 相關管理頁（Products/Orders/Coupons/Members/Payments/Settings）。
+
+### Delete（files / routes）
+
+- `app/[locale]/admin/shop/**`（整個資料夾）
+- `components/admin/shop/**`（整個資料夾）
+- `app/[locale]/admin/users/[id]/components/UserOrdersTable.tsx`（若僅用於 shop 訂單）
+- `lib/modules/user/user-orders-io.ts`（cross-domain wrapper 依賴 shop）
+
+### Update（code）
+
+- `components/admin/common/AdminSidebar.tsx`：移除 shop entry
+- `components/admin/common/AdminTabs.tsx`：移除 shop tabs/註解（若存在）
+- `app/[locale]/admin/users/[id]/page.tsx` + `UserDetailClient.tsx`：移除 orders data fetch + UI 區塊
+
+### Verification
+
+- `rg -n \"admin\\/shop|\\bShop\\b\" app components -S`（確認無路由/連結殘留）
+- `npm run type-check`
+
+---
+
+## PR-3 — Remove shop/payment modules（server modules + webhooks + cron）【P1】
+
+### Delete（code modules）
+
+- `lib/modules/shop/**`
+- `lib/types/shop.ts`
+- `lib/infrastructure/stripe/index.ts`（shim re-export shop payment modules）
+- `app/api/webhooks/**`（stripe/linepay/ecpay）
+- `app/api/cron/inventory-cleanup/route.ts`
+- `tests/shop/**` + `tests/shop-*.test.ts`（variants/pricing/order-status/payment-config）
+
+### Update（code）
+
+- 移除所有 `@/lib/modules/shop/*` imports（routes/actions/components/tests）
+- 若有 shop-only types：從 `lib/types/*` 移除或改成 domain-neutral
+
+### Verification
+
+- `rg -n \"@/lib/modules/shop|lib/types/shop\" app components lib tests -S` → 0 hits
+- `npm test`
+
+---
+
+## PR-4 — Remove product domain from embedding/preprocessing/AI analysis【P1】
+
+> 因為 `product` 屬於 shop domain；移除 shop 後，embedding/preprocessing/AI analysis 不應再處理 product。
+
+### Update（types）
+
+- `lib/types/embedding.ts`
+  - 刪除 `EmbeddingTargetType` 內的 `'product'`
+  - 刪除 `SimilarItemTargetType` 內的 `'product'`
+  - 刪除 `EmbeddingStats.products`、`ProductEmbeddingData` 等 product 專用 types
+
+### Update（embedding modules）
+
+- `lib/modules/embedding/embedding-target-content-io.ts`：移除 `getProductContent()` 與 `case 'product'`
+- `lib/modules/embedding/embedding-batch-io.ts`：移除 products 初始化與 stats
+- `lib/modules/embedding/embedding-search-io.ts`：預設 targetTypes 移除 `'product'`
+- `lib/modules/embedding/similar-items-worker-io.ts`：移除 products 流程與回傳欄位
+- `lib/modules/embedding/similar-items-public-io.ts`：刪除 `getResolvedSimilarProducts()` / `ResolvedSimilarProduct`
+- `app/api/cron/similar-items/route.ts`：回傳 payload 移除 `products`
+
+### Update（preprocessing）
+
+- `lib/modules/preprocessing/*`：移除 product configs（chunking/quality）
+- `lib/validators/preprocessing-config.ts`：移除預設 product config
+- `app/[locale]/admin/(data)/preprocessing/*`：UI 移除 product 選項
+
+### Update（Edge Functions / workers）
+
+- `supabase/functions/generate-embedding/index.ts`：targetType allowlist 移除 product
+- `supabase/functions/judge-preprocessing/index.ts`：targetType allowlist 移除 product
+- `app/api/worker/embedding-queue/route.ts`：VALID_TARGET_TYPES 移除 product
+
+### Update（AI analysis, shop-related data sources）
+
+- `lib/modules/ai-analysis/analysis-data-mappers.ts`：刪除 `mapProductToAnalysisShape` / `mapOrderToAnalysisShape` / `mapMemberToAnalysisShape`
+- `lib/modules/ai-analysis/analysis-products-io.ts` / `analysis-orders-io.ts` / `analysis-members-io.ts`：刪除（若僅服務 shop）
+- `lib/modules/ai-analysis/analysis-rag-io.ts`：targetTypes 移除 `'product'`
+- `tests/ai-analysis/analysis-data-mappers.test.ts`：移除 products/orders/members 測試，保留 comments mapper 測試
+
+### Verification
+
+- `rg -n \"'product'\" lib app supabase tests -S --glob '!doc/**'` → only allowed hits（如 literal strings in UI copy should be removed too）
+- `npm test`
+- `npm run type-check`
+
+---
+
+## PR-5 — Remove shop/payment Supabase SQL + DB scripts【P1】
+
+### Delete（SQL）
+
+- `supabase/01_drop/07_shop.sql`
+- `supabase/02_add/07_shop.sql`
+- `supabase/02_add/08_shop_functions.sql`
+- `supabase/03_seed/03_shop.sql`
+
+### Update（SQL + scripts）
+
+- `supabase/COMBINED_ADD.sql` / `supabase/COMBINED_DROP.sql` / `supabase/COMBINED_SEED.sql` / `supabase/COMBINED_GRANTS.sql`：移除 shop/payments 相關段落
+- `supabase/02_add/06_feature_settings.sql` + `supabase/03_seed/04_features_landing.sql`：移除 shop feature row/註解
+- `scripts/db.mjs`：移除 `shop` feature entry + usage notes
+- `supabase/README.sql`：移除 shop 的目錄/依賴/執行說明
+
+### Verification
+
+- `node scripts/db.mjs list` 不再列出 `shop`
+- `node scripts/db.mjs add --feature shop` 應回報 unknown feature（預期）
+
+---
+
+## PR-6 — Docs/Test cleanup（remove shop/payments references）【P1】
+
+### Update docs (SSoT + navigation)
+
+- `README.md`：移除 Shop feature 介紹
+- `ARCHITECTURE.md`：移除 Shop/Payment constraints、移除 canonical 結構中的 shop/stripe
+- `doc/RUNBOOK.md`：移除 Payments entry（或改為 archived link）
+- `doc/ROADMAP.md` / `doc/STATUS.md` / `doc/specs/README.md`：移除 payments 相關項目
+- `doc/SPEC.md` / `doc/SECURITY.md`：移除 shop/payments 相關描述
+
+### Delete docs (shop/payments only)
+
+- `doc/runbook/payments.md`
+- `doc/specs/proposed/payments-initiation-spec.md`
+
+### Update tests
+
+- `tests/architecture-boundaries.test.ts`：移除 shop allowlist 與 “shop boundaries” 段落
+- `tests/validators/page-views.test.ts`：移除 `/shop/*` 測試樣本
+- `tests/theme-resolve.test.ts`：移除 shop scope 的期待值（若 ThemeScopeKey 同步移除 shop）
+
+### Verification
+
+- `npm run docs:generate-indexes`
+- `npm run lint:md-links`
+- `npm run docs:check-indexes`
+- `rg -n \"\\bshop\\b|payment|stripe|linepay|ecpay\" doc -S --glob '!doc/archive/**'` → only intentional historical mentions (should be near 0)
+
+---
+
+## Deferred (2026-01-11): Architecture & Docs Alignment Gate (`lib/` + Supabase)
 
 ## Inputs（SSoT）
 

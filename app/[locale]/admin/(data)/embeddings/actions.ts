@@ -29,7 +29,6 @@ export type ActionResult<T> =
   | { success: false; error: string };
 
 export interface InitializeResult {
-  products: { queued: number; skipped: number };
   posts: { queued: number; skipped: number };
   galleryItems: { queued: number; skipped: number };
   comments: { queued: number; skipped: number };
@@ -108,7 +107,6 @@ export async function initializeAllEmbeddingsAction(): Promise<ActionResult<Init
     return {
       success: true,
       data: {
-        products: result.products,
         posts: result.posts,
         galleryItems: result.galleryItems,
         comments: result.comments,

@@ -45,7 +45,7 @@ Ops gates（不一定需要 code PR，但必須在 go‑live 前完成）：
 
 Blocked（外部依賴；不要塞在本 plan 內重複寫）：
 
-- **Stripe Checkout Session（P1）**：見 [`doc/BLOCKERS.md#stripe`](../BLOCKERS.md#stripe), [`doc/specs/proposed/payments-initiation-spec.md#stripe-checkout-session`](../specs/proposed/payments-initiation-spec.md#stripe-checkout-session)
+- **Stripe Checkout Session（P1; removed）**：payments scope 已移除；此項為歷史阻塞記錄（保留文字、移除連結以避免 drift）。
 
 ---
 

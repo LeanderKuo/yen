@@ -183,12 +183,6 @@ test('Selected lib modules stay pure (no Next/React/Supabase/IO)', () => {
     'lib/utils/cloudinary-url.ts',
     'lib/security/ip.ts',
     'lib/utils/anon-id.ts',
-    // Shop pure modules (Phase A) - migrated to lib/modules/shop
-    'lib/modules/shop/variants.ts',
-    'lib/modules/shop/pricing.ts',
-    'lib/modules/shop/order-status.ts',
-    'lib/modules/shop/invoice-schema.ts',
-    'lib/modules/shop/payment-config.ts',
     // Theme pure modules (Phase 0)
     'lib/modules/theme/presets.ts',
     'lib/modules/theme/resolve.ts',
@@ -223,10 +217,9 @@ test('Selected lib modules stay pure (no Next/React/Supabase/IO)', () => {
   assert.deepEqual(violations, []);
 });
 
-test('Client components do not import server-only/SSR modules (shop boundaries)', () => {
+test('Client components do not import server-only/SSR modules', () => {
   // P3-2: Forbid 'use client' files from importing:
   // - next/cache
-  // - @/lib/modules/shop (to avoid Supabase client in client bundle)
   const roots = ['app', 'components', 'lib']
     .map((p) => path.join(repoRoot, p))
     .filter((p) => fs.existsSync(p));
@@ -236,7 +229,6 @@ test('Client components do not import server-only/SSR modules (shop boundaries)'
 
   const forbiddenImports = [
     { pattern: /from\s+['"]next\/cache['"]/, label: 'next/cache' },
-    { pattern: /@\/lib\/modules\/shop['"]/, label: '@/lib/modules/shop' },
   ];
 
   for (const filePath of files) {

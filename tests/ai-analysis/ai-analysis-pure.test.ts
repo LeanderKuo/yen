@@ -61,9 +61,9 @@ const MOCK_PRICING: ModelPricing = {
 };
 
 const MOCK_DATA = [
-  { id: '1', type: 'order', amount: 100, email: 'john@example.com' },
-  { id: '2', type: 'order', amount: 200, email: 'jane@example.com' },
-  { id: '3', type: 'comment', content: 'Great!', email: 'user@test.com' },
+  { id: '1', type: 'comment', content: 'Great!', email: 'john@example.com' },
+  { id: '2', type: 'comment', content: 'Nice!', email: 'jane@example.com' },
+  { id: '3', type: 'reaction', target: 'post', email: 'user@test.com' },
 ];
 
 // =============================================================================
@@ -253,12 +253,12 @@ describe('De-identification', () => {
     });
 
     it('preserves non-PII fields', () => {
-      const record = { id: '1', amount: 100, type: 'order' };
+      const record = { id: '1', amount: 100, type: 'comment' };
       const result = deidentifyRecord(record);
 
       assert.equal(result.id, '1');
       assert.equal(result.amount, 100);
-      assert.equal(result.type, 'order');
+      assert.equal(result.type, 'comment');
     });
 
     it('handles nested objects', () => {
@@ -294,20 +294,19 @@ describe('De-identification', () => {
 
 describe('Data Sampling', () => {
   describe('getDataPriority', () => {
-    it('returns highest priority for orders', () => {
-      assert.equal(getDataPriority('order'), 3);
-      assert.equal(getDataPriority('orders'), 3);
-      assert.equal(getDataPriority('purchase'), 3);
-    });
-
-    it('returns medium priority for comments', () => {
-      assert.equal(getDataPriority('comment'), 2);
-      assert.equal(getDataPriority('comments'), 2);
+    it('returns highest priority for comments', () => {
+      assert.equal(getDataPriority('comment'), 3);
+      assert.equal(getDataPriority('comments'), 3);
     });
 
     it('returns low priority for reactions', () => {
       assert.equal(getDataPriority('reaction'), 1);
       assert.equal(getDataPriority('like'), 1);
+    });
+
+    it('returns lowest priority for views', () => {
+      assert.equal(getDataPriority('view'), 0);
+      assert.equal(getDataPriority('views'), 0);
     });
 
     it('returns default for unknown types', () => {
@@ -318,25 +317,25 @@ describe('Data Sampling', () => {
   describe('prioritizedSample', () => {
     it('returns all data when under limit', () => {
       const data = [
-        { type: 'order', id: 1 },
-        { type: 'comment', id: 2 },
+        { type: 'comment', id: 1 },
+        { type: 'reaction', id: 2 },
       ];
       const result = prioritizedSample(data, 10);
       assert.equal(result.length, 2);
     });
 
-    it('prioritizes orders over comments', () => {
+    it('prioritizes comments over reactions', () => {
       const data = [
         { type: 'comment', id: 1 },
         { type: 'comment', id: 2 },
-        { type: 'order', id: 3 },
-        { type: 'order', id: 4 },
+        { type: 'reaction', id: 3 },
+        { type: 'reaction', id: 4 },
       ];
       const result = prioritizedSample(data, 2);
 
-      // Should keep the 2 orders (higher priority)
+      // Should keep the 2 comments (higher priority)
       assert.equal(result.length, 2);
-      assert.ok(result.every((r) => r.type === 'order'));
+      assert.ok(result.every((r) => r.type === 'comment'));
     });
 
     it('handles empty array', () => {
@@ -443,8 +442,8 @@ describe('Data Sampling', () => {
   describe('seededPrioritizedSample', () => {
     it('returns all data when under limit (not sampled)', () => {
       const data = [
-        { _dataType: 'orders', id: 1, created_at: '2025-01-01' },
-        { _dataType: 'comments', id: 2, created_at: '2025-01-02' },
+        { _dataType: 'comments', id: 1, created_at: '2025-01-01' },
+        { _dataType: 'views', id: 2, created_at: '2025-01-02' },
       ];
       const result = seededPrioritizedSample(data, 10, 'seed-1');
 
@@ -459,8 +458,8 @@ describe('Data Sampling', () => {
         { _dataType: 'comments', id: 1, created_at: '2025-01-01' },
         { _dataType: 'comments', id: 2, created_at: '2025-01-02' },
         { _dataType: 'comments', id: 3, created_at: '2025-01-03' },
-        { _dataType: 'orders', id: 4, created_at: '2025-01-04' },
-        { _dataType: 'orders', id: 5, created_at: '2025-01-05' },
+        { _dataType: 'reactions', id: 4, created_at: '2025-01-04' },
+        { _dataType: 'views', id: 5, created_at: '2025-01-05' },
       ];
 
       const result1 = seededPrioritizedSample(data, 3, 'report-123');
@@ -471,7 +470,7 @@ describe('Data Sampling', () => {
 
     it('produces different output for different seeds', () => {
       const data = Array.from({ length: 20 }, (_, i) => ({
-        _dataType: 'comments',
+        _dataType: 'reactions',
         id: i,
         created_at: `2025-01-${String(i + 1).padStart(2, '0')}`,
       }));
@@ -490,13 +489,13 @@ describe('Data Sampling', () => {
       );
     });
 
-    it('prioritizes orders over comments', () => {
+    it('prioritizes comments over views', () => {
       const data = [
-        { _dataType: 'comments', id: 1, created_at: '2025-01-01' },
-        { _dataType: 'comments', id: 2, created_at: '2025-01-02' },
-        { _dataType: 'comments', id: 3, created_at: '2025-01-03' },
-        { _dataType: 'orders', id: 4, created_at: '2025-01-04' },
-        { _dataType: 'orders', id: 5, created_at: '2025-01-05' },
+        { _dataType: 'views', id: 1, created_at: '2025-01-01' },
+        { _dataType: 'views', id: 2, created_at: '2025-01-02' },
+        { _dataType: 'views', id: 3, created_at: '2025-01-03' },
+        { _dataType: 'comments', id: 4, created_at: '2025-01-04' },
+        { _dataType: 'comments', id: 5, created_at: '2025-01-05' },
       ];
 
       const result = seededPrioritizedSample(data, 2, 'seed-1');
@@ -504,15 +503,15 @@ describe('Data Sampling', () => {
       assert.equal(result.wasSampled, true);
       assert.equal(result.sampledCount, 2);
       assert.equal(result.highPriorityKept, 2);
-      // All 2 should be orders
-      assert.ok(result.data.every((r) => r._dataType === 'orders'));
+      // All 2 should be comments
+      assert.ok(result.data.every((r) => r._dataType === 'comments'));
     });
 
-    it('keeps most recent orders when over limit', () => {
+    it('keeps most recent comments when over limit', () => {
       const data = [
-        { _dataType: 'orders', id: 1, created_at: '2025-01-01' },
-        { _dataType: 'orders', id: 2, created_at: '2025-01-02' },
-        { _dataType: 'orders', id: 3, created_at: '2025-01-03' },
+        { _dataType: 'comments', id: 1, created_at: '2025-01-01' },
+        { _dataType: 'comments', id: 2, created_at: '2025-01-02' },
+        { _dataType: 'comments', id: 3, created_at: '2025-01-03' },
       ];
 
       const result = seededPrioritizedSample(data, 2, 'seed-1');
@@ -530,25 +529,25 @@ describe('Data Sampling', () => {
       const data = [
         { _dataType: 'views', id: 1, created_at: '2025-01-01' },
         { _dataType: 'views', id: 2, created_at: '2025-01-02' },
-        { _dataType: 'comments', id: 3, created_at: '2025-01-03' },
-        { _dataType: 'comments', id: 4, created_at: '2025-01-04' },
-        { _dataType: 'orders', id: 5, created_at: '2025-01-05' },
-        { _dataType: 'orders', id: 6, created_at: '2025-01-06' },
+        { _dataType: 'reactions', id: 3, created_at: '2025-01-03' },
+        { _dataType: 'reactions', id: 4, created_at: '2025-01-04' },
+        { _dataType: 'comments', id: 5, created_at: '2025-01-05' },
+        { _dataType: 'comments', id: 6, created_at: '2025-01-06' },
       ];
 
       const result = seededPrioritizedSample(data, 4, 'seed-1');
 
       assert.equal(result.wasSampled, true);
       assert.equal(result.sampledCount, 4);
-      assert.equal(result.highPriorityKept, 2); // both orders kept
+      assert.equal(result.highPriorityKept, 2); // both comments kept
 
-      // Should have both orders (priority 3)
-      const orders = result.data.filter((r) => r._dataType === 'orders');
-      assert.equal(orders.length, 2);
-
-      // Should have 2 comments (priority 2)
+      // Should have both comments (priority 3)
       const comments = result.data.filter((r) => r._dataType === 'comments');
       assert.equal(comments.length, 2);
+
+      // Should have 2 reactions (priority 1)
+      const reactions = result.data.filter((r) => r._dataType === 'reactions');
+      assert.equal(reactions.length, 2);
 
       // No views (priority 0) - lowest priority sampled out
       const views = result.data.filter((r) => r._dataType === 'views');
@@ -565,9 +564,8 @@ describe('AI Analysis Validators', () => {
   describe('isValidTemplateId', () => {
     it('accepts valid templates', () => {
       assert.equal(isValidTemplateId('user_behavior'), true);
-      assert.equal(isValidTemplateId('sales'), true);
-      assert.equal(isValidTemplateId('rfm'), true);
       assert.equal(isValidTemplateId('content_recommendation'), true);
+      assert.equal(isValidTemplateId('custom'), true);
     });
 
     it('rejects invalid templates', () => {
@@ -579,9 +577,9 @@ describe('AI Analysis Validators', () => {
 
   describe('validateTemplateId', () => {
     it('returns valid result for valid ID', () => {
-      const result = validateTemplateId('sales');
+      const result = validateTemplateId('user_behavior');
       assert.equal(result.valid, true);
-      assert.equal(result.data, 'sales');
+      assert.equal(result.data, 'user_behavior');
     });
 
     it('returns error for invalid ID', () => {
@@ -593,13 +591,13 @@ describe('AI Analysis Validators', () => {
 
   describe('isValidDataType', () => {
     it('accepts valid data types', () => {
-      assert.equal(isValidDataType('products'), true);
-      assert.equal(isValidDataType('orders'), true);
-      assert.equal(isValidDataType('members'), true);
       assert.equal(isValidDataType('comments'), true);
     });
 
     it('rejects invalid data types', () => {
+      assert.equal(isValidDataType('products'), false);
+      assert.equal(isValidDataType('orders'), false);
+      assert.equal(isValidDataType('members'), false);
       assert.equal(isValidDataType('invalid'), false);
       assert.equal(isValidDataType(''), false);
     });
@@ -607,7 +605,7 @@ describe('AI Analysis Validators', () => {
 
   describe('validateDataTypes', () => {
     it('returns valid for array with valid types', () => {
-      const result = validateDataTypes(['products', 'orders']);
+      const result = validateDataTypes(['comments']);
       assert.equal(result.valid, true);
     });
 
@@ -617,51 +615,47 @@ describe('AI Analysis Validators', () => {
     });
 
     it('returns error for invalid type in array', () => {
-      const result = validateDataTypes(['products', 'invalid']);
+      const result = validateDataTypes(['comments', 'invalid']);
       assert.equal(result.valid, false);
       assert.ok(result.error?.includes('invalid'));
     });
   });
 
   describe('getRequiredDataTypes', () => {
-    it('returns required types for sales template', () => {
-      const required = getRequiredDataTypes('sales');
-      assert.ok(required.includes('products'));
-      assert.ok(required.includes('orders'));
+    it('returns required types for user_behavior template', () => {
+      const required = getRequiredDataTypes('user_behavior');
+      assert.ok(required.includes('comments'));
     });
 
-    it('returns required types for rfm template', () => {
-      const required = getRequiredDataTypes('rfm');
-      assert.ok(required.includes('members'));
-      assert.ok(required.includes('orders'));
+    it('returns required types for content_recommendation template', () => {
+      const required = getRequiredDataTypes('content_recommendation');
+      assert.ok(required.includes('comments'));
     });
   });
 
   describe('validateRequiredDataTypes', () => {
     it('passes when all required types present', () => {
-      const result = validateRequiredDataTypes('sales', ['products', 'orders']);
+      const result = validateRequiredDataTypes('user_behavior', ['comments']);
       assert.equal(result.valid, true);
     });
 
     it('fails when missing required type', () => {
-      const result = validateRequiredDataTypes('sales', ['products']);
+      const result = validateRequiredDataTypes('user_behavior', []);
       assert.equal(result.valid, false);
-      assert.ok(result.error?.includes('orders'));
+      assert.ok(result.error?.includes('comments'));
     });
   });
 
   describe('mergeWithRequiredTypes', () => {
     it('merges selected with required', () => {
-      const merged = mergeWithRequiredTypes('sales', ['members']);
-      assert.ok(merged.includes('products'));
-      assert.ok(merged.includes('orders'));
-      assert.ok(merged.includes('members'));
+      const merged = mergeWithRequiredTypes('user_behavior', []);
+      assert.ok(merged.includes('comments'));
     });
 
     it('does not duplicate existing types', () => {
-      const merged = mergeWithRequiredTypes('sales', ['products', 'members']);
-      const productCount = merged.filter((t) => t === 'products').length;
-      assert.equal(productCount, 1);
+      const merged = mergeWithRequiredTypes('user_behavior', ['comments']);
+      const commentCount = merged.filter((t) => t === 'comments').length;
+      assert.equal(commentCount, 1);
     });
   });
 
@@ -706,10 +700,10 @@ describe('AI Analysis Validators', () => {
   describe('validateAnalysisRequest', () => {
     it('accepts valid request', () => {
       const request = {
-        templateId: 'sales',
+        templateId: 'user_behavior',
         mode: 'standard',
         modelId: 'openai/gpt-4o-mini',
-        dataTypes: ['products', 'orders'],
+        dataTypes: ['comments'],
         filters: {},
       };
       const result = validateAnalysisRequest(request);
@@ -717,29 +711,29 @@ describe('AI Analysis Validators', () => {
     });
 
     it('rejects missing required fields', () => {
-      const result = validateAnalysisRequest({ templateId: 'sales' });
+      const result = validateAnalysisRequest({ templateId: 'user_behavior' });
       assert.equal(result.valid, false);
     });
 
-    it('rejects missing required data types for template', () => {
+    it('rejects empty dataTypes array', () => {
       const request = {
-        templateId: 'sales',
+        templateId: 'user_behavior',
         mode: 'standard',
         modelId: 'openai/gpt-4o-mini',
-        dataTypes: ['products'],  // missing 'orders'
+        dataTypes: [],
         filters: {},
       };
       const result = validateAnalysisRequest(request);
       assert.equal(result.valid, false);
-      assert.ok(result.error?.includes('orders'));
+      assert.ok(result.error?.includes('data type') || result.error?.includes('Data types'));
     });
 
     it('rejects invalid modelId', () => {
       const request = {
-        templateId: 'sales',
+        templateId: 'user_behavior',
         mode: 'standard',
         modelId: 'invalid/model',
-        dataTypes: ['products', 'orders'],
+        dataTypes: ['comments'],
         filters: {},
       };
       const result = validateAnalysisRequest(request);

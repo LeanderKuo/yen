@@ -20,7 +20,6 @@ const SCOPE_PATHS: Record<ThemeScopeKey, string> = {
   home: '',
   blog: '/blog',
   gallery: '/gallery',
-  shop: '/shop',
 };
 
 export default function PageThemesClient({ config, canEdit }: PageThemesClientProps) {

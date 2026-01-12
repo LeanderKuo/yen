@@ -26,77 +26,6 @@ export interface RawContentResult {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Fetch raw content for a product.
- * Composition: name_en/zh + descriptions + tags + category
- * @see SUPABASE_AI.md §2.2
- */
-async function getProductContent(targetId: string): Promise<RawContentResult | null> {
-  const supabase = createAdminClient();
-
-  const { data, error } = await supabase
-    .from('products')
-    .select(`
-      id,
-      name_en,
-      name_zh,
-      description_short_en,
-      description_short_zh,
-      description_full_en,
-      description_full_zh,
-      tags_en,
-      tags_zh,
-      category,
-      is_visible
-    `)
-    .eq('id', targetId)
-    .single();
-
-  if (error || !data) {
-    console.error('[getProductContent] Query error:', error);
-    return null;
-  }
-
-  // Skip hidden products
-  if (!data.is_visible) {
-    return null;
-  }
-
-  // Compose content for embedding
-  const parts: string[] = [];
-  if (data.name_en) parts.push(data.name_en);
-  if (data.name_zh) parts.push(data.name_zh);
-  if (data.description_short_en) parts.push(data.description_short_en);
-  if (data.description_short_zh) parts.push(data.description_short_zh);
-  if (data.description_full_en) parts.push(data.description_full_en);
-  if (data.description_full_zh) parts.push(data.description_full_zh);
-
-  const mergedTags = [
-    ...(Array.isArray(data.tags_en) ? data.tags_en : []),
-    ...(Array.isArray(data.tags_zh) ? data.tags_zh : []),
-  ]
-    .map((t) => String(t).trim())
-    .filter(Boolean);
-  const uniqueTags = Array.from(new Set(mergedTags));
-  if (uniqueTags.length > 0) {
-    parts.push(uniqueTags.join(', '));
-  }
-  if (data.category) parts.push(`Category: ${data.category}`);
-
-  const rawContent = parts.join('\n\n');
-
-  return {
-    rawContent,
-    context: {
-      targetType: 'product',
-      targetId: data.id,
-      parentTitle: data.name_en ?? data.name_zh ?? undefined,
-      category: data.category ?? undefined,
-      tags: uniqueTags.length > 0 ? uniqueTags : undefined,
-    },
-  };
-}
-
-/**
  * Fetch raw content for a post.
  * Composition: title_en + title_zh + excerpt_en + excerpt_zh
  * @see SUPABASE_AI.md §2.2
@@ -263,8 +192,6 @@ export async function getTargetContent(
   targetId: string
 ): Promise<RawContentResult | null> {
   switch (targetType) {
-    case 'product':
-      return getProductContent(targetId);
     case 'post':
       return getPostContent(targetId);
     case 'gallery_item':

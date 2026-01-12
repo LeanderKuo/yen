@@ -59,7 +59,7 @@ interface ThemePreviewIframeProps {
 }
 
 // Preview path scope values for admin preview route
-const PREVIEW_SCOPES: (ThemeScopeKey | 'home')[] = ['home', 'blog', 'gallery', 'shop'];
+const PREVIEW_SCOPES: ThemeScopeKey[] = ['home', 'blog', 'gallery'];
 
 const ThemePreviewIframe = forwardRef<ThemePreviewIframeRef, ThemePreviewIframeProps>(
   function ThemePreviewIframe(

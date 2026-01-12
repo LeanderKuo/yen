@@ -98,7 +98,6 @@ interface PreprocessingClientProps {
 
 /** Target type display labels */
 const TYPE_LABELS: Record<EmbeddingTargetType, string> = {
-  product: "Product",
   post: "Blog Post",
   gallery_item: "Gallery Item",
   comment: "Comment",

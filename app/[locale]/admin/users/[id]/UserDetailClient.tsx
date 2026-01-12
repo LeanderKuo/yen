@@ -3,7 +3,7 @@
 /**
  * User Detail Client Component
  *
- * Orchestrates user detail page with tabs for profile/orders/comments/schedule.
+ * Orchestrates user detail page with tabs for profile/comments/schedule.
  * Route-local client component for UI state management only.
  * Uses admin i18n for UI text via NextIntlClientProvider.
  *
@@ -11,13 +11,12 @@
  */
 
 import { useState } from 'react';
-import { NextIntlClientProvider, useTranslations } from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
 import type { AbstractIntlMessages } from 'next-intl';
 import type { UserDetail } from '@/lib/types/user';
 import UserInfoCard from './components/UserInfoCard';
 import UserSectionTabs, { type UserSection } from './components/UserSectionTabs';
 import UserAdminNotesCard from './components/UserAdminNotesCard';
-import UserOrdersTable from './components/UserOrdersTable';
 import UserCommentsList from './components/UserCommentsList';
 import AppointmentCalendar from './components/AppointmentCalendar';
 
@@ -40,9 +39,8 @@ function UserDetailClientContent({
   isOwner,
 }: Omit<UserDetailClientProps, 'messages'>) {
   const [activeSection, setActiveSection] = useState<UserSection>('profile');
-  const t = useTranslations('admin.users');
 
-  const { directory, adminProfile, appointments, orders = [], comments = [] } = userDetail;
+  const { directory, adminProfile, appointments, comments = [] } = userDetail;
 
   // Get locale-specific markdown for admin notes (based on admin UI locale)
   const adminNotesMd =
@@ -62,7 +60,6 @@ function UserDetailClientContent({
       <UserSectionTabs
         activeSection={activeSection}
         onSectionChange={setActiveSection}
-        ordersCount={orders.length}
         commentsCount={comments.length}
       />
 
@@ -79,10 +76,6 @@ function UserDetailClientContent({
             isOwner={isOwner}
             adminProfile={adminProfile}
           />
-        )}
-
-        {activeSection === 'orders' && (
-          <UserOrdersTable orders={orders} routeLocale={routeLocale} />
         )}
 
         {activeSection === 'comments' && (

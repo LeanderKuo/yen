@@ -7,7 +7,7 @@ import type { Locale } from '@/lib/i18n/locales';
 
 interface TabItem {
   href: string;
-  /** Translation key under admin namespace (e.g., 'shop.tabs.dashboard') */
+  /** Translation key under admin namespace (e.g., 'gallery.tabs.dashboard') */
   labelKey?: string;
   /** @deprecated Use labelKey instead */
   labelEn?: string;

@@ -1,8 +1,7 @@
 ﻿import { MetadataRoute } from 'next';
 import { getPublicPostsForSitemapCached } from '@/lib/modules/blog/cached';
 import { getVisibleGalleryItemsForSitemapCached } from '@/lib/modules/gallery/cached';
-import { getVisibleProductsForSitemapCached, getVisibleProductCategoriesCached } from '@/lib/modules/shop/cached';
-import { isBlogEnabledCached, isGalleryEnabledCached, isShopEnabledCached } from '@/lib/features/cached';
+import { isBlogEnabledCached, isGalleryEnabledCached } from '@/lib/features/cached';
 // P0-6: Use centralized SITE_URL from lib/seo/hreflang
 import { SITE_URL } from '@/lib/seo/hreflang';
 
@@ -14,7 +13,6 @@ const STATIC_PAGES = [
   '/platforms',
   '/portfolio',
   '/gallery',
-  '/shop',
   '/contact',
   '/blog',
   '/privacy',
@@ -24,10 +22,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapEntries: MetadataRoute.Sitemap = [];
   
   // Check if features are enabled
-  const [blogEnabled, galleryEnabled, shopEnabled] = await Promise.all([
+  const [blogEnabled, galleryEnabled] = await Promise.all([
     isBlogEnabledCached(),
     isGalleryEnabledCached(),
-    isShopEnabledCached(),
   ]);
   
   // Filter static pages based on feature status
@@ -36,9 +33,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return false;
     }
     if (page === '/gallery' && !galleryEnabled) {
-      return false;
-    }
-    if (page === '/shop' && !shopEnabled) {
       return false;
     }
     return true;
@@ -158,85 +152,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     } catch (error) {
       console.error('Error generating sitemap for gallery items:', error);
-    }
-  }
-  
-  // Add shop categories and products (if shop is enabled)
-  if (shopEnabled) {
-    try {
-      // Add category pages
-      const categories = await getVisibleProductCategoriesCached();
-      for (const category of categories) {
-        const categoryPath = `/shop/${category.slug}`;
-        
-        // English version
-        sitemapEntries.push({
-          url: `${SITE_URL}/en${categoryPath}`,
-          lastModified: new Date(),
-          changeFrequency: 'weekly',
-          priority: 0.7,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${categoryPath}`,
-              'zh-Hant': `${SITE_URL}/zh${categoryPath}`,
-            },
-          },
-        });
-        
-        // Chinese version
-        sitemapEntries.push({
-          url: `${SITE_URL}/zh${categoryPath}`,
-          lastModified: new Date(),
-          changeFrequency: 'weekly',
-          priority: 0.7,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${categoryPath}`,
-              'zh-Hant': `${SITE_URL}/zh${categoryPath}`,
-            },
-          },
-        });
-      }
-      
-      // Add product pages
-      const products = await getVisibleProductsForSitemapCached();
-      for (const product of products) {
-        // Only add products with a category
-        if (!product.category) continue;
-        
-        const productPath = `/shop/${product.category}/${product.slug}`;
-        const lastModified = new Date(product.updatedAt);
-        
-        // English version
-        sitemapEntries.push({
-          url: `${SITE_URL}/en${productPath}`,
-          lastModified,
-          changeFrequency: 'weekly',
-          priority: 0.6,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${productPath}`,
-              'zh-Hant': `${SITE_URL}/zh${productPath}`,
-            },
-          },
-        });
-        
-        // Chinese version
-        sitemapEntries.push({
-          url: `${SITE_URL}/zh${productPath}`,
-          lastModified,
-          changeFrequency: 'weekly',
-          priority: 0.6,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${productPath}`,
-              'zh-Hant': `${SITE_URL}/zh${productPath}`,
-            },
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error generating sitemap for shop:', error);
     }
   }
   

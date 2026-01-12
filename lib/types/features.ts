@@ -2,10 +2,10 @@
  * Feature Settings Type Definitions
  *
  * Types for the centralized feature visibility system.
- * Features: blog, gallery, shop (all disabled by default)
+ * Features: blog, gallery (all disabled by default)
  */
 
-export type FeatureKey = 'blog' | 'gallery' | 'shop';
+export type FeatureKey = 'blog' | 'gallery';
 
 export interface FeatureSetting {
   feature_key: FeatureKey;
@@ -36,10 +36,5 @@ export const FEATURE_METADATA: Record<
     icon: '🖼️',
     labelEn: 'Gallery',
     labelZh: '畫廊',
-  },
-  shop: {
-    icon: '🛒',
-    labelEn: 'Shop',
-    labelZh: '商城',
   },
 };

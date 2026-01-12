@@ -57,13 +57,6 @@ export const API_ERROR_CODES = {
   // Feature gate
   FEATURE_DISABLED: 'feature_disabled',
   
-  // Cart/Shop
-  PRODUCT_NOT_FOUND: 'product_not_found',
-  VARIANT_NOT_FOUND: 'variant_not_found',
-  OUT_OF_STOCK: 'out_of_stock',
-  NOT_VISIBLE: 'not_visible',
-  INVALID_ITEMS: 'invalid_items',
-  
   // Comments
   COMMENT_NOT_FOUND: 'comment_not_found',
   COMMENT_SPAM: 'comment_spam',

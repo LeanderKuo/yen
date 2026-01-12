@@ -97,5 +97,5 @@ Cross-module interfaces (Single Source): [data-intelligence-interfaces-spec.md](
 
 ## 風險（摘要）
 
-- Provider/keys/production-only gating（例如 payments / 部分 secrets）→ `doc/BLOCKERS.md`
+- Provider/keys/production-only gating（例如 OpenAI / Sentry / 部分 secrets）→ `doc/BLOCKERS.md`
 - 文件 drift（PRD/spec/SPEC 不一致）→ `doc/GOVERNANCE.md` + `uiux_refactor.md` §4

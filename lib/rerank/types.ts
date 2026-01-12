@@ -50,7 +50,7 @@ export interface RerankConfig {
  * @see DATA_PREPROCESSING.md §8.2
  */
 export interface RetrievalCandidate {
-  /** Target type (product/post/gallery_item) */
+  /** Target type (post/gallery_item/comment) */
   targetType: EmbeddingTargetType;
   /** Target ID */
   targetId: string;

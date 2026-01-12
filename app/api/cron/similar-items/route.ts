@@ -71,7 +71,6 @@ export async function GET(request: Request) {
       updated: result.totalUpdated,
       errors: result.totalErrors,
       results: {
-        products: result.products,
         posts: result.posts,
         galleryItems: result.galleryItems,
       },

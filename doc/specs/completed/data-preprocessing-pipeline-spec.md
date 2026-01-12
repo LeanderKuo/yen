@@ -116,10 +116,10 @@ const output = `
 | 廣告標籤 | `[AD]`, `Sponsored` | 移除 |
 
 ```typescript
-// lib/modules/preprocessing/cleaners/noise-filter.ts
+// lib/modules/preprocessing/cleaners.ts
 
 const NOISE_PATTERNS = [
-  /^(Home|About|Contact|Products|Services)(\s*\|\s*.*)+$/gm,  // 導航列
+  /^(Home|About|Blog|Gallery|Contact)(\s*\|\s*[\w\s]+)+$/gim, // 導航列
   /©\s*\d{4}.*$/gm,                                            // 版權宣告
   /點此閱讀更多|Read more|Loading\.\.\./gi,                    // UI 提示
   /\[AD\]|\[廣告\]|Sponsored/gi,                               // 廣告標籤
@@ -143,42 +143,33 @@ const NOISE_PATTERNS = [
 |---------|----------|----------|------|
 | `HtmlStripper` | 10 | All | 移除 HTML 標籤，保留文字內容與標題結構 |
 | `NoiseFilter` | 15 | All | 移除導航、頁尾、廣告等視覺噪音 |
-| `MarkdownStripper` | 20 | Post, Product | 移除 Markdown 語法（保留標題層級） |
+| `MarkdownStripper` | 20 | Post | 移除 Markdown 語法（保留標題層級） |
 | `UrlRemover` | 30 | All | 移除 URLs（可選：替換為 `[LINK]`） |
 | `EmojiNormalizer` | 40 | Comment | 移除或轉換 emoji 為文字描述 |
 | `UnicodeNormalizer` | 45 | All | 統一 Unicode 格式（NFC），處理全形/半形 |
 | `WhitespaceNormalizer` | 50 | All | 壓縮連續空白、移除首尾空白 |
-| `LanguageSeparator` | 60 | Product, Post | 標記中英文邊界（供 chunker 參考） |
+| `LanguageSeparator` | 60 | Post | 標記中英文邊界（供 chunker 參考） |
 
 ### 2.4 清洗規則配置
 
 ```typescript
-// lib/modules/preprocessing/config.ts
+// lib/modules/preprocessing/preprocess-pure.ts
 
-const DEFAULT_CLEANING_CONFIG: CleaningConfig = {
-  product: {
-    cleaners: ['HtmlStripper', 'NoiseFilter', 'MarkdownStripper', 'UnicodeNormalizer', 'WhitespaceNormalizer'],
-    preserveUrls: false,
-    preserveEmoji: false,
-    preserveHeadingStructure: true,  // 保留標題結構供切片
-  },
+const TYPE_CONFIGS: Record<EmbeddingTargetType, TypePreprocessingConfig> = {
   post: {
-    cleaners: ['HtmlStripper', 'NoiseFilter', 'MarkdownStripper', 'UnicodeNormalizer', 'WhitespaceNormalizer'],
-    preserveUrls: false,
-    preserveEmoji: false,
-    preserveHeadingStructure: true,
+    cleaning: { ...DEFAULT_CLEANER_CONFIG, removeMarkdown: true, preserveHeadingStructure: true },
+    chunking: CHUNKING_CONFIGS.post,
+    quality: QUALITY_GATE_CONFIGS.post,
   },
   gallery_item: {
-    cleaners: ['HtmlStripper', 'NoiseFilter', 'UnicodeNormalizer', 'WhitespaceNormalizer'],
-    preserveUrls: false,
-    preserveEmoji: false,
-    preserveHeadingStructure: false,
+    cleaning: { ...DEFAULT_CLEANER_CONFIG, removeMarkdown: false, preserveHeadingStructure: false },
+    chunking: CHUNKING_CONFIGS.gallery_item,
+    quality: QUALITY_GATE_CONFIGS.gallery_item,
   },
   comment: {
-    cleaners: ['HtmlStripper', 'UrlRemover', 'EmojiNormalizer', 'UnicodeNormalizer', 'WhitespaceNormalizer'],
-    preserveUrls: false,
-    preserveEmoji: true,  // 保留 emoji 語意
-    preserveHeadingStructure: false,
+    cleaning: { ...DEFAULT_CLEANER_CONFIG, removeMarkdown: false, preserveHeadingStructure: false },
+    chunking: CHUNKING_CONFIGS.comment,
+    quality: QUALITY_GATE_CONFIGS.comment,
   },
 };
 ```
@@ -341,15 +332,7 @@ function chunkLongSection(section: string, config: ChunkingConfig): Chunk[] {
 ### 3.5 各資料類型的 Chunking 設定
 
 ```typescript
-const CHUNKING_CONFIG: Record<EmbeddingTargetType, ChunkingConfig> = {
-  product: {
-    targetSize: 300,
-    overlap: 45,          // 15% overlap
-    splitBy: 'semantic',
-    minSize: 64,
-    maxSize: 600,
-    useHeadingsAsBoundary: true,
-  },
+const CHUNKING_CONFIGS: Record<EmbeddingTargetType, ChunkingConfig> = {
   post: {
     targetSize: 500,
     overlap: 75,          // 15% overlap
@@ -640,7 +623,7 @@ CREATE INDEX idx_embedding_queue_status
 ```sql
 CREATE TABLE embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  target_type VARCHAR(50) NOT NULL,       -- 'product' | 'post' | 'gallery_item' | 'comment'
+  target_type VARCHAR(50) NOT NULL,       -- 'post' | 'gallery_item' | 'comment'
   target_id UUID NOT NULL,
   chunk_index INT DEFAULT 0,              -- 第幾個 chunk（0 = 單一/完整內容）
   chunk_total INT DEFAULT 1,              -- 總共幾個 chunks
