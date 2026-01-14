@@ -203,6 +203,7 @@
       "settings": "Settings",
       "blog": "Blog",
       "blogManagement": "Blog",
+      "safety": "Safety",
       "gallery": "Gallery",
       "galleryManagement": "Gallery",
       "users": "Users",
@@ -218,6 +219,78 @@
       "controlCenter": "Control Center",
       "embeddings": "Embeddings",
       "preprocessing": "Preprocessing"
+    },
+    "safety": {
+      "title": "Safety Queue",
+      "subtitle": "Review and moderate flagged comments",
+      "queueEmpty": "No flagged comments",
+      "queueEmptyDesc": "Comments flagged by the Safety Risk Engine will appear here.",
+      "filters": {
+        "riskLevel": "Risk Level",
+        "confidence": "Confidence",
+        "targetType": "Target Type",
+        "dateRange": "Date Range",
+        "search": "Search comments..."
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "label": "Label",
+        "promoteToCorpus": "Promote to Corpus"
+      },
+      "labels": {
+        "truePositive": "True Positive",
+        "falsePositive": "False Positive",
+        "trueNegative": "True Negative",
+        "falseNegative": "False Negative"
+      },
+      "detail": {
+        "title": "Assessment Detail",
+        "originalContent": "Original Content",
+        "layer1Hit": "Layer 1 Match",
+        "layer2Context": "RAG Context",
+        "layer3Result": "AI Analysis",
+        "model": "Model",
+        "latency": "Latency",
+        "confidence": "Confidence",
+        "reason": "Reason"
+      },
+      "corpus": {
+        "title": "Safety Corpus",
+        "subtitle": "Manage slang dictionary and case library",
+        "addItem": "Add Item",
+        "kind": "Kind",
+        "slang": "Slang",
+        "case": "Case",
+        "status": "Status",
+        "draft": "Draft",
+        "active": "Active",
+        "deprecated": "Deprecated",
+        "label": "Label",
+        "content": "Content",
+        "activate": "Activate",
+        "deprecate": "Deprecate",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete this corpus item?",
+        "activateHint": "Activating will trigger embedding generation."
+      },
+      "settings": {
+        "title": "Safety Settings",
+        "subtitle": "Configure the Safety Risk Engine",
+        "enabled": "Enable Safety Engine",
+        "enabledDesc": "Run safety checks on new comments",
+        "model": "AI Model",
+        "timeout": "Timeout (ms)",
+        "threshold": "Risk Threshold",
+        "thresholdDesc": "Minimum confidence for auto-approval (0.0-1.0)",
+        "heldMessage": "Held Message",
+        "heldMessageDesc": "Message shown when comment is held for review",
+        "rejectedMessage": "Rejected Message",
+        "rejectedMessageDesc": "Message shown when comment is rejected",
+        "save": "Save Settings",
+        "saving": "Saving...",
+        "saved": "Settings saved!"
+      }
     },
     "common": {
       "loggedInAs": "Logged in as",

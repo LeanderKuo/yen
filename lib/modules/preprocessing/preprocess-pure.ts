@@ -9,7 +9,7 @@
  * No IO, no side effects, no external dependencies.
  */
 
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 import type {
   CleanerConfig,
   ChunkingConfig,
@@ -28,7 +28,7 @@ import { qualityGateChunks, QUALITY_GATE_CONFIGS, DEFAULT_QUALITY_CONFIG, getQua
 // Per-Type Preprocessing Configs (PRD §2.4, §3.5, §5)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TYPE_CONFIGS: Record<EmbeddingTargetType, TypePreprocessingConfig> = {
+const TYPE_CONFIGS: Record<PreprocessableTargetType, TypePreprocessingConfig> = {
   post: {
     cleaning: {
       ...DEFAULT_CLEANER_CONFIG,
@@ -67,7 +67,7 @@ const TYPE_CONFIGS: Record<EmbeddingTargetType, TypePreprocessingConfig> = {
  * @pure
  */
 export function getCleaningConfig(targetType: EmbeddingTargetType): CleanerConfig {
-  return TYPE_CONFIGS[targetType]?.cleaning ?? DEFAULT_CLEANER_CONFIG;
+  return TYPE_CONFIGS[targetType as PreprocessableTargetType]?.cleaning ?? DEFAULT_CLEANER_CONFIG;
 }
 
 /**
@@ -75,7 +75,7 @@ export function getCleaningConfig(targetType: EmbeddingTargetType): CleanerConfi
  * @pure
  */
 export function getChunkingConfig(targetType: EmbeddingTargetType): ChunkingConfig {
-  return TYPE_CONFIGS[targetType]?.chunking ?? DEFAULT_CHUNKER_CONFIG;
+  return TYPE_CONFIGS[targetType as PreprocessableTargetType]?.chunking ?? DEFAULT_CHUNKER_CONFIG;
 }
 
 /**
@@ -83,7 +83,7 @@ export function getChunkingConfig(targetType: EmbeddingTargetType): ChunkingConf
  * @pure
  */
 export function getQualityConfig(targetType: EmbeddingTargetType): QualityGateConfig {
-  return TYPE_CONFIGS[targetType]?.quality ?? DEFAULT_QUALITY_CONFIG;
+  return TYPE_CONFIGS[targetType as PreprocessableTargetType]?.quality ?? DEFAULT_QUALITY_CONFIG;
 }
 
 /**
@@ -91,7 +91,7 @@ export function getQualityConfig(targetType: EmbeddingTargetType): QualityGateCo
  * @pure
  */
 export function getPreprocessingConfig(targetType: EmbeddingTargetType): TypePreprocessingConfig {
-  return TYPE_CONFIGS[targetType] ?? {
+  return TYPE_CONFIGS[targetType as PreprocessableTargetType] ?? {
     cleaning: DEFAULT_CLEANER_CONFIG,
     chunking: DEFAULT_CHUNKER_CONFIG,
     quality: DEFAULT_QUALITY_CONFIG,

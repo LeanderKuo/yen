@@ -203,6 +203,7 @@
       "settings": "公司設定",
       "blog": "Blog",
       "blogManagement": "部落格",
+      "safety": "安全審核",
       "gallery": "畫廊",
       "galleryManagement": "畫廊管理",
       "users": "用戶",
@@ -218,6 +219,78 @@
       "controlCenter": "控制中心",
       "embeddings": "嵌入管理",
       "preprocessing": "預處理"
+    },
+    "safety": {
+      "title": "安全審核佇列",
+      "subtitle": "審核與管理被標記的留言",
+      "queueEmpty": "沒有被標記的留言",
+      "queueEmptyDesc": "被安全引擎標記的留言會顯示在這裡。",
+      "filters": {
+        "riskLevel": "風險等級",
+        "confidence": "信心分數",
+        "targetType": "目標類型",
+        "dateRange": "日期範圍",
+        "search": "搜尋留言..."
+      },
+      "actions": {
+        "approve": "核准",
+        "reject": "拒絕",
+        "label": "標註",
+        "promoteToCorpus": "加入語料庫"
+      },
+      "labels": {
+        "truePositive": "真陽性",
+        "falsePositive": "假陽性",
+        "trueNegative": "真陰性",
+        "falseNegative": "假陰性"
+      },
+      "detail": {
+        "title": "評估詳情",
+        "originalContent": "原始內容",
+        "layer1Hit": "第一層命中",
+        "layer2Context": "RAG 脈絡",
+        "layer3Result": "AI 分析結果",
+        "model": "模型",
+        "latency": "延遲",
+        "confidence": "信心分數",
+        "reason": "理由"
+      },
+      "corpus": {
+        "title": "安全語料庫",
+        "subtitle": "管理黑話字典與案例庫",
+        "addItem": "新增項目",
+        "kind": "類型",
+        "slang": "黑話",
+        "case": "案例",
+        "status": "狀態",
+        "draft": "草稿",
+        "active": "啟用",
+        "deprecated": "已棄用",
+        "label": "標籤",
+        "content": "內容",
+        "activate": "啟用",
+        "deprecate": "棄用",
+        "delete": "刪除",
+        "confirmDelete": "確定要刪除這個語料項目嗎？",
+        "activateHint": "啟用後會自動產生嵌入向量。"
+      },
+      "settings": {
+        "title": "安全設定",
+        "subtitle": "設定安全風險引擎",
+        "enabled": "啟用安全引擎",
+        "enabledDesc": "對新留言執行安全檢查",
+        "model": "AI 模型",
+        "timeout": "逾時時間 (ms)",
+        "threshold": "風險閾值",
+        "thresholdDesc": "自動核准的最低信心分數 (0.0-1.0)",
+        "heldMessage": "待審訊息",
+        "heldMessageDesc": "留言被暫留時顯示的訊息",
+        "rejectedMessage": "拒絕訊息",
+        "rejectedMessageDesc": "留言被拒絕時顯示的訊息",
+        "save": "儲存設定",
+        "saving": "儲存中...",
+        "saved": "設定已儲存！"
+      }
     },
     "common": {
       "loggedInAs": "登入帳號",

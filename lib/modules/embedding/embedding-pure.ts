@@ -13,6 +13,7 @@ import type {
   PostEmbeddingData,
   GalleryItemEmbeddingData,
   CommentEmbeddingData,
+  SafetyCorpusEmbeddingData,
 } from '@/lib/types/embedding';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ export function estimateTokenCount(text: string): number {
   const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
   // Non-Chinese characters
   const otherChars = text.length - chineseChars;
-  
+
   // Chinese: ~1.5 tokens/char, Other: ~0.25 tokens/char
   return Math.ceil(chineseChars * 1.5 + otherChars * 0.25);
 }
@@ -124,20 +125,20 @@ export function estimateTokenCount(text: string): number {
  */
 export function truncateToTokenLimit(text: string, maxTokens: number = MAX_TOKENS): string {
   const estimatedTokens = estimateTokenCount(text);
-  
+
   if (estimatedTokens <= maxTokens) {
     return text;
   }
-  
+
   // Binary search for the right length
   let low = 0;
   let high = text.length;
   let result = text;
-  
+
   while (low < high) {
     const mid = Math.floor((low + high + 1) / 2);
     const truncated = text.slice(0, mid);
-    
+
     if (estimateTokenCount(truncated) <= maxTokens) {
       result = truncated;
       low = mid;
@@ -145,13 +146,13 @@ export function truncateToTokenLimit(text: string, maxTokens: number = MAX_TOKEN
       high = mid - 1;
     }
   }
-  
+
   // Try to break at word boundary
   const lastSpace = result.lastIndexOf(' ');
   if (lastSpace > result.length * 0.8) {
     result = result.slice(0, lastSpace);
   }
-  
+
   return result.trim();
 }
 
@@ -177,12 +178,12 @@ export function hashContent(text: string): string {
  */
 export function composePostContent(data: PostEmbeddingData): string {
   const parts: string[] = [];
-  
+
   if (data.title_en) parts.push(data.title_en);
   if (data.title_zh) parts.push(data.title_zh);
   if (data.excerpt_en) parts.push(stripHtmlAndMarkdown(data.excerpt_en));
   if (data.excerpt_zh) parts.push(stripHtmlAndMarkdown(data.excerpt_zh));
-  
+
   return normalizeWhitespace(parts.join(' '));
 }
 
@@ -192,12 +193,12 @@ export function composePostContent(data: PostEmbeddingData): string {
  */
 export function composeGalleryItemContent(data: GalleryItemEmbeddingData): string {
   const parts: string[] = [];
-  
+
   if (data.title_en) parts.push(data.title_en);
   if (data.title_zh) parts.push(data.title_zh);
   if (data.description_en) parts.push(stripHtmlAndMarkdown(data.description_en));
   if (data.description_zh) parts.push(stripHtmlAndMarkdown(data.description_zh));
-  
+
   return normalizeWhitespace(parts.join(' '));
 }
 
@@ -210,11 +211,19 @@ export function composeCommentContent(data: CommentEmbeddingData): string {
 }
 
 /**
+ * Compose embedding content from safety corpus item data.
+ * @see safety-risk-engine-spec.md §9.1
+ */
+export function composeSafetyCorpusContent(data: SafetyCorpusEmbeddingData): string {
+  return normalizeWhitespace(`${data.label}\n\n${data.content}`);
+}
+
+/**
  * Compose embedding content based on entity type.
  */
 export function composeEmbeddingContent(
   targetType: EmbeddingTargetType,
-  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
+  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData | SafetyCorpusEmbeddingData
 ): string {
   switch (targetType) {
     case 'post':
@@ -223,8 +232,13 @@ export function composeEmbeddingContent(
       return composeGalleryItemContent(data as GalleryItemEmbeddingData);
     case 'comment':
       return composeCommentContent(data as CommentEmbeddingData);
-    default:
-      throw new Error(`Unknown target type: ${targetType}`);
+    case 'safety_slang':
+    case 'safety_case':
+      return composeSafetyCorpusContent(data as SafetyCorpusEmbeddingData);
+    default: {
+      const exhaustiveCheck: never = targetType;
+      throw new Error(`Unknown target type: ${exhaustiveCheck}`);
+    }
   }
 }
 
@@ -233,13 +247,13 @@ export function composeEmbeddingContent(
  */
 export function prepareContentForEmbedding(
   targetType: EmbeddingTargetType,
-  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData
+  data: PostEmbeddingData | GalleryItemEmbeddingData | CommentEmbeddingData | SafetyCorpusEmbeddingData
 ): { content: string; contentHash: string; truncated: boolean } {
   const composed = composeEmbeddingContent(targetType, data);
   const originalTokens = estimateTokenCount(composed);
   const content = truncateToTokenLimit(composed, MAX_TOKENS);
   const contentHash = hashContent(content);
-  
+
   return {
     content,
     contentHash,

@@ -163,7 +163,7 @@ export interface CommentsCountResponse {
 /**
  * Spam decision type
  */
-export type CreateCommentDecision = 'allow' | 'pending' | 'spam';
+export type CreateCommentDecision = 'allow' | 'pending' | 'spam' | 'reject';
 
 /**
  * POST /api/comments request body

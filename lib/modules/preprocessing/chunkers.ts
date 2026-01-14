@@ -15,13 +15,13 @@ import type {
   ContentChunk,
   ChunkingMetadata,
 } from './types';
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Default Configs per Type (PRD §3.5)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const CHUNKING_CONFIGS: Record<EmbeddingTargetType, ChunkingConfig> = {
+export const CHUNKING_CONFIGS: Record<PreprocessableTargetType, ChunkingConfig> = {
   post: {
     targetSize: 500,
     overlap: 75, // 15% overlap
@@ -521,6 +521,6 @@ export function chunkContentForType(
   content: string,
   targetType: EmbeddingTargetType
 ): ChunkResult {
-  const config = CHUNKING_CONFIGS[targetType] || DEFAULT_CHUNKER_CONFIG;
+  const config = CHUNKING_CONFIGS[targetType as PreprocessableTargetType] || DEFAULT_CHUNKER_CONFIG;
   return chunkContent(content, config);
 }

@@ -51,7 +51,10 @@
 - `comment_rate_limits` — 評論速率限制
 - `spam_decision_log` — 垃圾郵件判斷記錄
 - `comment_blacklist` — 評論黑名單
-- `comment_moderation` — 評論審核資料
+- `comment_moderation` — 評論審核資料（含 safety pointer fields）
+- `comment_safety_assessments` — 安全評估歷史記錄（admin 可讀/標註）
+- `safety_settings` — 安全引擎設定（singleton, admin-only）
+- `safety_corpus_items` — 安全語料庫（slang/case，admin-only CRUD）
 
 **存取方式**：必須使用 `createAdminClient()`
 

@@ -17,14 +17,27 @@
 /**
  * Entities that can have embeddings.
  * @see SUPABASE_AI.md §2.2 for content composition per type
+ * @see safety-risk-engine-spec.md §9.5 for safety corpus types
  */
-export type EmbeddingTargetType = 'post' | 'gallery_item' | 'comment';
+export type EmbeddingTargetType =
+  | 'post'
+  | 'gallery_item'
+  | 'comment'
+  | 'safety_slang'
+  | 'safety_case';
 
 /**
- * Entities that can have similar items (excludes comments).
+ * Entities that can have similar items (excludes comments and safety corpus).
  * @see SUPABASE_AI.md §3.2
  */
 export type SimilarItemTargetType = 'post' | 'gallery_item';
+
+/**
+ * Entities that require preprocessing (clean → chunk → quality gate).
+ * Safety corpus items are curated and don't need complex preprocessing.
+ * @see DATA_PREPROCESSING.md
+ */
+export type PreprocessableTargetType = 'post' | 'gallery_item' | 'comment';
 
 /**
  * Quality status for embedding verification.
@@ -256,6 +269,8 @@ export interface EmbeddingStats {
   posts: EmbeddingTypeStats;
   galleryItems: EmbeddingTypeStats;
   comments: EmbeddingTypeStats;
+  safetySlang: EmbeddingTypeStats;
+  safetyCase: EmbeddingTypeStats;
   queuePending: number;
   queueFailed: number;
 }
@@ -309,6 +324,15 @@ export interface GalleryItemEmbeddingData {
  * @see SUPABASE_AI.md §2.2
  */
 export interface CommentEmbeddingData {
+  content: string;
+}
+
+/**
+ * Safety corpus item data for embedding composition.
+ * @see safety-risk-engine-spec.md §9.1
+ */
+export interface SafetyCorpusEmbeddingData {
+  label: string;
   content: string;
 }
 

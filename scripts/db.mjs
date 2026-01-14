@@ -150,6 +150,11 @@ const PATHS = {
       seed: [],
       drop: ['supabase/01_drop/16_page_views.sql'],
     },
+    safety_risk_engine: {
+      add: ['supabase/02_add/19_safety_risk_engine.sql'],
+      seed: ['supabase/03_seed/08_safety.sql'],
+      drop: ['supabase/01_drop/19_safety_risk_engine.sql'],
+    },
   },
 };
 

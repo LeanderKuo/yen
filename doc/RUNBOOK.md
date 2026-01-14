@@ -10,6 +10,7 @@
 - [Database Operations](#database-ops)
 - [AI Analysis](#ai-analysis)
 - [Embeddings + Preprocessing](#embeddings-preprocessing)
+- [Safety Queue](#safety-queue)
 - [Error Monitoring](#error-monitoring)
 - [References](#references)
 
@@ -52,6 +53,22 @@ Canonical enablement guide: [`runbook/ai-analysis.md`](runbook/ai-analysis.md)
 ## Embeddings + Preprocessing (Cron + QStash)
 
 Canonical enablement guide: [`runbook/embeddings-preprocessing.md`](runbook/embeddings-preprocessing.md)
+
+---
+
+<a id="safety-queue"></a>
+
+## Safety Queue (Admin)
+
+Admin Safety Queue is accessible at `/admin/comments/safety`. Operations include:
+- Review HELD comments
+- Approve/Reject decisions
+- Label assessments (feedback loop)
+- Promote content to safety corpus
+- Manage safety corpus items
+- Configure safety settings
+
+Spec: `specs/proposed/safety-risk-engine-spec.md`
 
 ---
 

@@ -9,7 +9,7 @@
  */
 import 'server-only';
 
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 import type { ChunkingConfig, QualityGateConfig } from './types';
 import type { PreprocessingConfig } from '@/lib/validators/preprocessing-config';
 import {
@@ -65,7 +65,7 @@ export async function getConfigForType(
     };
   }
 
-  const typeConfig = result.config[targetType];
+  const typeConfig = result.config[targetType as PreprocessableTargetType];
 
   return {
     chunking: mergeChunkingWithDefaults(targetType, typeConfig?.chunking),
@@ -77,17 +77,17 @@ export async function getConfigForType(
  * Get all merged configs for all target types.
  * Useful for Admin UI display.
  */
-export async function getAllConfigs(): Promise<Record<EmbeddingTargetType, TypeConfigResult>> {
-  const targetTypes: EmbeddingTargetType[] = ['post', 'gallery_item', 'comment'];
+export async function getAllConfigs(): Promise<Record<PreprocessableTargetType, TypeConfigResult>> {
+  const targetTypes: PreprocessableTargetType[] = ['post', 'gallery_item', 'comment'];
   const result = await getPreprocessingConfig();
 
-  const configs: Record<EmbeddingTargetType, TypeConfigResult> = {} as Record<
+  const configs: Record<PreprocessableTargetType, TypeConfigResult> = {} as Record<
     EmbeddingTargetType,
     TypeConfigResult
   >;
 
   for (const targetType of targetTypes) {
-    const typeConfig = result.success ? result.config?.[targetType] : undefined;
+    const typeConfig = result.success ? result.config?.[targetType as PreprocessableTargetType] : undefined;
 
     configs[targetType] = {
       chunking: mergeChunkingWithDefaults(targetType, typeConfig?.chunking),

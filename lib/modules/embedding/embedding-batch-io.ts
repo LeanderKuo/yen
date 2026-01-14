@@ -32,6 +32,8 @@ export async function initializeEmbeddingsForType(
     post: { table: 'posts', filter: { visibility: 'public' } },
     gallery_item: { table: 'gallery_items', filter: { is_visible: true } },
     comment: { table: 'comments', filter: { is_approved: true, is_spam: false } },
+    safety_slang: { table: 'safety_corpus_items', filter: { kind: 'slang', status: 'active' } },
+    safety_case: { table: 'safety_corpus_items', filter: { kind: 'case', status: 'active' } },
   };
 
   const config = tableConfig[targetType];
@@ -157,11 +159,15 @@ export async function getEmbeddingStats(): Promise<EmbeddingStats> {
     postStats,
     galleryStats,
     commentStats,
+    safetySlangStats,
+    safetyCaseStats,
     queueStats,
   ] = await Promise.all([
     getTypeStats(supabase, 'post', 'posts', { visibility: 'public' }),
     getTypeStats(supabase, 'gallery_item', 'gallery_items', { is_visible: true }),
     getTypeStats(supabase, 'comment', 'comments', { is_approved: true, is_spam: false }),
+    getTypeStats(supabase, 'safety_slang', 'safety_corpus_items', { kind: 'slang', status: 'active' }),
+    getTypeStats(supabase, 'safety_case', 'safety_corpus_items', { kind: 'case', status: 'active' }),
     getQueueStats(supabase),
   ]);
 
@@ -169,6 +175,8 @@ export async function getEmbeddingStats(): Promise<EmbeddingStats> {
     posts: postStats,
     galleryItems: galleryStats,
     comments: commentStats,
+    safetySlang: safetySlangStats,
+    safetyCase: safetyCaseStats,
     queuePending: queueStats.pending,
     queueFailed: queueStats.failed,
   };

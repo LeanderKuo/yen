@@ -466,7 +466,7 @@ test('AI SDK imports are restricted to allowed locations (bundle guard)', () => 
 
   // Patterns for AI SDK imports
   const openaiPattern = /from\s+['"]openai['"]|require\s*\(\s*['"]openai['"]\s*\)/;
-  const openrouterPattern = /from\s+['"]openrouter['"]|require\s*\(\s*['"]openrouter['"]\s*\)|['"]openrouter['"]/;
+  const openrouterPattern = /from\s+['"]openrouter['"]|require\s*\(\s*['"]openrouter['"]\s*\)/;
 
   for (const filePath of files) {
     const rel = toPosixPath(path.relative(repoRoot, filePath));

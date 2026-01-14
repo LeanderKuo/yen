@@ -44,7 +44,9 @@ export interface Comment {
 export interface CommentResult {
   success: boolean;
   comment?: Comment;
-  decision?: SpamDecision;
+  decision?: SpamDecision | 'reject';
+  /** Safety decision if safety check was run. */
+  safetyDecision?: 'APPROVED' | 'HELD' | 'REJECTED';
   error?: string;
   message?: string;
 }

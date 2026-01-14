@@ -178,6 +178,47 @@ async function getCommentContent(targetId: string): Promise<RawContentResult | n
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Safety Corpus Content Fetchers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetch raw content for a safety corpus item (slang or case).
+ * Only fetches items with status='active' (draft/deprecated should not be embedded).
+ * @see safety-risk-engine-spec.md §9.1
+ */
+async function getSafetyCorpusItemContent(targetId: string): Promise<RawContentResult | null> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('safety_corpus_items')
+    .select('id, kind, status, label, content')
+    .eq('id', targetId)
+    .single();
+
+  if (error || !data) {
+    console.error('[getSafetyCorpusItemContent] Query error:', error);
+    return null;
+  }
+
+  // Only embed active corpus items
+  if (data.status !== 'active') {
+    return null;
+  }
+
+  // Compose: label + content for semantic richness
+  const rawContent = `${data.label}\n\n${data.content}`;
+
+  return {
+    rawContent,
+    context: {
+      targetType: data.kind === 'slang' ? 'safety_slang' : 'safety_case',
+      targetId: data.id,
+      parentTitle: data.label,
+    },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Entry Point
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -198,8 +239,13 @@ export async function getTargetContent(
       return getGalleryItemContent(targetId);
     case 'comment':
       return getCommentContent(targetId);
-    default:
-      console.error(`[getTargetContent] Unknown target type: ${targetType}`);
+    case 'safety_slang':
+    case 'safety_case':
+      return getSafetyCorpusItemContent(targetId);
+    default: {
+      const exhaustiveCheck: never = targetType;
+      console.error(`[getTargetContent] Unknown target type: ${exhaustiveCheck}`);
       return null;
+    }
   }
 }

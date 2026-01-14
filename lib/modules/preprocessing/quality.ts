@@ -15,13 +15,13 @@ import type {
   QualityGateConfig,
   ValidityCheckResult,
 } from './types';
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Default Configs per Type (PRD §5.2)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const QUALITY_GATE_CONFIGS: Record<EmbeddingTargetType, QualityGateConfig> = {
+export const QUALITY_GATE_CONFIGS: Record<PreprocessableTargetType, QualityGateConfig> = {
   post: {
     minLength: 50, // characters for posts
     maxLength: 10000,
@@ -330,7 +330,7 @@ export function qualityGateChunksForType(
   chunks: ContentChunk[],
   targetType: EmbeddingTargetType
 ): QualifiedChunk[] {
-  const config = QUALITY_GATE_CONFIGS[targetType] || DEFAULT_QUALITY_CONFIG;
+  const config = QUALITY_GATE_CONFIGS[targetType as PreprocessableTargetType] || DEFAULT_QUALITY_CONFIG;
   return qualityGateChunks(chunks, config);
 }
 

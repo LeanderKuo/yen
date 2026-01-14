@@ -13,6 +13,7 @@ Template: `TEMPLATE.md`
 
 | File | Date | Status | Title |
 | --- | --- | --- | --- |
+| [2026-01-12-scope-reduction-remove-shop-payments-step-plan.md](2026-01-12-scope-reduction-remove-shop-payments-step-plan.md) | 2026-01-12 | **ARCHIVED / COMPLETE** | Step-by-Step Execution Plan — Scope Reduction (Remove Shop/Payments) |
 | [2026-01-04-step-plan-admin-i18n-lib-refactor.md](2026-01-04-step-plan-admin-i18n-lib-refactor.md) | 2026-01-04 | **ARCHIVED / COMPLETE** | [ARCHIVED] Step-by-Step Execution Plan — Drift Cleanup (Admin i18n gaps) + `lib/` Restructure |
 | [2026-01-04-lib-modules-migration-step-plan.md](2026-01-04-lib-modules-migration-step-plan.md) | 2026-01-04 | **ARCHIVED / COMPLETE** | [ARCHIVED] Step-by-Step Execution Plan — `lib/modules/*` Business Modules Migration |
 | [2026-01-04-go-live-readiness-drift-alignment-step-plan.md](2026-01-04-go-live-readiness-drift-alignment-step-plan.md) | 2026-01-04 | **ARCHIVED / COMPLETE** | Step-by-Step Execution Plan — Go‑Live Readiness + Drift Alignment |

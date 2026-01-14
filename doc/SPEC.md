@@ -113,8 +113,10 @@ This document describes **implemented** behavior and its technical details.
 - Supports Blog and Gallery comments
 - Threaded replies
 - Spam protection (honeypot + Akismet + reCAPTCHA)
+- **Safety Risk Engine** (three-layer defense: Layer 1 rules + Layer 2 RAG + Layer 3 LLM)
 - Rate limiting
 - Admin moderation tools (approve/spam/delete, blacklist, Akismet feedback)
+- Admin Safety Queue (HELD comments review + corpus management + settings)
 
 ### API Endpoints
 
@@ -137,9 +139,25 @@ This document describes **implemented** behavior and its technical details.
 - Canonical constraints (no PII in public responses): `../ARCHITECTURE.md` §3.12 (Comments API Sensitive Data Protection)
 - Security policies (RLS/server-only tables): `SECURITY.md`
 
+### Safety Risk Engine
+
+- Spec: `specs/proposed/safety-risk-engine-spec.md`
+- Decision semantics:
+  - `REJECTED`: Content blocked, not stored
+  - `HELD`: Content stored but not public, awaiting human review
+  - `APPROVED`: Content published
+- Fail Closed: Any timeout/error → HELD (safe default)
+- PII de-identification before sending to external AI
+- Admin routes:
+  - `/admin/comments/safety` — Safety queue (HELD comments)
+  - `/admin/comments/safety/[commentId]` — Assessment detail + review actions
+  - `/admin/comments/safety/corpus` — Safety corpus management (slang/cases)
+  - `/admin/comments/safety/settings` — Safety engine settings
+
 ### Implementation Notes
 
 - Public API adds `isMine` (server-computed ownership flag) without exposing `userId`.
+- Safety Risk Engine modules: `lib/modules/safety-risk-engine/*`
 - Implementation file map: see [Module Inventory](#module-inventory-single-source).
 
 ---

@@ -13,7 +13,7 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 
-import type { EmbeddingTargetType } from "@/lib/types/embedding";
+import type { EmbeddingTargetType, PreprocessableTargetType } from "@/lib/types/embedding";
 import type {
   ChunkingConfig,
   ChunkingStrategy,
@@ -84,7 +84,7 @@ interface TypeConfigResult {
   quality: QualityGateConfig;
 }
 
-type AllConfigs = Record<EmbeddingTargetType, TypeConfigResult>;
+type AllConfigs = Record<PreprocessableTargetType, TypeConfigResult>;
 
 interface PreprocessingClientProps {
   initialData: {
@@ -101,6 +101,8 @@ const TYPE_LABELS: Record<EmbeddingTargetType, string> = {
   post: "Blog Post",
   gallery_item: "Gallery Item",
   comment: "Comment",
+  safety_slang: "Safety Slang",
+  safety_case: "Safety Case",
 };
 
 /** Chunking strategy options */
@@ -242,7 +244,7 @@ export function PreprocessingClient({ initialData }: PreprocessingClientProps) {
   const handleEditConfig = useCallback(
     (targetType: EmbeddingTargetType) => {
       setEditingType(targetType);
-      setEditingConfig({ ...configs[targetType].chunking });
+      setEditingConfig({ ...configs[targetType as PreprocessableTargetType].chunking });
       setShowConfigEditor(true);
     },
     [configs]
@@ -590,7 +592,7 @@ export function PreprocessingClient({ initialData }: PreprocessingClientProps) {
             <tbody className="divide-y">
               {(Object.keys(TYPE_LABELS) as EmbeddingTargetType[]).map(
                 (type) => {
-                  const config = configs[type]?.chunking;
+                  const config = configs[type as PreprocessableTargetType]?.chunking;
                   return (
                     <tr key={type} className="hover:bg-gray-50">
                       <td className="px-3 py-2 font-medium">

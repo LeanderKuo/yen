@@ -196,11 +196,11 @@ import {
   type TypeConfigResult,
 } from '@/lib/modules/preprocessing/io';
 import { revalidateTag } from 'next/cache';
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 import type { ChunkingConfig, QualityGateConfig } from '@/lib/modules/preprocessing/types';
 
 /** Config for all target types */
-export type AllConfigsResult = Record<EmbeddingTargetType, TypeConfigResult>;
+export type AllConfigsResult = Record<PreprocessableTargetType, TypeConfigResult>;
 
 /** Update request format */
 export interface UpdateConfigRequest {

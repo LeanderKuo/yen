@@ -51,6 +51,8 @@ const TARGET_TYPE_LABELS: Record<EmbeddingTargetType, string> = {
   post: 'Blog Posts',
   gallery_item: 'Gallery Items',
   comment: 'Comments',
+  safety_slang: 'Safety Slang',
+  safety_case: 'Safety Cases',
 };
 
 /** Search mode display names */

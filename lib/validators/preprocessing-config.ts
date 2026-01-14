@@ -9,7 +9,7 @@
 
 import { z } from 'zod';
 import type { ChunkingConfig, ChunkingStrategy, QualityGateConfig } from '@/lib/modules/preprocessing/types';
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, PreprocessableTargetType } from '@/lib/types/embedding';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants (bounds for validation)
@@ -166,7 +166,7 @@ export function validateChunkingConfig(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Default chunking configs (copy from chunkers.ts for reference) */
-export const DEFAULT_CHUNKING_CONFIGS: Record<EmbeddingTargetType, ChunkingConfig> = {
+export const DEFAULT_CHUNKING_CONFIGS: Record<PreprocessableTargetType, ChunkingConfig> = {
   post: {
     targetSize: 500,
     overlap: 75,
@@ -210,7 +210,7 @@ export function mergeChunkingWithDefaults(
   targetType: EmbeddingTargetType,
   dbConfig: Partial<ChunkingConfig> | undefined
 ): ChunkingConfig {
-  const defaults = DEFAULT_CHUNKING_CONFIGS[targetType];
+  const defaults = DEFAULT_CHUNKING_CONFIGS[targetType as PreprocessableTargetType];
 
   if (!dbConfig) {
     return defaults;

@@ -7,3 +7,11 @@
  */
 export { getModelPricing, fetchAvailableModels } from './openrouter-models-io';
 export { type AnalysisRunResult, isOpenRouterConfigured, runAnalysis } from './openrouter-run-io';
+export {
+    type ChatMessage,
+    type ChatMessageRole,
+    type ChatCompletionRequest,
+    type ChatCompletionResult,
+    isChatCompletionConfigured,
+    runChatCompletion,
+} from './openrouter-chat-io';
