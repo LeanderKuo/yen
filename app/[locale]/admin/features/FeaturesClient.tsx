@@ -7,10 +7,9 @@ import { FEATURE_METADATA } from '@/lib/types/features';
 
 interface FeaturesClientProps {
   features: FeatureSetting[];
-  locale: string;
 }
 
-export default function FeaturesClient({ features, locale }: FeaturesClientProps) {
+export default function FeaturesClient({ features }: FeaturesClientProps) {
   const [featureStates, setFeatureStates] = useState(
     Object.fromEntries(features.map((f) => [f.feature_key, f.is_enabled]))
   );
@@ -31,7 +30,7 @@ export default function FeaturesClient({ features, locale }: FeaturesClientProps
       if (!result.success) {
         // Revert on error
         setFeatureStates((prev) => ({ ...prev, [key]: !newValue }));
-        setError(result.error || (locale === 'zh' ? '切換失敗' : 'Toggle failed'));
+        setError(result.error || '切換失敗');
       } else {
         setError(null);
       }
@@ -64,12 +63,10 @@ export default function FeaturesClient({ features, locale }: FeaturesClientProps
                 <span className="text-3xl">{meta?.icon || '⚙️'}</span>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {locale === 'zh' ? meta?.labelZh : meta?.labelEn}
+                    {meta?.label}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {locale === 'zh'
-                      ? feature.description_zh
-                      : feature.description_en}
+                    {feature.description_zh}
                   </p>
                 </div>
               </div>
@@ -124,12 +121,8 @@ export default function FeaturesClient({ features, locale }: FeaturesClientProps
                 }`}
               >
                 {isEnabled
-                  ? locale === 'zh'
-                    ? '已啟用'
-                    : 'Enabled'
-                  : locale === 'zh'
-                  ? '已停用'
-                  : 'Disabled'}
+                  ? '已啟用'
+                  : '已停用'}
               </span>
             </div>
           </div>
@@ -138,9 +131,7 @@ export default function FeaturesClient({ features, locale }: FeaturesClientProps
 
       {features.length === 0 && (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          {locale === 'zh'
-            ? '找不到功能設定。請確認資料庫已套用最新遷移。'
-            : 'No feature settings found. Please ensure database migrations are applied.'}
+          找不到功能設定。請確認資料庫已套用最新遷移。
         </div>
       )}
     </div>

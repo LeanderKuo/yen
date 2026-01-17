@@ -4,12 +4,7 @@ import { isOwner } from '@/lib/modules/auth';
 import { getSiteConfigAdmin } from '@/lib/modules/theme/admin-io';
 import FontsClient from '../FontsClient';
 
-export default async function FontsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function FontsPage() {
   const supabase = await createClient();
   const ownerCheck = await isOwner(supabase);
   const config = await getSiteConfigAdmin();

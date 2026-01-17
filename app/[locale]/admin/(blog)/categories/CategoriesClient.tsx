@@ -36,7 +36,6 @@ interface CategoriesClientProps {
 }
 
 interface FormData {
-  name_en: string;
   name_zh: string;
   slug: string;
 }
@@ -63,19 +62,18 @@ function CategoriesClientContent({
     useState<CategoryWithCount[]>(initialCategories);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    name_en: '',
     name_zh: '',
     slug: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Handle English name change with auto-slug
-  const handleNameEnChange = (value: string) => {
+  // Handle Chinese name change with auto-slug
+  const handleNameZhChange = (value: string) => {
     setFormData((prev) => {
-      const next = { ...prev, name_en: value };
+      const next = { ...prev, name_zh: value };
       // Auto-generate slug if not manually edited
-      const shouldAutoSlug = !prev.slug || prev.slug === generateSlug(prev.name_en);
+      const shouldAutoSlug = !prev.slug || prev.slug === generateSlug(prev.name_zh);
       if (shouldAutoSlug) {
         next.slug = generateSlug(value);
       }
@@ -105,7 +103,7 @@ function CategoriesClientContent({
       }
 
       // Reset form and refresh
-      setFormData({ name_en: '', name_zh: '', slug: '' });
+      setFormData({ name_zh: '', slug: '' });
       setShowForm(false);
       await refreshCategories();
     });
@@ -177,22 +175,8 @@ function CategoriesClientContent({
 
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t('nameEn')}
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name_en}
-                onChange={(e) => handleNameEnChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Technology"
-                disabled={isPending}
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t('nameZh')}
@@ -201,9 +185,7 @@ function CategoriesClientContent({
                 type="text"
                 required
                 value={formData.name_zh}
-                onChange={(e) =>
-                  setFormData({ ...formData, name_zh: e.target.value })
-                }
+                onChange={(e) => handleNameZhChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="科技"
                 disabled={isPending}
@@ -253,10 +235,7 @@ function CategoriesClientContent({
             <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Name (EN)
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  名稱 (中文)
+                  分類名稱
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Slug
@@ -275,9 +254,6 @@ function CategoriesClientContent({
                   key={category.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                 >
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                    {category.name_en}
-                  </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
                     {category.name_zh}
                   </td>

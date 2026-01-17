@@ -2,28 +2,25 @@
 
 import { useState, useMemo } from 'react';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
+import type { AbstractIntlMessages } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { ContentHistory } from '@/lib/types/content';
-import type { Locale } from '@/lib/i18n/locales';
 import { restoreHistoryAction } from './actions';
 
 interface HistoryClientProps {
   initialHistory: ContentHistory[];
   routeLocale: string;
-  adminLocale: Locale;
-  adminMessages: Record<string, unknown>;
+  messages: AbstractIntlMessages;
   query: { type?: string; id?: string };
 }
 
 function HistoryClientInner({
   initialHistory,
   routeLocale,
-  adminLocale,
   query,
 }: {
   initialHistory: ContentHistory[];
   routeLocale: string;
-  adminLocale: Locale;
   query: { type?: string; id?: string };
 }) {
   const router = useRouter();
@@ -75,8 +72,7 @@ function HistoryClientInner({
     }
   };
 
-  // Date formatting uses adminLocale for display
-  const dateLocale = adminLocale === 'zh' ? 'zh-TW' : 'en-US';
+  const dateLocale = 'zh-TW';
 
   return (
     <div>
@@ -190,16 +186,14 @@ function HistoryClientInner({
 export default function HistoryClient({
   initialHistory,
   routeLocale,
-  adminLocale,
-  adminMessages,
+  messages,
   query,
 }: HistoryClientProps) {
   return (
-    <NextIntlClientProvider locale={adminLocale} messages={adminMessages}>
+    <NextIntlClientProvider locale={routeLocale} messages={messages}>
       <HistoryClientInner
         initialHistory={initialHistory}
         routeLocale={routeLocale}
-        adminLocale={adminLocale}
         query={query}
       />
     </NextIntlClientProvider>

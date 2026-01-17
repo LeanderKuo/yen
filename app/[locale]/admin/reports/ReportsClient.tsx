@@ -2,15 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
+import type { AbstractIntlMessages } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { Report } from '@/lib/modules/reports/admin-io';
-import type { Locale } from '@/lib/i18n/locales';
 
 interface Props {
   initialReports: Report[];
   routeLocale: string;
-  adminLocale: Locale;
-  adminMessages: Record<string, unknown>;
+  messages: AbstractIntlMessages;
 }
 
 function ReportsClientInner({ initialReports, routeLocale }: { initialReports: Report[]; routeLocale: string }) {
@@ -273,9 +272,9 @@ function ReportsClientInner({ initialReports, routeLocale }: { initialReports: R
   );
 }
 
-export default function ReportsClient({ initialReports, routeLocale, adminLocale, adminMessages }: Props) {
+export default function ReportsClient({ initialReports, routeLocale, messages }: Props) {
   return (
-    <NextIntlClientProvider locale={adminLocale} messages={adminMessages}>
+    <NextIntlClientProvider locale={routeLocale} messages={messages}>
       <ReportsClientInner initialReports={initialReports} routeLocale={routeLocale} />
     </NextIntlClientProvider>
   );

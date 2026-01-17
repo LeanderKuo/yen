@@ -28,11 +28,11 @@ export default async function SimilarGalleryItems({
   return (
     <section className="mt-12 pt-8 border-t border-border-light">
       <h2 className="text-xl font-bold text-foreground mb-6">
-        {locale === 'zh' ? '相似作品' : 'Similar Works'}
+        相似作品
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {similarItems.map((item) => {
-          const title = locale === 'zh' ? item.titleZh : item.titleEn;
+          const title = item.titleZh;
           const categorySlug = item.category?.slug || 'uncategorized';
           const href = `/${locale}/gallery/${categorySlug}/${item.slug}`;
 
@@ -57,7 +57,7 @@ export default async function SimilarGalleryItems({
               <div className="p-4">
                 {item.category && (
                   <span className="inline-block text-xs font-medium text-primary mb-1">
-                    {locale === 'zh' ? item.category.nameZh : item.category.nameEn}
+                    {item.category.nameZh}
                   </span>
                 )}
                 <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">

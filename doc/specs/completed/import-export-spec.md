@@ -35,11 +35,13 @@ Links:
 
 ## 2. 格式規格
 
+> 單一語言（zh）專案：匯入時 `*_en` 欄位可省略；系統會優先採用 `*_zh`（若無則 fallback `*_en`），並將結果鏡像寫入 legacy 欄位（`*_en` / `*_zh` 同值）。
+
 ### 2.1 Blog Posts（Markdown）
 
 **用途**：內容編輯、版本控制（Git）、靜態網站遷移
 
-**單檔格式**（YAML frontmatter + 雙語內容）：
+**單檔格式**（YAML frontmatter + 單一內容）：
 
 ```markdown
 ---
@@ -56,14 +58,6 @@ cover_image_url_zh: https://res.cloudinary.com/...
 cover_image_alt_en: Description of image
 cover_image_alt_zh: 圖片描述
 ---
-
-<!-- lang: en -->
-
-# My First Post
-
-English content here...
-
-<!-- lang: zh -->
 
 # 我的第一篇文章
 
@@ -84,7 +78,7 @@ blog_posts_2025-12-27.zip
 **匯入邏輯**：
 
 1. 解析 frontmatter 取得 metadata
-2. 用 `<!-- lang: en -->` 和 `<!-- lang: zh -->` 分隔符解析雙語內容
+2. 內容支援 legacy markers（`<!-- lang: zh -->` / `<!-- lang: en -->`）：若同時存在則優先取 zh；若無 markers 則整份視為內容
 3. 用 `category` slug 查找對應的 `category_id`
 4. 若 category 不存在 → 報錯
 

@@ -281,7 +281,7 @@ app/[locale]/admin/<module>/
 > 本節的 item 編號（尤其是 item 2/3/6/8）已被多處 in-code `@see uiux_refactor.md §4 item ...` 引用；請勿改號。
 > 本檔只保留「當前狀態 + 待修復 / 待落地」的最小資訊；詳細落地記錄請放/參照 `doc/archive/*`。
 
-**狀態（2026-01-11）**
+**狀態（2026-01-14）**
 
 - Open drift items：目前無（若新增 drift，請先補 `Evidence`：rg output + file paths，再拆 PR）
 
@@ -295,8 +295,9 @@ app/[locale]/admin/<module>/
 8. **[ARCHIVED ✅] Supabase AI：Search Analytics（日誌表 + 低品質查詢追蹤）** → `doc/specs/completed/embeddings-semantic-search-spec.md`
 9. **[ARCHIVED ✅] Data Preprocessing：動態配置（DB SSOT + Config Editor）** → `doc/specs/completed/data-preprocessing-pipeline-spec.md`
 10. **[ARCHIVED ✅] Admin i18n Toggle：inline branching / legacy translations island** → `doc/meta/STEP_PLAN.md`
- 
- ### 4.1 Admin routes must use `actions.ts`（ARCHIVED; keep for stable `@see`）
+11. **[ARCHIVED ✅] Architecture：`lib/modules/*` 模組隔離 drift（移除跨模組 import + 新增 guardrail test）** → `ARCHITECTURE.md`, `tests/architecture-boundaries.test.ts`, `lib/use-cases/**`, `lib/auth/index.ts`, `lib/embeddings/index.ts`
+  
+  ### 4.1 Admin routes must use `actions.ts`（ARCHIVED; keep for stable `@see`）
 
 - Guardrail enforced by `tests/architecture-boundaries.test.ts`；修復流程請看本檔 §3.6。
 

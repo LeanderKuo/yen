@@ -1,5 +1,6 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './lib/i18n/routing';
+import { isValidLocale } from './lib/i18n/locales';
 import { updateSession } from './lib/infrastructure/supabase/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -30,12 +31,21 @@ export async function middleware(request: NextRequest) {
     callbackUrl.pathname = '/auth/callback';
     return NextResponse.redirect(callbackUrl);
   }
+
+  // If the path looks like a locale-prefixed route but the locale is unsupported,
+  // skip next-intl redirects and let it 404.
+  const firstSegment = pathname.split('/')[1] ?? '';
+  const localeCandidate = firstSegment.toLowerCase();
+  const looksLikeLocalePrefix = /^[a-z]{2}$/.test(localeCandidate);
+  if (looksLikeLocalePrefix && !isValidLocale(localeCandidate)) {
+    return await updateSession(request);
+  }
   
   // Skip i18n middleware for auth and api routes (including locale-prefixed auth routes)
   if (
     pathname.startsWith('/auth') || 
     pathname.startsWith('/api') ||
-    pathname.match(/^\/(zh|en)\/auth/)
+    pathname.match(/^\/zh\/auth/)
   ) {
     return await updateSession(request);
   }
@@ -58,5 +68,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(zh|en)/:path*', '/((?!_next|_vercel|api|.*\\..*).*)'],
+  matcher: ['/', '/zh/:path*', '/((?!_next|_vercel|api|.*\\..*).*)'],
 };

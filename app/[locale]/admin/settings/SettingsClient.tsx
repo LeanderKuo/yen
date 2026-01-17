@@ -27,10 +27,10 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
     setSaving(null);
     
     if (result.success) {
-      setMessage({ type: 'success', text: locale === 'zh' ? '已儲存' : 'Saved' });
+      setMessage({ type: 'success', text: '已儲存' });
       router.refresh();
     } else {
-      setMessage({ type: 'error', text: locale === 'zh' ? '儲存失敗' : 'Save failed' });
+      setMessage({ type: 'error', text: '儲存失敗' });
     }
   };
 
@@ -45,35 +45,31 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
     if (result.success) {
       setMessage({
         type: 'success',
-        text: locale === 'zh'
-          ? `快取已清除 (版本: ${result.newVersion})`
-          : `Cache purged successfully (version: ${result.newVersion})`
+        text: `快取已清除 (版本: ${result.newVersion})`
       });
       router.refresh();
     } else {
       setMessage({
         type: 'error',
-        text: locale === 'zh' ? '清除快取失敗' : 'Failed to purge cache'
+        text: '清除快取失敗'
       });
     }
   };
 
   const t = {
-    title: locale === 'zh' ? '公司設定' : 'Company Settings',
-    description: locale === 'zh' ? '管理公司基本資訊和聯絡方式' : 'Manage company information and contact details',
-    noSettings: locale === 'zh' ? '尚無設定' : 'No settings found',
-    save: locale === 'zh' ? '儲存' : 'Save',
-    system: locale === 'zh' ? '系統' : 'System',
-    purgeCache: locale === 'zh' ? '清除所有快取' : 'Purge All Cache',
-    purgeCacheDesc: locale === 'zh' 
-      ? '清除所有已快取的內容，強制重新載入所有資料。' 
-      : 'Clear all cached content and force reload of all data.',
+    title: '公司設定',
+    description: '管理公司基本資訊和聯絡方式',
+    noSettings: '尚無設定',
+    save: '儲存',
+    system: '系統',
+    purgeCache: '清除所有快取',
+    purgeCacheDesc: '清除所有已快取的內容，強制重新載入所有資料。',
   };
 
-  const categoryLabels: Record<string, { en: string; zh: string }> = {
-    general: { en: 'General', zh: '一般設定' },
-    contact: { en: 'Contact', zh: '聯絡資訊' },
-    social: { en: 'Social Links', zh: '社群連結' },
+  const categoryLabels: Record<string, string> = {
+    general: '一般設定',
+    contact: '聯絡資訊',
+    social: '社群連結',
   };
 
   // Group settings by category
@@ -113,13 +109,13 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedSettings).map(([category, categorySettings]) => {
-            const label = categoryLabels[category] || { en: category, zh: category };
+            const label = categoryLabels[category] || category;
 
             return (
               <div key={category} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {locale === 'zh' ? label.zh : label.en}
+                    {label}
                   </h2>
                 </div>
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -127,7 +123,6 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
                     <SettingRow
                       key={setting.key}
                       setting={setting}
-                      locale={locale}
                       saving={saving === setting.key}
                       onSave={(value) => handleSave(setting, value)}
                       t={t}
@@ -163,7 +158,7 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {purging 
-                ? (locale === 'zh' ? '清除中...' : 'Purging...') 
+                ? '清除中...'
                 : t.purgeCache}
             </button>
           </div>
@@ -175,13 +170,11 @@ export default function SettingsClient({ initialSettings, locale }: SettingsClie
 
 function SettingRow({
   setting,
-  locale,
   saving,
   onSave,
   t,
 }: {
   setting: CompanySetting;
-  locale: string;
   saving: boolean;
   onSave: (value: string) => void;
   t: Record<string, string>;
@@ -240,7 +233,7 @@ function SettingRow({
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <label className="block text-sm font-medium text-gray-900 dark:text-white">
-            {locale === 'zh' ? setting.label_zh || setting.key : setting.label_en || setting.key}
+            {setting.label_zh || setting.key}
           </label>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{setting.key}</p>
         </div>
@@ -280,7 +273,7 @@ function SettingRow({
                 onClick={() => setEditing(true)}
                 className="px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-lg"
               >
-                {locale === 'zh' ? '編輯' : 'Edit'}
+                編輯
               </button>
             </>
           )}

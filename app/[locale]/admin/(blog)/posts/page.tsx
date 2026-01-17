@@ -11,11 +11,9 @@
  */
 
 import { getAllPosts, getCategories } from '@/lib/modules/blog/admin-io';
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getTranslations, getMessages } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 import Link from 'next/link';
-import { format } from 'date-fns';
 import DeletePostButton from './components/DeletePostButton';
 import AdminPostsFilter from '@/components/admin/posts/AdminPostsFilter';
 
@@ -29,14 +27,11 @@ export default async function PostsPage({
   const { locale: routeLocale } = await params;
   const { search, category: categoryId, sort } = await searchParams;
   
-  // Get admin UI locale
-  const adminLocale = await getAdminLocale();
-  
   // Get translations for admin blog namespace
-  const t = await getTranslations({ locale: adminLocale, namespace: 'admin.blog' });
+  const t = await getTranslations({ locale: routeLocale, namespace: 'admin.blog' });
   
   // Get messages for client component
-  const allMessages = await getMessages({ locale: adminLocale });
+  const allMessages = await getMessages({ locale: routeLocale });
   const adminMessages = { admin: allMessages.admin } as AbstractIntlMessages;
   
   const [posts, categories] = await Promise.all([
@@ -107,13 +102,8 @@ export default async function PostsPage({
                 <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                   <td className="px-6 py-4">
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {post.title_en || post.title_zh || t('noTitle')}
+                      {post.title_zh || t('noTitle')}
                     </p>
-                    {post.title_en && post.title_zh && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {post.title_zh}
-                      </p>
-                    )}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-block px-2.5 py-1 text-xs font-medium rounded-full ${
@@ -126,11 +116,15 @@ export default async function PostsPage({
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {post.category 
-                      ? post.category.name_en
+                      ? post.category.name_zh
                       : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {format(new Date(post.created_at), 'MMM d, yyyy')}
+                    {new Date(post.created_at).toLocaleDateString('zh-TW', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">

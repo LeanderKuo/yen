@@ -17,12 +17,11 @@ interface SaveResult {
 }
 
 /**
- * Save site content (update content_en/content_zh)
+ * Save site content (single-language zh; mirror to content_en for legacy)
  */
 export async function saveSiteContent(
   sectionKey: string,
-  contentEn: Record<string, unknown>,
-  contentZh: Record<string, unknown>,
+  content: Record<string, unknown>,
   locale: string
 ): Promise<SaveResult> {
   try {
@@ -30,13 +29,14 @@ export async function saveSiteContent(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Unauthorized' };
+      return { success: false, error: '尚未登入' };
     }
     
-    const result = await updateSiteContent(sectionKey, contentEn, contentZh, user.id);
+    // DB schema still has content_en/content_zh; keep them identical for single-language site.
+    const result = await updateSiteContent(sectionKey, content, content, user.id);
     
     if (!result) {
-      return { success: false, error: 'Failed to save content' };
+      return { success: false, error: '儲存內容失敗' };
     }
     
     // Invalidate cached site content (Header/Footer/Home rely on unstable_cache tags)
@@ -56,7 +56,7 @@ export async function saveSiteContent(
     return { success: true };
   } catch (error) {
     console.error('Error saving site content:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -72,13 +72,13 @@ export async function publishSiteContent(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Unauthorized' };
+      return { success: false, error: '尚未登入' };
     }
     
     const result = await togglePublishSiteContent(sectionKey, true, user.id);
     
     if (!result) {
-      return { success: false, error: 'Failed to publish content' };
+      return { success: false, error: '發布失敗' };
     }
     
     // Invalidate cached site content (Header/Footer/Home rely on unstable_cache tags)
@@ -98,7 +98,7 @@ export async function publishSiteContent(
     return { success: true };
   } catch (error) {
     console.error('Error publishing site content:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -114,13 +114,13 @@ export async function unpublishSiteContent(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Unauthorized' };
+      return { success: false, error: '尚未登入' };
     }
     
     const result = await togglePublishSiteContent(sectionKey, false, user.id);
     
     if (!result) {
-      return { success: false, error: 'Failed to unpublish content' };
+      return { success: false, error: '取消發布失敗' };
     }
     
     // Invalidate cached site content (Header/Footer/Home rely on unstable_cache tags)
@@ -140,6 +140,6 @@ export async function unpublishSiteContent(
     return { success: true };
   } catch (error) {
     console.error('Error unpublishing site content:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }

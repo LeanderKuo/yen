@@ -30,10 +30,10 @@ export default function ServicesSection({ services, locale, title }: ServicesSec
                  <div className="w-6 h-6 bg-primary/20 rounded-full group-hover:bg-primary transition-colors"></div>
               </div>
               <h3 className="text-xl font-bold text-foreground mb-4">
-                {locale === 'zh' ? service.title_zh : service.title_en}
+                {service.title_zh}
               </h3>
               <p className="text-secondary leading-relaxed">
-                {locale === 'zh' ? service.description_zh : service.description_en}
+                {service.description_zh}
               </p>
             </div>
           ))}

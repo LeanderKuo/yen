@@ -5,14 +5,10 @@ import Link from 'next/link';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
 import type { AbstractIntlMessages } from 'next-intl';
 import AdminSignOutButton from '@/components/admin/common/AdminSignOutButton';
-import { useAdminLocale } from '@/hooks/useAdminLocale';
-import type { Locale } from '@/lib/i18n/locales';
 
 interface AdminSidebarProps {
-  /** Route locale from URL path — used for hrefs */
-  routeLocale: string;
-  /** Admin UI locale from preference — used for labels */
-  adminLocale: Locale;
+  /** Route locale from URL path — used for hrefs and UI */
+  locale: string;
   userEmail: string;
   /** Scoped messages for admin namespace */
   messages: AbstractIntlMessages;
@@ -38,16 +34,14 @@ type NavEntry = NavItem | NavDivider;
  * Must be wrapped by NextIntlClientProvider.
  */
 function AdminSidebarContent({
-  routeLocale,
-  initialAdminLocale,
+  locale,
   userEmail,
 }: {
-  routeLocale: string;
-  initialAdminLocale: Locale;
+  locale: string;
   userEmail: string;
 }) {
   const pathname = usePathname();
-  const { adminLocale, toggleLocale } = useAdminLocale(initialAdminLocale);
+  const routeLocale = locale;
   const tSidebar = useTranslations('admin.sidebar');
   const tCommon = useTranslations('admin.common');
   const tButtons = useTranslations('admin.buttons');
@@ -395,24 +389,7 @@ function AdminSidebarContent({
           </p>
           <p className="text-sm text-gray-300 truncate">{userEmail}</p>
         </div>
-        <AdminSignOutButton locale={routeLocale} messages={{ buttons: tButtons.raw('signOut') }} />
-
-        {/* Language Toggle - URL 不變，只改 UI locale */}
-        <button
-          type="button"
-          onClick={toggleLocale}
-          className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-150"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
-            />
-          </svg>
-          {adminLocale === 'zh' ? tButtons('switchToEn') : tButtons('switchToZh')}
-        </button>
+        <AdminSignOutButton locale={routeLocale} messages={{ buttons: tButtons('signOut') }} />
 
         {/* Back to Site */}
         <Link
@@ -440,20 +417,17 @@ function AdminSidebarContent({
  * Sub-pages are handled by module-specific tabs in layouts.
  *
  * Key concept:
- * - routeLocale: determines hrefs (URL path)
- * - adminLocale: determines UI text labels (via i18n)
+ * - locale: determines hrefs (URL path) and UI language
  */
 export default function AdminSidebar({
-  routeLocale,
-  adminLocale: initialAdminLocale,
+  locale,
   userEmail,
   messages,
 }: AdminSidebarProps) {
   return (
-    <NextIntlClientProvider messages={messages} locale={initialAdminLocale}>
+    <NextIntlClientProvider messages={messages} locale={locale}>
       <AdminSidebarContent
-        routeLocale={routeLocale}
-        initialAdminLocale={initialAdminLocale}
+        locale={locale}
         userEmail={userEmail}
       />
     </NextIntlClientProvider>

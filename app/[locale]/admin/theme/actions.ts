@@ -34,35 +34,34 @@ export async function updateGlobalThemeAction(
     const supabase = await createClient();
     const ownerCheck = await isOwner(supabase);
     if (!ownerCheck) {
-      return { success: false, error: 'Owner required' };
+      return { success: false, error: '需要擁有者權限' };
     }
 
     // 2. Validate input
     if (!isValidThemeKey(theme)) {
-      return { success: false, error: 'Invalid theme key' };
+      return { success: false, error: '主題 key 無效' };
     }
 
     // 3. Get user ID for audit
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
 
     // 4. Update site config
     const result = await updateSiteConfig({ global_theme: theme }, user.id);
     if (!result.success) {
-      return { success: false, error: result.error || 'Update failed' };
+      return { success: false, error: result.error || '更新失敗' };
     }
 
     // 5. Invalidate cache
     revalidateTag('site-config', { expire: 0 });
-    revalidatePath('/en', 'layout');
     revalidatePath('/zh', 'layout');
 
     return { success: true };
   } catch (error) {
     console.error('[updateGlobalThemeAction] Error:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -78,46 +77,43 @@ export async function updatePageThemesAction(
     const supabase = await createClient();
     const ownerCheck = await isOwner(supabase);
     if (!ownerCheck) {
-      return { success: false, error: 'Owner required' };
+      return { success: false, error: '需要擁有者權限' };
     }
 
     // 2. Validate input - check all theme keys are valid
     for (const [scope, theme] of Object.entries(pageThemes)) {
       if (!THEME_SCOPE_KEYS.includes(scope as ThemeScopeKey)) {
-        return { success: false, error: `Invalid scope: ${scope}` };
+        return { success: false, error: `範圍無效：${scope}` };
       }
       if (theme && !isValidThemeKey(theme)) {
-        return { success: false, error: `Invalid theme key for ${scope}: ${theme}` };
+        return { success: false, error: `主題 key 無效（${scope}）：${theme}` };
       }
     }
 
     // 3. Get user ID for audit
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
 
     // 4. Update site config
     const result = await updateSiteConfig({ page_themes: pageThemes }, user.id);
     if (!result.success) {
-      return { success: false, error: result.error || 'Update failed' };
+      return { success: false, error: result.error || '更新失敗' };
     }
 
     // 5. Invalidate cache
     revalidateTag('site-config', { expire: 0 });
-    revalidatePath('/en', 'layout');
     revalidatePath('/zh', 'layout');
     // Also invalidate specific page layouts
-    revalidatePath('/en/blog', 'layout');
     revalidatePath('/zh/blog', 'layout');
-    revalidatePath('/en/gallery', 'layout');
     revalidatePath('/zh/gallery', 'layout');
 
 
     return { success: true };
   } catch (error) {
     console.error('[updatePageThemesAction] Error:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -137,23 +133,23 @@ export async function updateThemeFontAction(
     const supabase = await createClient();
     const ownerCheck = await isOwner(supabase);
     if (!ownerCheck) {
-      return { success: false, error: 'Owner required' };
+      return { success: false, error: '需要擁有者權限' };
     }
 
     // 2. Validate input (null is valid for reset)
     if (fontKey !== null && !isValidThemeFontKey(fontKey)) {
-      return { success: false, error: 'Invalid font key' };
+      return { success: false, error: '字體 key 無效' };
     }
 
     // 3. Validate theme key
     if (!isValidThemeKey(themeKey)) {
-      return { success: false, error: 'Invalid theme key' };
+      return { success: false, error: '主題 key 無效' };
     }
 
     // 4. Get user ID for audit
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
 
     // 5. Update site config using theme_overrides (Theme v2)
@@ -163,18 +159,17 @@ export async function updateThemeFontAction(
       user.id
     );
     if (!result.success) {
-      return { success: false, error: result.error || 'Update failed' };
+      return { success: false, error: result.error || '更新失敗' };
     }
 
     // 6. Invalidate cache
     revalidateTag('site-config', { expire: 0 });
-    revalidatePath('/en', 'layout');
     revalidatePath('/zh', 'layout');
 
     return { success: true };
   } catch (error) {
     console.error('[updateThemeFontAction] Error:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -194,12 +189,12 @@ export async function updateThemeOverridesAction(
     const supabase = await createClient();
     const ownerCheck = await isOwner(supabase);
     if (!ownerCheck) {
-      return { success: false, error: 'Owner required' };
+      return { success: false, error: '需要擁有者權限' };
     }
 
     // 2. Validate theme key
     if (!isValidThemeKey(themeKey)) {
-      return { success: false, error: 'Invalid theme key' };
+      return { success: false, error: '主題 key 無效' };
     }
 
     // 3. Validate override keys (whitelist check)
@@ -208,16 +203,16 @@ export async function updateThemeOverridesAction(
     
     for (const [key, value] of Object.entries(overrides)) {
       if (!isCustomizableCssVar(key)) {
-        return { success: false, error: `Invalid CSS variable key: ${key}` };
+        return { success: false, error: `CSS 變數 key 無效：${key}` };
       }
       
       // Validate value format based on key type
       if (value !== null) {
         if (key.includes('radius') && !isValidCssLength(value)) {
-          return { success: false, error: `Invalid length value for ${key}: ${value}` };
+          return { success: false, error: `長度值無效（${key}）：${value}` };
         }
         if (key.includes('shadow') && !isValidShadowValue(value)) {
-          return { success: false, error: `Invalid shadow value for ${key}: ${value}` };
+          return { success: false, error: `陰影值無效（${key}）：${value}` };
         }
         // Note: color validation is relaxed to allow hex and rgb values
         // Font validation is relaxed to allow any font-family string
@@ -227,7 +222,7 @@ export async function updateThemeOverridesAction(
     // 4. Get user ID for audit
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
 
     // 5. Update site config
@@ -236,22 +231,19 @@ export async function updateThemeOverridesAction(
       user.id
     );
     if (!result.success) {
-      return { success: false, error: result.error || 'Update failed' };
+      return { success: false, error: result.error || '更新失敗' };
     }
 
     // 6. Invalidate cache
     revalidateTag('site-config', { expire: 0 });
-    revalidatePath('/en', 'layout');
     revalidatePath('/zh', 'layout');
-    revalidatePath('/en/blog', 'layout');
     revalidatePath('/zh/blog', 'layout');
-    revalidatePath('/en/gallery', 'layout');
     revalidatePath('/zh/gallery', 'layout');
 
 
     return { success: true };
   } catch (error) {
     console.error('[updateThemeOverridesAction] Error:', error);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }

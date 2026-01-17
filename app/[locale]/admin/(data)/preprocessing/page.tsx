@@ -9,6 +9,7 @@
  */
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from 'next-intl/server';
 
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { isOwner } from "@/lib/modules/auth";
@@ -17,10 +18,6 @@ import {
   getQualityMetrics,
   getAllConfigs,
 } from "@/lib/modules/preprocessing/io";
-import {
-  getAdminLocale,
-  getAdminMessages,
-} from "@/lib/i18n/admin-locale.server";
 
 import { PreprocessingClient } from "./PreprocessingClient";
 
@@ -29,13 +26,13 @@ interface Props {
 }
 
 export default async function PreprocessingPage({ params }: Props) {
-  await params;
+  const { locale: routeLocale } = await params;
   const supabase = await createClient();
 
   // Owner-only gate
   const owner = await isOwner(supabase);
   if (!owner) {
-    redirect("/");
+    redirect(`/${routeLocale}`);
   }
 
   // Fetch initial data
@@ -45,8 +42,7 @@ export default async function PreprocessingPage({ params }: Props) {
     getAllConfigs(),
   ]);
 
-  const adminLocale = await getAdminLocale();
-  const messages = await getAdminMessages(adminLocale);
+  const messages = await getMessages({ locale: routeLocale });
 
   const initialData = {
     queue: monitoringStats.queue,
@@ -57,7 +53,7 @@ export default async function PreprocessingPage({ params }: Props) {
   };
 
   return (
-    <NextIntlClientProvider locale={adminLocale} messages={messages}>
+    <NextIntlClientProvider locale={routeLocale} messages={messages}>
       <PreprocessingClient initialData={initialData} />
     </NextIntlClientProvider>
   );

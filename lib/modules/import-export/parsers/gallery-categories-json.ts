@@ -37,8 +37,9 @@ export function validateGalleryCategoryFields(
   const missing: string[] = [];
 
   if (!isNonEmptyString(data.slug)) missing.push('slug');
-  if (!isNonEmptyString(data.name_en)) missing.push('name_en');
-  if (!isNonEmptyString(data.name_zh)) missing.push('name_zh');
+
+  const nameCandidate = data.name_zh ?? data.name_en;
+  if (!isNonEmptyString(nameCandidate)) missing.push('name');
 
   return missing;
 }
@@ -56,10 +57,12 @@ export function validateGalleryCategoryFields(
 export function transformToImportData(
   data: GalleryCategoryExportData
 ): GalleryCategoryImportData {
+  const name = (data.name_zh ?? data.name_en ?? '').trim();
   return {
     slug: data.slug,
-    name_en: data.name_en,
-    name_zh: data.name_zh,
+    // Single-language: mirror into legacy en/zh fields
+    name_en: name,
+    name_zh: name,
     sort_order: typeof data.sort_order === 'number' ? data.sort_order : 0,
     is_visible: typeof data.is_visible === 'boolean' ? data.is_visible : true,
   };

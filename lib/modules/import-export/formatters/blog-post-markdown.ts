@@ -14,7 +14,7 @@ import type { BlogPostFrontmatter } from '@/lib/types/import-export';
 // Constants
 // =============================================================================
 
-/** Language content separator markers */
+/** Legacy language content separator markers (backward compatibility for old exports) */
 export const LANG_MARKER_EN = '<!-- lang: en -->';
 export const LANG_MARKER_ZH = '<!-- lang: zh -->';
 
@@ -109,7 +109,7 @@ export function escapeYamlString(value: string): string {
 /**
  * Format a blog post to Markdown string.
  * @param post - The blog post to format
- * @returns Markdown string with YAML frontmatter and bilingual content
+ * @returns Markdown string with YAML frontmatter and single-language content
  */
 export function formatBlogPostToMarkdown(post: Post): string {
   const frontmatter = extractFrontmatter(post);
@@ -123,18 +123,8 @@ export function formatBlogPostToMarkdown(post: Post): string {
   parts.push('---');
   parts.push('');
 
-  // English content (required)
-  parts.push(LANG_MARKER_EN);
-  parts.push('');
-  parts.push(post.content_en);
-
-  // Chinese content (optional)
-  if (post.content_zh) {
-    parts.push('');
-    parts.push(LANG_MARKER_ZH);
-    parts.push('');
-    parts.push(post.content_zh);
-  }
+  // Single-language content (prefer zh, fallback to en)
+  parts.push(post.content_zh ?? post.content_en);
 
   return parts.join('\n');
 }

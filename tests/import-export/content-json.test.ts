@@ -135,8 +135,7 @@ describe('Site Content JSON Parser', () => {
     it('returns missing fields', () => {
       const data = { section_key: 'about' };
       const missing = validateSiteContentFields(data);
-      assert.ok(missing.includes('content_en'));
-      assert.ok(missing.includes('content_zh'));
+      assert.ok(missing.includes('content'));
     });
   });
 

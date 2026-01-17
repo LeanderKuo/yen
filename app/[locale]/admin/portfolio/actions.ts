@@ -48,7 +48,7 @@ export async function savePortfolioAction(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
     
     let result;
@@ -61,7 +61,7 @@ export async function savePortfolioAction(
     }
     
     if (!result) {
-      return { success: false, error: 'Save failed' };
+      return { success: false, error: '儲存失敗' };
     }
     
     // Revalidate all portfolio caches
@@ -70,7 +70,7 @@ export async function savePortfolioAction(
     return { success: true };
   } catch (err) {
     console.error('Save portfolio action error:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -86,13 +86,13 @@ export async function deletePortfolioAction(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
     
     const result = await deletePortfolioItem(id, user.id);
     
     if (!result) {
-      return { success: false, error: 'Delete failed' };
+      return { success: false, error: '刪除失敗' };
     }
     
     // Revalidate all portfolio caches
@@ -101,7 +101,7 @@ export async function deletePortfolioAction(
     return { success: true };
   } catch (err) {
     console.error('Delete portfolio action error:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -118,13 +118,13 @@ export async function toggleVisibilityAction(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
     
     const result = await updatePortfolioItem(id, { is_visible: visible }, user.id);
     
     if (!result) {
-      return { success: false, error: 'Update failed' };
+      return { success: false, error: '更新失敗' };
     }
     
     // Revalidate all portfolio caches
@@ -133,6 +133,6 @@ export async function toggleVisibilityAction(
     return { success: true };
   } catch (err) {
     console.error('Toggle visibility action error:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }

@@ -15,13 +15,13 @@ import { createClient } from '@/lib/infrastructure/supabase/server';
 import { 
   getCommentsForTarget, 
   getCommentCountForTarget, 
-  createComment, 
   deleteComment, 
   updateComment,
   buildPermalink,
   commentToPublicSafe,
   getOwnedCommentIds,
 } from '@/lib/modules/comment/io';
+import { createCommentWithSafety } from '@/lib/use-cases/comments/create-comment';
 import { getAnonLikedItemIds } from '@/lib/reactions/io';
 import { collectAllCommentIds, attachLikedByMe } from '@/lib/modules/comment/tree';
 import { ANON_ID_COOKIE_NAME, isValidAnonId } from '@/lib/utils/anon-id';
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     const avatarUrl = isAnonymous ? null : (userMetadata.avatar_url || userMetadata.picture);
 
     // Create comment
-    const result = await createComment({
+    const result = await createCommentWithSafety({
       targetType,
       targetId,
       userId: user.id,

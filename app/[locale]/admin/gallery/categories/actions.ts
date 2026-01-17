@@ -25,7 +25,6 @@ export type { CategoryWithCount };
  * Category payload for create/update operations
  */
 export interface CategoryPayload {
-  name_en: string;
   name_zh: string;
   slug: string;
   sort_order: number;
@@ -50,9 +49,11 @@ function revalidateGalleryCache(locale: string) {
 }
 
 function toDbPayload(payload: CategoryPayload): GalleryCategoryDbPayload {
+  const nameZh = payload.name_zh.trim();
   return {
-    name_en: payload.name_en.trim(),
-    name_zh: payload.name_zh.trim(),
+    // Single-language site: mirror zh to legacy en column
+    name_en: nameZh,
+    name_zh: nameZh,
     slug: payload.slug.trim(),
     sort_order: payload.sort_order,
     is_visible: payload.is_visible,
@@ -107,7 +108,7 @@ export async function deleteGalleryCategory(
   if (hasItems) {
     return {
       success: false,
-      error: 'Cannot delete category because it contains items. Please move or delete the items first.',
+      error: '此分類仍包含作品，請先移動或刪除作品後再刪除分類。',
     };
   }
 

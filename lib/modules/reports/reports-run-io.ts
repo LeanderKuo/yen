@@ -29,17 +29,11 @@ import type { ReportType } from '@/lib/types/reports';
 export async function checkLinks(siteUrl: string): Promise<Record<string, unknown>> {
   const pagesToCheck = [
     '',
-    '/en',
     '/zh',
-    '/en/blog',
     '/zh/blog',
-    '/en/about',
     '/zh/about',
-    '/en/services',
     '/zh/services',
-    '/en/contact',
     '/zh/contact',
-    '/en/privacy',
     '/zh/privacy',
   ];
 
@@ -94,7 +88,6 @@ export async function checkLinks(siteUrl: string): Promise<Record<string, unknow
  */
 export async function checkSchema(siteUrl: string): Promise<Record<string, unknown>> {
   const pagesToCheck = [
-    { path: '/en', name: 'Homepage (EN)' },
     { path: '/zh', name: 'Homepage (ZH)' },
   ];
 

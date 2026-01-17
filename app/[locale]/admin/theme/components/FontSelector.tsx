@@ -7,8 +7,7 @@
  */
 
 import { THEME_FONT_KEYS } from '@/lib/types/theme';
-import { THEME_FONT_PRESETS } from '@/lib/modules/theme/fonts';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import {
   FONT_SELECTION_PRESET,
   FONT_SELECTION_CUSTOM,
@@ -29,7 +28,6 @@ export default function FontSelector({
   onSelectionChange,
 }: FontSelectorProps) {
   const t = useTranslations('admin');
-  const locale = useLocale();
   const isCustom = selection === FONT_SELECTION_CUSTOM;
 
   return (

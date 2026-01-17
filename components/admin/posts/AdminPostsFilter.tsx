@@ -102,7 +102,7 @@ function AdminPostsFilterContent({ routeLocale, categories }: AdminPostsFilterPr
         <option value="">{t('allCategories')}</option>
         {categories.map((cat) => (
           <option key={cat.id} value={cat.id}>
-            {cat.name_en}
+            {cat.name_zh || cat.name_en}
           </option>
         ))}
       </select>

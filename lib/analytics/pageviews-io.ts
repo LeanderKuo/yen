@@ -22,7 +22,7 @@ import type { PageViewLocale } from '@/lib/types/page-views';
  * Uses UTC date to avoid timezone drift.
  *
  * @param path - Canonical path (without locale prefix)
- * @param locale - Page locale ('en' | 'zh')
+ * @param locale - Page locale ('zh')
  * @throws Error if RPC call fails
  */
 export async function recordPageView(

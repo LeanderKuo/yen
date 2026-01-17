@@ -36,7 +36,6 @@ import type { CategoryWithCount } from '@/lib/types/blog';
 // ============================================================================
 
 export interface CreateCategoryInput {
-  name_en: string;
   name_zh: string;
   slug: string;
 }
@@ -79,7 +78,7 @@ export async function createCategoryAction(
     }
 
     // Validate input
-    if (!input.name_en?.trim() || !input.name_zh?.trim() || !input.slug?.trim()) {
+    if (!input.name_zh?.trim() || !input.slug?.trim()) {
       return actionError(ADMIN_ERROR_CODES.VALIDATION_ERROR);
     }
 
@@ -89,7 +88,8 @@ export async function createCategoryAction(
     }
 
     const category = await createCategory({
-      name_en: input.name_en.trim(),
+      // DB schema still has name_en; mirror zh value to keep single-language editing.
+      name_en: input.name_zh.trim(),
       name_zh: input.name_zh.trim(),
       slug: input.slug.trim(),
     });

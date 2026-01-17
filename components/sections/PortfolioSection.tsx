@@ -11,7 +11,7 @@ interface PortfolioSectionProps {
   };
 }
 
-export default function PortfolioSection({ portfolioItems, locale, labels }: PortfolioSectionProps) {
+export default function PortfolioSection({ portfolioItems, locale: _locale, labels }: PortfolioSectionProps) {
   return (
     <section id="portfolio" className="py-24 md:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,18 +36,18 @@ export default function PortfolioSection({ portfolioItems, locale, labels }: Por
                 <div className="p-8 md:p-10">
                    <div className="flex items-start justify-between mb-6">
                       <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-                        {locale === 'zh' ? item.title_zh : item.title_en}
+                        {item.title_zh}
                       </h3>
                       {item.status !== 'live' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface text-secondary border border-border">
-                             {labels.inDevelopment}
-                          </span>
-                      )}
-                   </div>
-                   
-                   <p className="text-secondary text-lg mb-8 line-clamp-3">
-                      {locale === 'zh' ? item.description_zh : item.description_en}
-                   </p>
+                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface text-secondary border border-border">
+                              {labels.inDevelopment}
+                           </span>
+                       )}
+                    </div>
+                    
+                    <p className="text-secondary text-lg mb-8 line-clamp-3">
+                      {item.description_zh}
+                    </p>
 
                   {item.url && (
                      <div className="pt-4 mt-auto">

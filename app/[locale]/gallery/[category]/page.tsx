@@ -50,13 +50,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
   
-  const title = locale === 'zh' ? category.name_zh : category.name_en;
-  const description = locale === 'zh' 
-    ? `瀏覽 ${category.name_zh} 分類的作品`
-    : `Browse artworks in ${category.name_en} category`;
+  const title = category.name_zh;
+  const description = `瀏覽「${category.name_zh}」分類的作品`;
   
   return {
-    title: `${title} | ${locale === 'zh' ? '畫廊' : 'Gallery'}`,
+    title: `${title}｜畫廊`,
     description,
     alternates: getMetadataAlternates(`/gallery/${categorySlug}`, locale),
     openGraph: {
@@ -130,7 +128,7 @@ export default async function GalleryCategoryPage({ params, searchParams }: Page
     };
   });
   
-  const title = locale === 'zh' ? category.name_zh : category.name_en;
+  const title = category.name_zh;
   
   return (
     <div className="min-h-screen">
@@ -139,7 +137,7 @@ export default async function GalleryCategoryPage({ params, searchParams }: Page
         {/* Breadcrumb */}
         <nav className="mb-4 text-sm text-secondary">
           <a href={`/${locale}/gallery`} className="hover:text-primary transition-colors">
-            {locale === 'zh' ? '畫廊' : 'Gallery'}
+            畫廊
           </a>
           <span className="mx-2">/</span>
           <span className="text-foreground">{title}</span>

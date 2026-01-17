@@ -26,10 +26,7 @@ export default function ContentEditorClient({
   sectionKey,
 }: ContentEditorClientProps) {
   const router = useRouter();
-  const [contentEn, setContentEn] = useState<string>(
-    initialContent ? JSON.stringify(initialContent.content_en, null, 2) : '{}'
-  );
-  const [contentZh, setContentZh] = useState<string>(
+  const [contentJson, setContentJson] = useState<string>(
     initialContent ? JSON.stringify(initialContent.content_zh, null, 2) : '{}'
   );
   const [saving, setSaving] = useState(false);
@@ -43,10 +40,9 @@ export default function ContentEditorClient({
     setMessage(null);
 
     try {
-      const parsedEn = JSON.parse(contentEn);
-      const parsedZh = JSON.parse(contentZh);
+      const parsed = JSON.parse(contentJson);
 
-      const result = await saveSiteContent(sectionKey, parsedEn, parsedZh, locale);
+      const result = await saveSiteContent(sectionKey, parsed, locale);
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to save');
@@ -54,7 +50,7 @@ export default function ContentEditorClient({
 
       setMessage({
         type: 'success',
-        text: locale === 'zh' ? '已儲存' : 'Saved',
+        text: '已儲存',
       });
 
       router.refresh();
@@ -62,7 +58,7 @@ export default function ContentEditorClient({
       console.error('Save error:', err);
       setMessage({
         type: 'error',
-        text: locale === 'zh' ? '儲存失敗，請檢查 JSON 格式' : 'Save failed. Please check JSON format.',
+        text: '儲存失敗，請檢查 JSON 格式',
       });
     }
 
@@ -82,7 +78,7 @@ export default function ContentEditorClient({
 
       setMessage({
         type: 'success',
-        text: locale === 'zh' ? '已發布' : 'Published',
+        text: '已發布',
       });
 
       router.refresh();
@@ -90,7 +86,7 @@ export default function ContentEditorClient({
       console.error('Publish error:', err);
       setMessage({
         type: 'error',
-        text: locale === 'zh' ? '發布失敗' : 'Publish failed.',
+        text: '發布失敗',
       });
     }
 
@@ -110,7 +106,7 @@ export default function ContentEditorClient({
 
       setMessage({
         type: 'success',
-        text: locale === 'zh' ? '已取消發布' : 'Unpublished',
+        text: '已取消發布',
       });
 
       router.refresh();
@@ -118,7 +114,7 @@ export default function ContentEditorClient({
       console.error('Unpublish error:', err);
       setMessage({
         type: 'error',
-        text: locale === 'zh' ? '取消發布失敗' : 'Unpublish failed.',
+        text: '取消發布失敗',
       });
     }
 
@@ -127,7 +123,7 @@ export default function ContentEditorClient({
 
   const handleRestore = (historyItem: ContentHistory) => {
     if (!historyItem.old_value) {
-      setMessage({ type: 'error', text: 'No previous value to restore' });
+      setMessage({ type: 'error', text: '沒有可還原的歷史內容' });
       return;
     }
 
@@ -135,50 +131,50 @@ export default function ContentEditorClient({
       content_en?: Record<string, unknown>;
       content_zh?: Record<string, unknown>;
     };
-    if (value.content_en) {
-      setContentEn(JSON.stringify(value.content_en, null, 2));
-    }
-    if (value.content_zh) {
-      setContentZh(JSON.stringify(value.content_zh, null, 2));
-    }
+    const next = value.content_zh ?? value.content_en;
+    if (next) setContentJson(JSON.stringify(next, null, 2));
 
     setMessage({
       type: 'success',
-      text:
-        locale === 'zh'
-          ? '已載入歷史版本，請點擊儲存以套用'
-          : 'Loaded historical version. Click Save to apply.',
+      text: '已載入歷史版本，請點擊儲存以套用',
     });
     setShowHistory(false);
   };
 
   const t = {
-    title: locale === 'zh' ? '編輯內容' : 'Edit Content',
-    back: locale === 'zh' ? '返回' : 'Back',
-    english: locale === 'zh' ? '英文內容' : 'English Content',
-    chinese: locale === 'zh' ? '中文內容' : 'Chinese Content',
-    save: locale === 'zh' ? '儲存草稿' : 'Save Draft',
-    publish: locale === 'zh' ? '發布' : 'Publish',
-    unpublish: locale === 'zh' ? '取消發布' : 'Unpublish',
-    history: locale === 'zh' ? '歷史記錄' : 'History',
-    restore: locale === 'zh' ? '還原' : 'Restore',
-    noHistory: locale === 'zh' ? '無歷史記錄' : 'No history',
-    close: locale === 'zh' ? '關閉' : 'Close',
+    title: '編輯內容',
+    back: '返回',
+    content: '內容（JSON）',
+    save: '儲存草稿',
+    publish: '發布',
+    unpublish: '取消發布',
+    history: '歷史記錄',
+    restore: '還原',
+    noHistory: '無歷史記錄',
+    close: '關閉',
   };
 
-  const sectionLabels: Record<string, { en: string; zh: string }> = {
-    hero: { en: 'Hero Section', zh: '首頁主視覺' },
-    about: { en: 'About Section', zh: '關於我們' },
-    platforms: { en: 'Platforms Section', zh: '技術平台' },
-    contact: { en: 'Contact Section', zh: '聯絡資訊' },
-    footer: { en: 'Footer', zh: '頁尾' },
-    metadata: { en: 'Site Metadata', zh: '網站中繼資料' },
-    nav: { en: 'Navigation', zh: '導航選單' },
-    company: { en: 'Company Info', zh: '公司資訊' },
-    gallery: { en: 'Gallery', zh: '畫廊' },
+  const sectionLabels: Record<string, string> = {
+    hero: '首頁主視覺',
+    about: '關於我們',
+    platforms: '技術平台',
+    contact: '聯絡資訊',
+    footer: '頁尾',
+    metadata: '網站中繼資料',
+    nav: '導航選單',
+    company: '公司資訊',
+    gallery: '畫廊',
   };
 
-  const label = sectionLabels[sectionKey] || { en: sectionKey, zh: sectionKey };
+  const label = sectionLabels[sectionKey] || sectionKey;
+
+  const actionLabels: Record<ContentHistory['action'], string> = {
+    create: '建立',
+    update: '更新',
+    publish: '發布',
+    unpublish: '取消發布',
+    delete: '刪除',
+  };
 
   return (
     <div className="relative">
@@ -200,7 +196,7 @@ export default function ContentEditorClient({
             {t.back}
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t.title}: {locale === 'zh' ? label.zh : label.en}
+            {t.title}: {label}
           </h1>
         </div>
 
@@ -252,24 +248,12 @@ export default function ContentEditorClient({
       )}
 
       {/* Content Editors */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* English */}
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.english}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.content}</h2>
           <textarea
-            value={contentEn}
-            onChange={(e) => setContentEn(e.target.value)}
-            className="w-full h-96 p-4 font-mono text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            spellCheck={false}
-          />
-        </div>
-
-        {/* Chinese */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.chinese}</h2>
-          <textarea
-            value={contentZh}
-            onChange={(e) => setContentZh(e.target.value)}
+            value={contentJson}
+            onChange={(e) => setContentJson(e.target.value)}
             className="w-full h-96 p-4 font-mono text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             spellCheck={false}
           />
@@ -309,7 +293,7 @@ export default function ContentEditorClient({
                             : 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {item.action}
+                        {actionLabels[item.action]}
                       </span>
                       {item.old_value && (
                         <button
@@ -321,7 +305,7 @@ export default function ContentEditorClient({
                       )}
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(item.changed_at).toLocaleString(locale === 'zh' ? 'zh-TW' : 'en-US')}
+                      {new Date(item.changed_at).toLocaleString('zh-TW')}
                     </p>
                   </li>
                 ))}

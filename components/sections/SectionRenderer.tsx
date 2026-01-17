@@ -105,9 +105,9 @@ export interface SectionRendererProps {
 /**
  * Get localized content from a SiteContent object
  */
-function getContent<T>(content: SiteContent | undefined, locale: string): T | null {
+function getContent<T>(content: SiteContent | undefined, _locale: string): T | null {
   if (!content) return null;
-  return (locale === 'zh' ? content.content_zh : content.content_en) as T;
+  return content.content_zh as T;
 }
 
 // ============================================
@@ -129,9 +129,9 @@ export default function SectionRenderer({
   siteContents.forEach((c) => contentMap.set(c.section_key, c));
 
   // Get localized title and subtitle from landing section
-  const sectionTitle = locale === 'zh' ? section.title_zh : section.title_en;
-  const sectionSubtitle = locale === 'zh' ? section.subtitle_zh : section.subtitle_en;
-  const sectionContent = locale === 'zh' ? section.content_zh : section.content_en;
+  const sectionTitle = section.title_zh;
+  const sectionSubtitle = section.subtitle_zh;
+  const sectionContent = section.content_zh;
 
   // ============================================
   // Preset Sections (by section_key)

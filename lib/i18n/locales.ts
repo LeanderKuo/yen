@@ -11,12 +11,12 @@
  * All supported locales in the application.
  * Order matters: first locale is used as fallback in some contexts.
  */
-export const LOCALES = ['en', 'zh'] as const;
+export const LOCALES = ['zh'] as const;
 
 /**
  * The default locale used when no locale is specified.
  */
-export const DEFAULT_LOCALE = 'en' as const;
+export const DEFAULT_LOCALE = 'zh' as const;
 
 /**
  * Type representing a valid locale.

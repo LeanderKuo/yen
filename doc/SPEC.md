@@ -1,7 +1,7 @@
 # Feature Specification
 
 > Implemented features and their technical details
-> Last Updated: 2026-01-11
+> Last Updated: 2026-01-14
 > Status: Active
 
 This document describes **implemented** behavior and its technical details.
@@ -49,9 +49,8 @@ This document describes **implemented** behavior and its technical details.
 
 | Route                              | Description   |
 | ---------------------------------- | ------------- |
-| `/[locale]/blog`                   | Blog list     |
-| `/[locale]/blog/[category]`        | Category list |
-| `/[locale]/blog/[category]/[slug]` | Post detail   |
+| `/[locale]/blog`                   | Blog list (supports `?category=<slug>&search=<q>&sort=<...>`) |
+| `/[locale]/blog/[category]/[slug]` | Post detail (canonical URL includes category segment) |
 
 ### Data Model
 
@@ -158,6 +157,7 @@ This document describes **implemented** behavior and its technical details.
 
 - Public API adds `isMine` (server-computed ownership flag) without exposing `userId`.
 - Safety Risk Engine modules: `lib/modules/safety-risk-engine/*`
+- Comment submit use-case (Spam → Safety → Persist): `lib/use-cases/comments/create-comment.ts` (called by `app/api/comments/route.ts`)
 - Implementation file map: see [Module Inventory](#module-inventory-single-source).
 
 ---
@@ -189,13 +189,13 @@ This document describes **implemented** behavior and its technical details.
 - Users list (SSOT: `user_directory`, synced from `auth.users`)
 - User detail:
   - Directory info (id/email/created/updated)
-  - Admin notes (Owner-only write): bilingual markdown (`description_*_md`) + tags (`tags_*`)
+  - Admin notes (Owner-only write): Markdown (`description_zh_md`) + tags (`tags_zh`)
   - Schedule (Owner-only write): appointment calendar (DB stores UTC; UI edits in local time)
   - Comment history (read-only)
 
 ### Routes
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (e.g. `/en/admin/users`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes are localized under `/[locale]/admin/*` (single locale: `zh`, e.g. `/zh/admin/users`). Tables below omit the `/[locale]` prefix for readability.
 
 | Route               | Description                                         |
 | ------------------- | --------------------------------------------------- |
@@ -211,7 +211,7 @@ This document describes **implemented** behavior and its technical details.
 ### Security Notes
 
 - Writes are Owner-only (server actions + IO layer gate; RLS is the final boundary)
-- `description_*_md` is treated as **owner-authored admin-controlled markdown** (do not reuse this rendering pipeline for user-submitted content)
+- `description_zh_md` is treated as **owner-authored admin-controlled markdown** (do not reuse this rendering pipeline for user-submitted content)
 
 ### Known Limitations (V1)
 
@@ -239,7 +239,8 @@ This document describes **implemented** behavior and its technical details.
 
 ### Admin Routes
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (e.g. `/en/admin/theme`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes are localized under `/[locale]/admin/*` (e.g. `/zh/admin/theme`). Tables below omit the `/[locale]` prefix for readability.
+
 
 | Route                  | Description                                         |
 | ---------------------- | --------------------------------------------------- |
@@ -290,7 +291,7 @@ This document describes **implemented** behavior and its technical details.
 
 ### Routes
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (e.g. `/en/admin/posts`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes are localized under `/[locale]/admin/*` (single locale: `zh`, e.g. `/zh/admin/posts`). Tables below omit the `/[locale]` prefix for readability.
 
 **Dashboard**
 
@@ -440,54 +441,14 @@ This document describes **implemented** behavior and its technical details.
 ### Implementation
 
 - Using `next-intl` package
-- Supported languages: English (en), Chinese (zh)
-- Translation files: `messages/en.json`, `messages/zh.json`
-
-### Admin UI Locale（adminLocale）
-
-Admin UI supports bilingual toggle (EN / zh) without changing the URL.
-
-| Item               | Behavior                                                              |
-| ------------------ | --------------------------------------------------------------------- |
-| Route pattern      | `/{routeLocale}/admin/*` (URL locale unchanged)                       |
-| UI language toggle | Sidebar bottom (above sign-out button)                                |
-| Storage            | Cookie `admin-locale` (primary, SSR) + localStorage (client sync)     |
-| Priority           | cookie → Accept-Language (SSR) / navigator.language (client fallback) |
-| Expiry             | Long-term (1 year)                                                    |
-
-#### Covered Modules
-
-All admin modules use `adminLocale` for UI text:
-
-- AdminSidebar + Admin Dashboard
-- Theme / Features / Landing / Portfolio / Settings
-- Blog / Gallery / Content / Users
-- Data Intelligence (Control Center / AI Analysis / Preprocessing / Embeddings / Import/Export)
-- Reports / History
-
-#### Translation Keys Structure
-
-- Namespace: `admin.*` (under existing `messages/en.json` and `messages/zh.json`)
-- Key naming: `admin.<module>.<element>` (e.g., `admin.sidebar.dashboard`, `admin.comments.title`)
-- Technical terms preserved in English: Embedding, RAG, Vector, Token, Prompt, API, Webhook, Slug, etc.
-
-#### Evidence Paths
-
-- Pure locale helpers: `lib/i18n/admin-locale.ts`
-- Server-side reader: `lib/i18n/admin-locale.server.ts`
-- Client hook: `hooks/useAdminLocale.ts`
-- Layout integration: `app/[locale]/admin/layout.tsx`
-- Sidebar toggle: `components/admin/common/AdminSidebar.tsx`
-
-#### UI Policy
-
-- Icons are allowed only in AdminSidebar navigation items.
-- Panel content areas do not use emoji/icon/svg to prevent translation drift.
+- Supported locale: Traditional Chinese (`zh`)
+- Translation file: `messages/zh.json`
 
 ### Route Structure
 
 - All routes use `/[locale]/*` pattern
-- Default language: `en`
+- Locale prefix always present (e.g. `/zh/...`)
+- Default language: `zh`
 
 ### Single Source
 
@@ -564,6 +525,9 @@ All admin modules use `adminLocale` for UI text:
 - Analytics: `lib/analytics/pageviews-io.ts`, `lib/validators/page-views.ts`, `lib/types/page-views.ts`
 - i18n: `lib/i18n/locales.ts`, `messages/*.json`
 - Spam: `lib/spam/io.ts`, `lib/spam/engine.ts`（pure）
+- Auth (RBAC helpers): `lib/auth/index.ts`（server-only）
+- Embeddings facade (non-module import surface): `lib/embeddings/index.ts`（server-only）
+- Cross-domain use cases: `lib/use-cases/**`
 
 ---
 

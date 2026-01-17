@@ -6,7 +6,7 @@
  * Shows the current global theme, preset font stack, and any override.
  */
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 interface FontStatusCardProps {
   themeName: string;

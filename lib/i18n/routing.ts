@@ -5,6 +5,8 @@ import { LOCALES, DEFAULT_LOCALE } from './locales';
 export const routing = defineRouting({
   locales: [...LOCALES],
   defaultLocale: DEFAULT_LOCALE,
+  // App Router uses `app/[locale]/*` routes: always keep locale prefix in URLs.
+  localePrefix: 'always',
   pathnames: {
     '/': '/',
     '/about': '/about',

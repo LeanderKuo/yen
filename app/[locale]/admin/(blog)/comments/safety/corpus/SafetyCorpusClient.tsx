@@ -134,7 +134,7 @@ export default function SafetyCorpusClient() {
 
                 <input
                     type="text"
-                    placeholder="Search..."
+                    placeholder="搜尋..."
                     value={filters.search || ''}
                     onChange={(e) => setFilters(f => ({ ...f, search: e.target.value || undefined }))}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -148,7 +148,7 @@ export default function SafetyCorpusClient() {
                 </div>
             ) : items.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-gray-500 dark:text-gray-400">No corpus items found</p>
+                    <p className="text-gray-500 dark:text-gray-400">找不到語料庫項目</p>
                 </div>
             ) : (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -159,7 +159,7 @@ export default function SafetyCorpusClient() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('label')}</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('content')}</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('status')}</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">操作</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -184,7 +184,7 @@ export default function SafetyCorpusClient() {
                                             onClick={() => openEditModal(item)}
                                             className="text-blue-600 hover:text-blue-900 dark:text-blue-400 mr-3"
                                         >
-                                            Edit
+                                            編輯
                                         </button>
                                         {item.status === 'draft' && (
                                             <button
@@ -222,7 +222,7 @@ export default function SafetyCorpusClient() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {editItem ? 'Edit Item' : t('addItem')}
+                            {editItem ? '編輯項目' : t('addItem')}
                         </h3>
 
                         <div className="space-y-4">
@@ -266,13 +266,13 @@ export default function SafetyCorpusClient() {
                                 onClick={() => setShowModal(false)}
                                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                             >
-                                Cancel
+                                取消
                             </button>
                             <button
                                 onClick={handleSave}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
-                                Save
+                                儲存
                             </button>
                         </div>
                     </div>

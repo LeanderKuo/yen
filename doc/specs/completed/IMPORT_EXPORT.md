@@ -14,7 +14,7 @@
 
 | 項目 | 決定 |
 | --- | --- |
-| Blog Posts 格式 | Markdown（frontmatter + 雙語內容） |
+| Blog Posts 格式 | Markdown（frontmatter + 單一內容） |
 | 其他資料格式 | JSON |
 | 單次匯入上限 | 100 筆記錄 |
 | Dry Run 模式 | 必須支援（Preview，不寫入） |

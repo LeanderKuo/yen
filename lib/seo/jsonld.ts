@@ -43,7 +43,7 @@ export function generateArticleJsonLd(input: ArticleJsonLdInput): object {
     },
     datePublished: input.datePublished,
     url: input.url,
-    inLanguage: input.locale === 'zh' ? 'zh-Hant' : 'en',
+    inLanguage: 'zh-Hant',
     publisher: {
       '@type': 'Organization',
       name: 'Quantum Nexus LNK',
@@ -94,12 +94,12 @@ export function generateWebSiteJsonLd(): object {
     '@type': 'WebSite',
     name: 'Quantum Nexus LNK',
     url: SITE_URL,
-    inLanguage: ['en', 'zh-Hant'],
+    inLanguage: ['zh-Hant'],
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/en/blog?search={search_term_string}`,
+        urlTemplate: `${SITE_URL}/zh/blog?search={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -174,7 +174,7 @@ export interface ServiceJsonLdInput {
  */
 export function generateServicesJsonLd(
   services: ServiceJsonLdInput[],
-  locale: string
+  _locale: string
 ): object[] {
   return services.map((service) => ({
     '@context': 'https://schema.org',
@@ -189,7 +189,7 @@ export function generateServicesJsonLd(
     },
     areaServed: {
       '@type': 'Place',
-      name: locale === 'zh' ? '全球' : 'Worldwide',
+      name: '全球',
     },
   }));
 }
@@ -271,7 +271,7 @@ export function generateHomePageJsonLd(input: HomePageJsonLdInput): object {
     '@id': `${input.siteUrl}/#website`,
     name: input.siteName,
     url: input.siteUrl,
-    inLanguage: input.locale === 'zh' ? 'zh-Hant' : 'en',
+    inLanguage: 'zh-Hant',
     publisher: {
       '@id': `${input.siteUrl}/#organization`,
     },
@@ -279,7 +279,7 @@ export function generateHomePageJsonLd(input: HomePageJsonLdInput): object {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${input.siteUrl}/${input.locale}/blog?search={search_term_string}`,
+        urlTemplate: `${input.siteUrl}/zh/blog?search={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -297,7 +297,7 @@ export function generateHomePageJsonLd(input: HomePageJsonLdInput): object {
         },
         areaServed: {
           '@type': 'Place',
-          name: input.locale === 'zh' ? '全球' : 'Worldwide',
+          name: '全球',
         },
       });
     });

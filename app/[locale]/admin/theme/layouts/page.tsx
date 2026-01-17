@@ -8,7 +8,6 @@
  */
 
 import { getTranslations } from 'next-intl/server';
-import { getLocale } from 'next-intl/server';
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { isOwner, isSiteAdmin } from '@/lib/modules/auth';
 import { getSiteConfigAdmin } from '@/lib/modules/theme/admin-io';
@@ -16,7 +15,6 @@ import LayoutsClient from '../LayoutsClient';
 
 
 export default async function ThemeLayoutsPage() {
-  const locale = await getLocale();
   const supabase = await createClient();
   const t = await getTranslations('admin');
 

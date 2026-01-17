@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { isSiteAdmin, getAdminRole } from '@/lib/modules/auth';
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getMessages } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 import AdminSidebar from '@/components/admin/common/AdminSidebar';
@@ -36,27 +35,23 @@ export default async function AdminLayout({
   const jwtRole = await getAdminRole(supabase);
   const roleMismatch = isAdmin && !jwtRole;
 
-  // Get admin UI locale (independent from route locale)
-  const adminLocale = await getAdminLocale();
-
-  // Get messages for the admin locale and extract admin namespace
-  const allMessages = await getMessages({ locale: adminLocale });
+  // Single-language admin UI: use route locale for messages
+  const allMessages = await getMessages({ locale: routeLocale });
   // Extract admin namespace for scoped provider
   const adminNamespaceMessages = { admin: allMessages.admin } as AbstractIntlMessages;
   
   // Get role mismatch text from messages (with type-safe access)
   const adminMessages = allMessages.admin as Record<string, Record<string, string>> | undefined;
   const commonMessages = adminMessages?.common;
-  const roleMismatchTitle = commonMessages?.roleMismatchTitle ?? 'Role Not Synced';
+  const roleMismatchTitle = commonMessages?.roleMismatchTitle ?? '角色未同步';
   const roleMismatchMessage = commonMessages?.roleMismatchMessage ?? 
-    'You entered via environment fallback, but your database role is not synced. Some operations may be denied by RLS. Please contact the Owner to add you to the site_admins table.';
+    '您是透過環境變數 fallback 進入後台，但 JWT 角色尚未同步；部分操作可能會被 RLS 拒絕。請聯繫擁有者將您加入 site_admins。';
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="flex">
         <AdminSidebar
-          routeLocale={routeLocale}
-          adminLocale={adminLocale}
+          locale={routeLocale}
           userEmail={user.email || ''}
           messages={adminNamespaceMessages}
         />

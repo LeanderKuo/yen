@@ -11,7 +11,7 @@
 import 'server-only';
 
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { isOwner } from '@/lib/modules/auth';
+import { isOwner } from '@/lib/auth';
 import type { UpdateUserAdminProfileInput } from '@/lib/types/user';
 
 // =============================================================================

@@ -11,8 +11,6 @@
 import 'server-only';
 
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { getAllGalleryCategories } from '@/lib/modules/gallery/categories-admin-io';
-import { getAllGalleryItemsForAdmin } from '@/lib/modules/gallery/items-admin-io';
 import { formatGalleryItemsToJsonString } from './formatters/gallery-items-json';
 import { formatGalleryCategoriesToJsonString } from './formatters/gallery-categories-json';
 import type { GalleryItem, GalleryCategory } from '@/lib/types/gallery';
@@ -42,6 +40,42 @@ const EXPORTS_BUCKET = 'exports';
 
 /** Signed URL expiration (24 hours in seconds) */
 const SIGNED_URL_EXPIRY = 60 * 60 * 24;
+
+// =============================================================================
+// Local Queries (no cross-module imports)
+// =============================================================================
+
+async function getAllGalleryCategoriesForExport(): Promise<GalleryCategory[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('gallery_categories')
+    .select('*')
+    .order('sort_order');
+
+  if (error) {
+    console.error('[exportGalleryBundle] Error fetching gallery categories:', error);
+    return [];
+  }
+
+  return (data ?? []) as GalleryCategory[];
+}
+
+async function getAllGalleryItemsForExport(): Promise<GalleryItem[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('gallery_items')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[exportGalleryBundle] Error fetching gallery items:', error);
+    return [];
+  }
+
+  return (data ?? []) as GalleryItem[];
+}
 
 // =============================================================================
 // Export Functions
@@ -94,8 +128,8 @@ export async function exportGalleryItemsBundle(): Promise<GalleryExportResult> {
   try {
     // Fetch all data
     const [items, categories] = await Promise.all([
-      getAllGalleryItemsForAdmin(),
-      getAllGalleryCategories(),
+      getAllGalleryItemsForExport(),
+      getAllGalleryCategoriesForExport(),
     ]);
 
     // Format to JSON
@@ -140,7 +174,7 @@ export async function exportGalleryItemsBundle(): Promise<GalleryExportResult> {
 export async function exportGalleryCategoriesBundle(): Promise<GalleryExportResult> {
   try {
     // Fetch categories
-    const categories = await getAllGalleryCategories();
+    const categories = await getAllGalleryCategoriesForExport();
 
     // Format to JSON
     const jsonString = formatGalleryCategoriesToJsonString(categories as GalleryCategory[]);

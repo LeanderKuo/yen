@@ -1,5 +1,4 @@
 import { getAllSiteContent } from '@/lib/modules/content/io';
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import SectionToggle from './components/SectionToggle';
@@ -11,11 +10,8 @@ export default async function ContentManagementPage({
 }) {
   const { locale: routeLocale } = await params;
   
-  // Get admin UI locale
-  const adminLocale = await getAdminLocale();
-  
   // Get translations for admin content namespace
-  const t = await getTranslations({ locale: adminLocale, namespace: 'admin.content' });
+  const t = await getTranslations({ locale: routeLocale, namespace: 'admin.content' });
   
   const contents = await getAllSiteContent();
 
@@ -89,7 +85,7 @@ export default async function ContentManagementPage({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(content.updated_at).toLocaleDateString('en-US', {
+                      {new Date(content.updated_at).toLocaleDateString('zh-TW', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',

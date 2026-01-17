@@ -12,7 +12,7 @@ import 'server-only';
 
 import type { AnalysisTemplateId, RAGConfig } from '@/lib/types/ai-analysis';
 import { RAG_DEFAULTS } from '@/lib/types/ai-analysis';
-import { semanticSearch } from '@/lib/modules/embedding/embedding-io';
+import { isSemanticSearchEnabled, semanticSearch } from '@/lib/embeddings';
 import { deidentifyData } from './analysis-pure';
 
 // =============================================================================
@@ -181,9 +181,7 @@ export function buildRagDataFromContext(
  */
 export async function isRagModeAvailable(): Promise<boolean> {
   try {
-    // Import dynamically to avoid circular dependency
-    const { isSemanticSearchEnabled } = await import('@/lib/modules/embedding/embedding-io');
-    return isSemanticSearchEnabled();
+    return await isSemanticSearchEnabled();
   } catch {
     return false;
   }

@@ -1,9 +1,9 @@
 import AdminTabs from '@/components/admin/common/AdminTabs';
 
 const USERS_TABS = [
-  { href: '/admin/users', labelEn: 'Users', labelZh: '用戶列表' },
-  // PR-4 將新增: { href: '/admin/users/tags', labelEn: 'Tags', labelZh: '標籤管理' },
-  // PR-5 將新增: { href: '/admin/users/appointments', labelEn: 'Schedule', labelZh: '預約管理' },
+  { href: '/admin/users', label: '用戶列表' },
+  // PR-4 將新增: { href: '/admin/users/tags', label: '標籤管理' },
+  // PR-5 將新增: { href: '/admin/users/appointments', label: '預約管理' },
 ];
 
 export default async function UsersLayout({

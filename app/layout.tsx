@@ -17,9 +17,8 @@ export const viewport: Viewport = {
 // P0-6: Use centralized SITE_URL from lib/seo/hreflang
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Quantum Nexus LNK | Quantum-Inspired Digital Solutions',
-  description:
-    'Building technology platforms that connect communities with cutting-edge digital services.',
+  title: 'Quantum Nexus LNK｜連結社群的數位解決方案',
+  description: '打造連接社群與尖端數位服務的科技平台。',
 };
 
 export default function RootLayout({

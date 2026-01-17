@@ -174,30 +174,30 @@ export function hashContent(text: string): string {
 
 /**
  * Compose embedding content from post data.
- * @see SUPABASE_AI.md §2.2 - "title_en + title_zh + excerpt_en + excerpt_zh"
+ * Single-language composition: title + excerpt (prefer zh, fallback to en).
  */
 export function composePostContent(data: PostEmbeddingData): string {
-  const parts: string[] = [];
+  const title = data.title_zh ?? data.title_en ?? '';
+  const excerpt = data.excerpt_zh ?? data.excerpt_en ?? '';
 
-  if (data.title_en) parts.push(data.title_en);
-  if (data.title_zh) parts.push(data.title_zh);
-  if (data.excerpt_en) parts.push(stripHtmlAndMarkdown(data.excerpt_en));
-  if (data.excerpt_zh) parts.push(stripHtmlAndMarkdown(data.excerpt_zh));
+  const parts: string[] = [];
+  if (title) parts.push(title);
+  if (excerpt) parts.push(stripHtmlAndMarkdown(excerpt));
 
   return normalizeWhitespace(parts.join(' '));
 }
 
 /**
  * Compose embedding content from gallery item data.
- * @see SUPABASE_AI.md §2.2 - "title_en + title_zh + description_en + description_zh"
+ * Single-language composition: title + description (prefer zh, fallback to en).
  */
 export function composeGalleryItemContent(data: GalleryItemEmbeddingData): string {
-  const parts: string[] = [];
+  const title = data.title_zh ?? data.title_en ?? '';
+  const description = data.description_zh ?? data.description_en ?? '';
 
-  if (data.title_en) parts.push(data.title_en);
-  if (data.title_zh) parts.push(data.title_zh);
-  if (data.description_en) parts.push(stripHtmlAndMarkdown(data.description_en));
-  if (data.description_zh) parts.push(stripHtmlAndMarkdown(data.description_zh));
+  const parts: string[] = [];
+  if (title) parts.push(title);
+  if (description) parts.push(stripHtmlAndMarkdown(description));
 
   return normalizeWhitespace(parts.join(' '));
 }

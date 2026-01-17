@@ -22,7 +22,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="en">
+    <html lang="zh">
       <body>
         <div
           style={{
@@ -37,10 +37,10 @@ export default function GlobalError({
           }}
         >
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>
-            Something went wrong
+            發生錯誤
           </h2>
           <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-            An unexpected error occurred. Our team has been notified.
+            系統發生未預期的錯誤，我們已收到通知。
           </p>
           <button
             onClick={() => reset()}
@@ -54,7 +54,7 @@ export default function GlobalError({
               fontSize: '1rem',
             }}
           >
-            Try again
+            再試一次
           </button>
         </div>
       </body>

@@ -43,15 +43,13 @@ export default function BlogCategorySidebar({
 
   const totalPosts = categories.reduce((sum, cat) => sum + cat.post_count, 0) + uncategorizedCount;
 
-  const isZh = locale === 'zh';
-
   return (
     <aside className="w-full lg:w-64 flex-shrink-0">
       <div className="bg-surface-raised rounded-theme-lg shadow-sm border border-border-light overflow-hidden">
         {/* Header - using theme primary color */}
         <div className="bg-primary px-4 py-3">
           <h2 className="text-white font-semibold text-sm">
-            {isZh ? '文章分類' : 'Categories'}
+            文章分類
           </h2>
         </div>
 
@@ -66,7 +64,7 @@ export default function BlogCategorySidebar({
                 : 'text-secondary hover:bg-surface-raised-hover hover:text-foreground'
             }`}
           >
-            <span>{isZh ? '全部文章' : 'All Posts'}</span>
+            <span>全部文章</span>
             <span className="ml-auto text-secondary/80">({totalPosts})</span>
           </Link>
 
@@ -79,7 +77,7 @@ export default function BlogCategorySidebar({
                   <button
                     onClick={() => toggleCategory(category.id)}
                     className="w-5 h-5 flex items-center justify-center text-secondary/70 hover:text-foreground flex-shrink-0"
-                    aria-label={expandedCategories.has(category.id) ? 'Collapse' : 'Expand'}
+                    aria-label={expandedCategories.has(category.id) ? '收合' : '展開'}
                   >
                     <span className="text-xs font-mono">
                       {expandedCategories.has(category.id) ? '−' : '+'}
@@ -96,7 +94,7 @@ export default function BlogCategorySidebar({
                     }`}
                   >
                     <span className="truncate">
-                      {isZh ? category.name_zh : category.name_en}
+                      {category.name_zh}
                     </span>
                     <span className="ml-auto text-secondary/80 flex-shrink-0">
                       ({category.post_count})
@@ -116,7 +114,7 @@ export default function BlogCategorySidebar({
                     : 'text-secondary hover:bg-surface-raised-hover hover:text-foreground'
                 }`}
               >
-                <span>{isZh ? '未分類文章' : 'Uncategorized'}</span>
+                <span>未分類文章</span>
                 <span className="ml-auto">({uncategorizedCount})</span>
               </Link>
             )}

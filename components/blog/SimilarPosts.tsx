@@ -9,7 +9,7 @@
 
 import { getTranslations } from 'next-intl/server';
 import { format } from 'date-fns';
-import { zhTW, enUS } from 'date-fns/locale';
+import { zhTW } from 'date-fns/locale';
 import { getResolvedSimilarPosts } from '@/lib/modules/embedding/similar-items-public-io';
 
 interface SimilarPostsProps {
@@ -29,22 +29,20 @@ export default async function SimilarPosts({ postId, locale }: SimilarPostsProps
     return null;
   }
 
-  const dateLocale = locale === 'zh' ? zhTW : enUS;
+  const dateLocale = zhTW;
 
   return (
     <section className="mt-16 pt-8 border-t border-border-light">
       <h2 className="text-2xl font-bold text-foreground mb-6">
-        {locale === 'zh' ? '相似文章' : 'Similar Articles'}
+        相似文章
       </h2>
       <div className="grid gap-6 md:grid-cols-2">
         {similarPosts.map((post) => {
-          const title = locale === 'zh' && post.titleZh ? post.titleZh : post.titleEn;
-          const excerpt = locale === 'zh' && post.excerptZh ? post.excerptZh : post.excerptEn;
+          const title = post.titleZh || '（無標題）';
+          const excerpt = post.excerptZh || '';
           const categorySlug = post.category?.slug || 'uncategorized';
           const categoryName = post.category
-            ? locale === 'zh'
-              ? post.category.nameZh
-              : post.category.nameEn
+            ? post.category.nameZh
             : null;
 
           return (

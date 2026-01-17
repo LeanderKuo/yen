@@ -12,7 +12,6 @@ import 'server-only';
 
 import JSZip from 'jszip';
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { getAllPosts, getCategories } from '@/lib/modules/blog/admin-io';
 import {
   formatBlogPostToMarkdown,
   formatBlogPostsFolderStructure,
@@ -49,6 +48,45 @@ const EXPORTS_BUCKET = 'exports';
 
 /** Signed URL expiration (24 hours in seconds) */
 const SIGNED_URL_EXPIRY = 60 * 60 * 24;
+
+// =============================================================================
+// Local Queries (no cross-module imports)
+// =============================================================================
+
+async function getAllCategoriesForExport(): Promise<Category[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name_en');
+
+  if (error) {
+    console.error('[exportBlogBundle] Error fetching categories:', error);
+    return [];
+  }
+
+  return (data ?? []) as Category[];
+}
+
+async function getAllPostsForExport(): Promise<Post[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *,
+      category:categories(*)
+    `)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('[exportBlogBundle] Error fetching posts:', error);
+    return [];
+  }
+
+  return (data ?? []) as unknown as Post[];
+}
 
 // =============================================================================
 // Export Functions
@@ -135,8 +173,8 @@ export async function exportBlogBundle(): Promise<BlogExportResult> {
   try {
     // Fetch all data
     const [posts, categories] = await Promise.all([
-      getAllPosts(),
-      getCategories(),
+      getAllPostsForExport(),
+      getAllCategoriesForExport(),
     ]);
 
     // Create ZIP

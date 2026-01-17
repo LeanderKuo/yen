@@ -9,6 +9,7 @@
  */
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from 'next-intl/server';
 
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { getAdminRole } from "@/lib/modules/auth";
@@ -21,10 +22,6 @@ import {
   isRagModeAvailable,
 } from "@/lib/modules/ai-analysis/io";
 import { listSchedules } from "@/lib/modules/ai-analysis/analysis-schedules-io";
-import {
-  getAdminLocale,
-  getAdminMessages,
-} from "@/lib/i18n/admin-locale.server";
 
 import { AIAnalysisClient } from "./AIAnalysisClient";
 
@@ -35,12 +32,12 @@ interface PageProps {
 export default async function AIAnalysisPage({
   params,
 }: PageProps) {
-  await params;
+  const { locale: routeLocale } = await params;
   const supabase = await createClient();
   const role = await getAdminRole(supabase);
 
   if (!role) {
-    redirect("/");
+    redirect(`/${routeLocale}`);
   }
 
   // Get user ID for fetching reports
@@ -48,7 +45,7 @@ export default async function AIAnalysisPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect("/");
+    redirect(`/${routeLocale}`);
   }
 
   // Check if OpenRouter is configured
@@ -74,8 +71,7 @@ export default async function AIAnalysisPage({
       : Promise.resolve({ schedules: [], total: 0 }),
   ]);
 
-  const adminLocale = await getAdminLocale();
-  const messages = await getAdminMessages(adminLocale);
+  const messages = await getMessages({ locale: routeLocale });
 
   const initialData = {
     role,
@@ -91,7 +87,7 @@ export default async function AIAnalysisPage({
   };
 
   return (
-    <NextIntlClientProvider locale={adminLocale} messages={messages}>
+    <NextIntlClientProvider locale={routeLocale} messages={messages}>
       <AIAnalysisClient initialData={initialData} />
     </NextIntlClientProvider>
   );

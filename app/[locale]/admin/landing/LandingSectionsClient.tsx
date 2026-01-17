@@ -30,14 +30,14 @@ interface Props {
 const ALWAYS_VISIBLE = ['hero', 'contact'];
 
 // Section labels for display
-const SECTION_LABELS: Record<string, { en: string; zh: string }> = {
-  hero: { en: 'Hero', zh: '首頁橫幅' },
-  about: { en: 'About', zh: '關於我們' },
-  services: { en: 'Services', zh: '服務' },
-  platforms: { en: 'Platforms', zh: '平台' },
-  product_design: { en: 'Product Design', zh: '產品設計' },
-  portfolio: { en: 'Portfolio', zh: '作品集' },
-  contact: { en: 'Contact', zh: '聯繫' },
+const SECTION_LABELS: Record<string, string> = {
+  hero: '首頁橫幅',
+  about: '關於我們',
+  services: '服務',
+  platforms: '平台',
+  product_design: '產品設計',
+  portfolio: '作品集',
+  contact: '聯繫',
 };
 
 // Type-safe preset key lookup
@@ -58,12 +58,9 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
 
   const getSectionLabel = (section: LandingSection): string => {
     if (isCustom(section.section_key)) {
-      return locale === 'zh' 
-        ? (section.title_zh || section.section_key)
-        : (section.title_en || section.section_key);
+      return section.title_zh || section.section_key;
     }
-    const labels = SECTION_LABELS[section.section_key];
-    return labels ? (locale === 'zh' ? labels.zh : labels.en) : section.section_key;
+    return SECTION_LABELS[section.section_key] || section.section_key;
   };
 
   const handleToggleVisibility = async (sectionKey: string, currentVisible: boolean) => {
@@ -78,7 +75,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
         );
         router.refresh();
       } else {
-        setError(result.error || 'Failed to toggle visibility');
+        setError(result.error || '切換顯示狀態失敗');
       }
     });
   };
@@ -93,14 +90,14 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
         router.refresh();
         router.push(`/${locale}/admin/landing/${result.sectionKey}`);
       } else {
-        setError(result.error || 'Failed to create section');
+        setError(result.error || '新增區塊失敗');
       }
     });
   };
 
   const handleDeleteSection = async (sectionKey: string) => {
     if (!isCustom(sectionKey)) return;
-    if (!confirm(locale === 'zh' ? '確定要刪除此區塊？' : 'Delete this section?')) return;
+    if (!confirm('確定要刪除此區塊？')) return;
     
     setError(null);
     startTransition(async () => {
@@ -109,7 +106,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
         setSections(prev => prev.filter(s => s.section_key !== sectionKey));
         router.refresh();
       } else {
-        setError(result.error || 'Failed to delete section');
+        setError(result.error || '刪除區塊失敗');
       }
     });
   };
@@ -118,7 +115,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">
-          {locale === 'zh' ? '首頁區塊管理' : 'Landing Sections'}
+          首頁區塊管理
         </h1>
         
         {canAddCustom && (
@@ -127,7 +124,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
             disabled={isPending}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors"
           >
-            {locale === 'zh' ? '+ 新增自訂區塊' : '+ Add Custom Section'}
+            + 新增自訂區塊
           </button>
         )}
       </div>
@@ -143,19 +140,19 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
           <thead className="bg-surface-secondary">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-secondary">
-                {locale === 'zh' ? '順序' : 'Order'}
+                順序
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-secondary">
-                {locale === 'zh' ? '區塊' : 'Section'}
+                區塊
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-secondary">
-                {locale === 'zh' ? '類型' : 'Type'}
+                類型
               </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-secondary">
-                {locale === 'zh' ? '顯示' : 'Visible'}
+                顯示
               </th>
               <th className="px-4 py-3 text-right text-sm font-medium text-secondary">
-                {locale === 'zh' ? '操作' : 'Actions'}
+                操作
               </th>
             </tr>
           </thead>
@@ -186,7 +183,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
                       section.is_visible ? 'bg-green-500' : 'bg-gray-300'
                     } ${!canToggleVisibility(section.section_key) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={!canToggleVisibility(section.section_key) 
-                      ? (locale === 'zh' ? '此區塊無法隱藏' : 'This section cannot be hidden')
+                      ? '此區塊無法隱藏'
                       : undefined}
                   >
                     <span 
@@ -202,7 +199,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
                       href={`/${locale}/admin/landing/${section.section_key}`}
                       className="px-3 py-1 text-sm text-primary hover:underline"
                     >
-                      {locale === 'zh' ? '編輯' : 'Edit'}
+                      編輯
                     </Link>
                     {isCustom(section.section_key) && (
                       <button
@@ -210,7 +207,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
                         disabled={isPending}
                         className="px-3 py-1 text-sm text-red-600 hover:underline disabled:opacity-50"
                       >
-                        {locale === 'zh' ? '刪除' : 'Delete'}
+                        刪除
                       </button>
                     )}
                   </div>
@@ -222,9 +219,7 @@ export default function LandingSectionsClient({ initialSections, locale }: Props
       </div>
 
       <p className="mt-4 text-sm text-secondary">
-        {locale === 'zh' 
-          ? `自訂區塊: ${customSectionCount}/10`
-          : `Custom sections: ${customSectionCount}/10`}
+        {`自訂區塊: ${customSectionCount}/10`}
       </p>
     </div>
   );

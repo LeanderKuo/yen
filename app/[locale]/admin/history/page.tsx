@@ -5,7 +5,8 @@
  * Client component handles filtering and restore actions.
  */
 import { getAllRecentHistory } from '@/lib/modules/content/io';
-import { getAdminLocale, getAdminMessages } from '@/lib/i18n/admin-locale.server';
+import { getMessages } from 'next-intl/server';
+import type { AbstractIntlMessages } from 'next-intl';
 import HistoryClient from './HistoryClient';
 
 interface PageProps {
@@ -16,8 +17,9 @@ interface PageProps {
 export default async function HistoryPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
   const query = await searchParams;
-  const adminLocale = await getAdminLocale();
-  const adminMessages = await getAdminMessages(adminLocale);
+
+  const allMessages = await getMessages({ locale });
+  const messages = { admin: allMessages.admin } as AbstractIntlMessages;
 
   // Server-side data fetching
   const history = await getAllRecentHistory(100);
@@ -26,8 +28,7 @@ export default async function HistoryPage({ params, searchParams }: PageProps) {
     <HistoryClient
       initialHistory={history}
       routeLocale={locale}
-      adminLocale={adminLocale}
-      adminMessages={adminMessages}
+      messages={messages}
       query={query}
     />
   );

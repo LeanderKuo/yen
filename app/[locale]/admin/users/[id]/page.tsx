@@ -9,11 +9,10 @@
 
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { isSiteAdmin, isOwner } from '@/lib/modules/auth';
+import { isOwner, isSiteAdmin } from '@/lib/auth';
 import { getUserById } from '@/lib/modules/user/users-admin-io';
-import { getCommentsByUserId } from '@/lib/modules/user/user-comments-io';
+import { getCommentsForAdminByUserId } from '@/lib/modules/comment/moderation-read-admin-io';
 import { markdownToHtml } from '@/lib/markdown/server';
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getMessages } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 import UserDetailClient from './UserDetailClient';
@@ -42,17 +41,13 @@ export default async function UserDetailPage({
   // Check if current user is Owner (for edit permissions)
   const ownerRole = await isOwner(supabase);
 
-  // Get admin UI locale (independent from route locale)
-  const adminLocale = await getAdminLocale();
-
-  // Get messages for admin locale and extract admin namespace
-  const allMessages = await getMessages({ locale: adminLocale });
+  const allMessages = await getMessages({ locale: routeLocale });
   const adminMessages = { admin: allMessages.admin } as AbstractIntlMessages;
 
   // Fetch user detail and cross-domain data in parallel
   const [userDetail, comments] = await Promise.all([
     getUserById(userId),
-    getCommentsByUserId(userId),
+    getCommentsForAdminByUserId(userId),
   ]);
 
   if (!userDetail) {
@@ -66,13 +61,9 @@ export default async function UserDetailPage({
   };
 
   // Optional: Server-side Markdown to HTML conversion for preview mode
-  // Note: For markdown preview, use adminLocale to determine which description to render
   let adminNotesHtml: string | undefined;
   if (notesPreview) {
-    const markdown =
-      adminLocale === 'zh'
-        ? userDetail.adminProfile?.descriptionZhMd
-        : userDetail.adminProfile?.descriptionEnMd;
+    const markdown = userDetail.adminProfile?.descriptionZhMd;
 
     if (markdown) {
       adminNotesHtml = await markdownToHtml(markdown);
@@ -83,7 +74,6 @@ export default async function UserDetailPage({
     <UserDetailClient
       userDetail={enrichedUserDetail}
       routeLocale={routeLocale}
-      adminLocale={adminLocale}
       notesPreview={notesPreview}
       adminNotesHtml={adminNotesHtml}
       isOwner={ownerRole}

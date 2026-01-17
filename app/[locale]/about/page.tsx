@@ -12,9 +12,9 @@ import type { SiteContent, CompanySetting } from '@/lib/types/content';
 import { AboutSection } from '@/components/sections';
 
 // Helper to get localized content
-function getContent<T>(content: SiteContent | undefined, locale: string): T | null {
+function getContent<T>(content: SiteContent | undefined, _locale: string): T | null {
   if (!content) return null;
-  return (locale === 'zh' ? content.content_zh : content.content_en) as T;
+  return content.content_zh as T;
 }
 
 // Helper to get setting value
@@ -42,10 +42,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const alternates = getMetadataAlternates('/about', locale);
   
-  const title = locale === 'zh' ? '關於我們 | Quantum Nexus LNK' : 'About Us | Quantum Nexus LNK';
-  const description = locale === 'zh' 
-    ? '了解 Quantum Nexus LNK 的願景、使命與創辦人'
-    : 'Learn about Quantum Nexus LNK\'s vision, mission, and founder';
+  const title = '關於我們｜Quantum Nexus LNK';
+  const description = '了解 Quantum Nexus LNK 的願景、使命與創辦人';
 
   return {
     title,
@@ -76,9 +74,9 @@ export default async function AboutPage({
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center p-8">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Content Temporarily Unavailable</h1>
-          <p className="text-secondary">Please try again later.</p>
-          <Link href="/" className="mt-4 inline-block text-primary hover:underline">Return to Home</Link>
+          <h1 className="text-2xl font-bold text-foreground mb-4">內容暫時無法取得</h1>
+          <p className="text-secondary">請稍後再試。</p>
+          <Link href={`/${locale}`} className="mt-4 inline-block text-primary hover:underline">返回首頁</Link>
         </div>
       </div>
     );
@@ -99,8 +97,8 @@ export default async function AboutPage({
   
   // JSON-LD breadcrumbs
   const breadcrumbs = [
-    { name: locale === 'zh' ? '首頁' : 'Home', url: `${SITE_URL}/${locale}` },
-    { name: locale === 'zh' ? '關於我們' : 'About', url: `${SITE_URL}/${locale}/about` },
+    { name: '首頁', url: `${SITE_URL}/${locale}` },
+    { name: '關於我們', url: `${SITE_URL}/${locale}/about` },
   ];
   const breadcrumbJsonLd = generateBreadcrumbJsonLd(breadcrumbs);
 
@@ -110,7 +108,7 @@ export default async function AboutPage({
         <Header locale={locale} />
         <main className="pt-24 md:pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-secondary">Content not available</p>
+            <p className="text-secondary">內容不存在</p>
           </div>
         </main>
         <Footer locale={locale} />

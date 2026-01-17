@@ -1,7 +1,7 @@
 ﻿import { PostSummary } from '@/lib/types/blog';
 import { getTranslations } from 'next-intl/server';
 import { format } from 'date-fns';
-import { zhTW, enUS } from 'date-fns/locale';
+import { zhTW } from 'date-fns/locale';
 
 interface RelatedPostsProps {
   posts: PostSummary[];
@@ -19,7 +19,7 @@ export default async function RelatedPosts({ posts, locale }: RelatedPostsProps)
     return null;
   }
   
-  const dateLocale = locale === 'zh' ? zhTW : enUS;
+  const dateLocale = zhTW;
   
   return (
     <section className="mt-16 pt-8 border-t border-border-light">
@@ -28,11 +28,11 @@ export default async function RelatedPosts({ posts, locale }: RelatedPostsProps)
       </h2>
       <div className="grid gap-6 md:grid-cols-2">
         {posts.slice(0, 4).map((post) => {
-          const title = locale === 'zh' && post.title_zh ? post.title_zh : post.title_en;
-          const excerpt = locale === 'zh' && post.excerpt_zh ? post.excerpt_zh : post.excerpt_en;
+          const title = post.title_zh || '（無標題）';
+          const excerpt = post.excerpt_zh || '';
           const categorySlug = post.category?.slug || 'uncategorized';
           const categoryName = post.category
-            ? (locale === 'zh' ? post.category.name_zh : post.category.name_en)
+            ? post.category.name_zh
             : null;
           
           return (

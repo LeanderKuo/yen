@@ -16,12 +16,15 @@ import { type ValidationResult, validResult, invalidResult } from './api-common'
 
 /**
  * Single source regex for URL-safe slug validation.
- * Format: lowercase alphanumeric, optionally separated by single hyphens.
+ * Format: lowercase (no uppercase letters), Unicode letters/numbers/underscore,
+ * optionally separated by single hyphens.
  * Examples:
  * - Valid: "hello", "hello-world", "a1", "123"
- * - Invalid: "Hello" (uppercase), "a--b" (double hyphen), "-abc" (leading hyphen), "a_b" (underscore)
+ * - Valid (Unicode): "中文-測試", "hello世界", "foo_bar"
+ * - Invalid: "Hello" (uppercase), "a--b" (double hyphen), "-abc" (leading hyphen)
  */
-export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const SLUG_REGEX =
+  /^(?!.*\p{Lu})[\p{L}\p{N}_]+(?:-[\p{L}\p{N}_]+)*$/u;
 
 // =============================================================================
 // Validators
@@ -43,18 +46,18 @@ export function isValidSlug(slug: string): boolean {
  */
 export function validateSlug(input: string): ValidationResult<string> {
   if (typeof input !== 'string') {
-    return invalidResult('Slug must be a string');
+    return invalidResult('Slug 必須為字串');
   }
 
   const trimmed = input.trim();
 
   if (trimmed.length === 0) {
-    return invalidResult('Slug is required');
+    return invalidResult('Slug 為必填');
   }
 
   if (!SLUG_REGEX.test(trimmed)) {
     return invalidResult(
-      'Slug must be URL-safe: lowercase letters, numbers, and hyphens only (no leading/trailing hyphens or consecutive hyphens)'
+      'Slug 格式不正確：僅允許小寫字母、數字、底線與連字號（不可有連續連字號、前後連字號）'
     );
   }
 

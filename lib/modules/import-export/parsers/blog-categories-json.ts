@@ -17,7 +17,7 @@ import type {
 // =============================================================================
 
 /** Required category fields */
-const REQUIRED_CATEGORY_FIELDS = ['slug', 'name_en', 'name_zh'] as const;
+const REQUIRED_CATEGORY_FIELDS = ['slug'] as const;
 
 // =============================================================================
 // Validation Functions
@@ -76,6 +76,11 @@ export function validateCategoryObject(
     }
   }
 
+  const nameCandidate = obj.name_zh ?? obj.name_en;
+  if (typeof nameCandidate !== 'string' || nameCandidate.trim().length === 0) {
+    return `Item ${index}: missing or empty required field "name"`;
+  }
+
   return undefined;
 }
 
@@ -88,10 +93,13 @@ export function validateCategoryObject(
 export function extractCategoryData(
   obj: Record<string, unknown>
 ): ParsedBlogCategory {
+  const nameCandidate = obj.name_zh ?? obj.name_en ?? '';
+  const name = String(nameCandidate);
   return {
     slug: String(obj.slug),
-    name_en: String(obj.name_en),
-    name_zh: String(obj.name_zh),
+    // Single-language: mirror into legacy en/zh fields
+    name_en: name,
+    name_zh: name,
   };
 }
 

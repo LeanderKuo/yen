@@ -8,9 +8,9 @@ import type { SiteContent } from '@/lib/types/content';
 import { PlatformsSection } from '@/components/sections';
 
 // Helper to get localized content
-function getContent<T>(content: SiteContent | undefined, locale: string): T | null {
+function getContent<T>(content: SiteContent | undefined, _locale: string): T | null {
   if (!content) return null;
-  return (locale === 'zh' ? content.content_zh : content.content_en) as T;
+  return content.content_zh as T;
 }
 
 interface PlatformsContent {
@@ -29,10 +29,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const alternates = getMetadataAlternates('/platforms', locale);
   
-  const title = locale === 'zh' ? '技術平台 | Quantum Nexus LNK' : 'Platforms | Quantum Nexus LNK';
-  const description = locale === 'zh' 
-    ? '了解我們使用的現代技術平台和工具'
-    : 'Learn about the modern technology platforms and tools we use';
+  const title = '技術平台｜Quantum Nexus LNK';
+  const description = '了解我們使用的現代技術平台和工具';
 
   return {
     title,
@@ -60,8 +58,8 @@ export default async function PlatformsPage({
   
   // JSON-LD breadcrumbs
   const breadcrumbs = [
-    { name: locale === 'zh' ? '首頁' : 'Home', url: `${SITE_URL}/${locale}` },
-    { name: locale === 'zh' ? '技術平台' : 'Platforms', url: `${SITE_URL}/${locale}/platforms` },
+    { name: '首頁', url: `${SITE_URL}/${locale}` },
+    { name: '技術平台', url: `${SITE_URL}/${locale}/platforms` },
   ];
   const breadcrumbJsonLd = generateBreadcrumbJsonLd(breadcrumbs);
 
@@ -71,7 +69,7 @@ export default async function PlatformsPage({
         <Header locale={locale} />
         <main className="pt-24 md:pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-secondary">Content not available</p>
+            <p className="text-secondary">內容不存在</p>
           </div>
         </main>
         <Footer locale={locale} />

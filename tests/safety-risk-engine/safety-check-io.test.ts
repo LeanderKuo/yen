@@ -5,44 +5,21 @@
  * Uses mocks for IO dependencies to test pure orchestration logic.
  */
 
-import { describe, it, mock, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
-// Mock modules before importing
-const mockGetSafetySettings = mock.fn();
-const mockSearchSafetyCorpus = mock.fn();
-const mockRunSafetyLlmAssessment = mock.fn();
-const mockIsLlmAssessmentAvailable = mock.fn();
-
-// We'll test the orchestrator logic by importing the actual functions
-// and testing their behavior with various inputs
 import {
     runLayer1Check,
     makeSafetyDecision,
 } from '../../lib/modules/safety-risk-engine/engine';
 import { redactPii } from '../../lib/modules/safety-risk-engine/pii';
 import type {
-    SafetyEngineSettings,
     SafetyLlmResponse,
-    SafetyRagContext,
 } from '../../lib/types/safety-risk-engine';
 
 // =============================================================================
 // Test Helpers
 // =============================================================================
-
-function createDefaultSettings(overrides: Partial<SafetyEngineSettings> = {}): SafetyEngineSettings {
-    return {
-        isEnabled: true,
-        modelId: 'openai/gpt-4o-mini',
-        timeoutMs: 1500,
-        riskThreshold: 0.7,
-        heldMessage: 'Your comment is being reviewed.',
-        rejectedMessage: 'Your comment could not be posted.',
-        layer1Blocklist: [],
-        ...overrides,
-    };
-}
 
 function createSafeLlmResponse(confidence: number = 0.85): SafetyLlmResponse {
     return {

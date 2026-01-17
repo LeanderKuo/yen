@@ -166,7 +166,7 @@ describe('Gallery Items JSON Parser', () => {
       const data = { slug: 'test' };
       const missing = validateGalleryItemFields(data);
       assert.ok(missing.includes('category'));
-      assert.ok(missing.includes('title_en'));
+      assert.ok(missing.includes('title'));
     });
   });
 

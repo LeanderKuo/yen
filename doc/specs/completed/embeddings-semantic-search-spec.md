@@ -76,7 +76,7 @@ Embedding 是用數字表示內容「意義」的方法：
 ### 2.1 設計原則
 
 - **集中式設計**：一張表存所有 embedding，業務表不用改 schema
-- **雙語合併**：中英文內容合併，讓搜尋同時支援兩種語言
+- **單語內容**：以 `zh` 內容為主（必要時 fallback `en`），避免重複合併造成 tokens 膨脹
 - **精簡內容**：只取語意相關的欄位，不需完整內容
 
 ### 2.1.1 Embeddings 表設計
@@ -123,8 +123,8 @@ CREATE INDEX idx_embeddings_quality ON embeddings(quality_status, quality_score)
 
 | 資料類型         | 組合欄位                                              | 範例                                                                                               |
 | ---------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Post**         | title_en + title_zh + excerpt_en + excerpt_zh         | "My First Post 我的第一篇文章 Introduction to... 介紹..."                                          |
-| **Gallery Item** | title_en + title_zh + description_en + description_zh | "Sunset Photography 夕陽攝影 Captured at... 拍攝於..."                                             |
+| **Post**         | title_zh（fallback title_en） + excerpt_zh（fallback excerpt_en）         | "我的第一篇文章 介紹..."                                          |
+| **Gallery Item** | title_zh（fallback title_en） + description_zh（fallback description_en） | "夕陽攝影 拍攝於..."                                             |
 | **Comment**      | content（單一語言）                                   | "This post is amazing! Love the writing."                                                          |
 
 ### 2.3 重要決策

@@ -23,8 +23,7 @@ function revalidateLandingCaches() {
   // Invalidate cached landing section data
   revalidateTag('landing-sections', { expire: 0 });
   
-  // Revalidate paths for all locales
-  revalidatePath('/en');
+  // Single-language site (zh)
   revalidatePath('/zh');
   revalidatePath('/sitemap.xml');
 }
@@ -81,21 +80,22 @@ export async function batchUpdateSortOrders(
  */
 export async function createCustomSection(input: {
   section_type: LandingSectionType;
-  title_en?: string;
   title_zh?: string;
 }): Promise<{ success: boolean; sectionKey?: string; error?: string }> {
   // Get next available custom key
   const nextKey = await getNextAvailableCustomKey();
   
   if (!nextKey) {
-    return { success: false, error: 'Maximum custom sections (10) reached' };
+    return { success: false, error: '自訂區塊已達上限（10）' };
   }
   
+  const titleZh = input.title_zh || '新區塊';
   const sectionInput: LandingSectionInput = {
     section_key: nextKey,
     section_type: input.section_type,
-    title_en: input.title_en || 'New Section',
-    title_zh: input.title_zh || '新區塊',
+    // DB schema still has title_en/title_zh; keep them identical for single-language site.
+    title_en: titleZh,
+    title_zh: titleZh,
     is_visible: false, // Start hidden
   };
   

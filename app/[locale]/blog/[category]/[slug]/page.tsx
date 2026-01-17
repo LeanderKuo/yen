@@ -15,7 +15,7 @@ import ArticleJsonLd from '@/components/blog/ArticleJsonLd';
 import Image from 'next/image';
 import ClientCommentSection from '@/components/blog/ClientCommentSection';
 import { format } from 'date-fns';
-import { zhTW, enUS } from 'date-fns/locale';
+import { zhTW } from 'date-fns/locale';
 
 interface PageProps {
   params: Promise<{ 
@@ -30,17 +30,15 @@ export async function generateMetadata({ params }: PageProps) {
   const post = await getPostBySlugWithCategoryCached(slug);
   
   if (!post) {
-    return { title: 'Post Not Found' };
+    return { title: '找不到文章' };
   }
   
-  const title = locale === 'zh' && post.title_zh ? post.title_zh : post.title_en;
-  const description = locale === 'zh' && post.excerpt_zh ? post.excerpt_zh : post.excerpt_en;
+  const title = post.title_zh || '（無標題）';
+  const description = post.excerpt_zh || undefined;
   const categorySlug = post.category?.slug || 'uncategorized';
   
   // Select cover image based on locale (with fallback)
-  const coverImage = locale === 'zh' 
-    ? (post.cover_image_url_zh || post.cover_image_url_en || post.cover_image_url)
-    : (post.cover_image_url_en || post.cover_image_url_zh || post.cover_image_url);
+  const coverImage = post.cover_image_url_zh || post.cover_image_url;
   
   // Generate hreflang alternates using Next.js Metadata API
   const alternates = getMetadataAlternates(`/blog/${categorySlug}/${slug}`, locale);
@@ -51,12 +49,12 @@ export async function generateMetadata({ params }: PageProps) {
     alternates,
     openGraph: {
       title,
-      description: description || undefined,
+      description,
       type: 'article',
       publishedTime: post.published_at || undefined,
       modifiedTime: post.updated_at || undefined,
       images: coverImage ? [{ url: coverImage }] : undefined,
-      locale: locale === 'zh' ? 'zh_TW' : 'en_US',
+      locale: 'zh_TW',
     },
   };
 }
@@ -77,19 +75,17 @@ export default async function BlogPostPage({ params }: PageProps) {
     redirect(`/${locale}/blog/${actualCategorySlug}/${slug}`);
   }
   
-  const title = locale === 'zh' && post.title_zh ? post.title_zh : post.title_en;
-  const content = locale === 'zh' && post.content_zh ? post.content_zh : post.content_en;
-  const excerpt = locale === 'zh' && post.excerpt_zh ? post.excerpt_zh : post.excerpt_en;
+  const title = post.title_zh || '（無標題）';
+  const content = post.content_zh || '';
+  const excerpt = post.excerpt_zh || '';
   
   // Select cover image based on locale (with fallback)
-  const coverImage = locale === 'zh' 
-    ? (post.cover_image_url_zh || post.cover_image_url_en || post.cover_image_url)
-    : (post.cover_image_url_en || post.cover_image_url_zh || post.cover_image_url);
+  const coverImage = post.cover_image_url_zh || post.cover_image_url;
   const categoryName = post.category
-    ? (locale === 'zh' ? post.category.name_zh : post.category.name_en)
+    ? post.category.name_zh
     : null;
   
-  const dateLocale = locale === 'zh' ? zhTW : enUS;
+  const dateLocale = zhTW;
   const publishedDate = post.published_at
     ? format(new Date(post.published_at), 'PPP', { locale: dateLocale })
     : null;
@@ -99,7 +95,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     : null;
   
   // Calculate reading time (use stored value or auto-calculate)
-  const readingTime = post.reading_time_minutes || calculateReadingTimeMinutes(post.content_en, post.content_zh);
+  const readingTime = post.reading_time_minutes || calculateReadingTimeMinutes(null, post.content_zh);
   
   // Fetch author info and related posts
   const author = await getAuthorInfo(post.author_id);
@@ -223,12 +219,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <figure className="mb-10 -mx-4 sm:mx-0">
               <Image
                 src={coverImage}
-                alt={
-                  (locale === 'zh' 
-                    ? (post.cover_image_alt_zh || post.cover_image_alt_en) 
-                    : (post.cover_image_alt_en || post.cover_image_alt_zh)
-                  ) || title
-                }
+                alt={(post.cover_image_alt_zh || title) as string}
                 width={1200}
                 height={630}
                 sizes="(max-width: 768px) 100vw, 800px"

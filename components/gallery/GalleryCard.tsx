@@ -24,9 +24,9 @@ interface GalleryCardProps {
 }
 
 export default function GalleryCard({ item, locale }: GalleryCardProps) {
-  const title = locale === 'zh' ? item.title_zh : item.title_en;
+  const title = item.title_zh;
   const categorySlug = item.category?.slug || '';
-  const imageAlt = (locale === 'zh' ? item.image_alt_zh : item.image_alt_en) || title;
+  const imageAlt = item.image_alt_zh || title;
   
   // Build the link to the item detail page
   const href = `/${locale}/gallery/${categorySlug}/${item.slug}`;

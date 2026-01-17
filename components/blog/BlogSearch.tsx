@@ -65,16 +65,11 @@ export default function BlogSearch({ placeholder, locale }: BlogSearchProps) {
     }
   };
 
-  const labels = locale === 'zh' ? {
+  const labels = {
     newest: '最新',
     oldest: '最舊',
     titleAZ: '標題 A-Z',
     titleZA: '標題 Z-A',
-  } : {
-    newest: 'Newest',
-    oldest: 'Oldest',
-    titleAZ: 'Title A-Z',
-    titleZA: 'Title Z-A',
   };
 
   return (
@@ -85,7 +80,7 @@ export default function BlogSearch({ placeholder, locale }: BlogSearchProps) {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={placeholder || 'Search...'}
+          placeholder={placeholder || '搜尋...'}
           className="w-full px-4 py-3 pl-12 border border-border rounded-full bg-surface-raised text-foreground placeholder:text-secondary/60 focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         <svg 

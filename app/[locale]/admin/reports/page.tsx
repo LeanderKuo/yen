@@ -6,7 +6,8 @@
  */
 
 import { getRecentReports } from '@/lib/modules/reports/admin-io';
-import { getAdminLocale, getAdminMessages } from '@/lib/i18n/admin-locale.server';
+import { getMessages } from 'next-intl/server';
+import type { AbstractIntlMessages } from 'next-intl';
 import ReportsClient from './ReportsClient';
 
 export default async function ReportsPage({
@@ -15,8 +16,8 @@ export default async function ReportsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const adminLocale = await getAdminLocale();
-  const adminMessages = await getAdminMessages(adminLocale);
+  const allMessages = await getMessages({ locale });
+  const messages = { admin: allMessages.admin } as AbstractIntlMessages;
 
   // Fetch initial data on the server
   const initialReports = await getRecentReports(50);
@@ -25,8 +26,7 @@ export default async function ReportsPage({
     <ReportsClient
       initialReports={initialReports}
       routeLocale={locale}
-      adminLocale={adminLocale}
-      adminMessages={adminMessages}
+      messages={messages}
     />
   );
 }

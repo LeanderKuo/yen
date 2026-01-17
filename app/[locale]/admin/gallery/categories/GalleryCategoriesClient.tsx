@@ -32,7 +32,6 @@ export default function GalleryCategoriesClient({
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<CategoryPayload>({
-    name_en: '',
     name_zh: '',
     slug: '',
     sort_order: 0,
@@ -51,10 +50,10 @@ export default function GalleryCategoriesClient({
     setLoading(false);
   };
 
-  const handleNameEnChange = (value: string) => {
+  const handleNameChange = (value: string) => {
     setFormData((prev) => {
-      const next = { ...prev, name_en: value };
-      const shouldAutoSlug = !editingId && (!prev.slug || prev.slug === generateSlug(prev.name_en));
+      const next = { ...prev, name_zh: value };
+      const shouldAutoSlug = !editingId && (!prev.slug || prev.slug === generateSlug(prev.name_zh));
       if (shouldAutoSlug) {
         next.slug = generateSlug(value);
       }
@@ -64,7 +63,6 @@ export default function GalleryCategoriesClient({
 
   const resetForm = () => {
     setFormData({
-      name_en: '',
       name_zh: '',
       slug: '',
       sort_order: 0,
@@ -77,8 +75,7 @@ export default function GalleryCategoriesClient({
 
   const handleEdit = (category: CategoryWithCount) => {
     setFormData({
-      name_en: category.name_en,
-      name_zh: category.name_zh,
+      name_zh: category.name_zh || category.name_en,
       slug: category.slug,
       sort_order: category.sort_order,
       is_visible: category.is_visible,
@@ -93,7 +90,6 @@ export default function GalleryCategoriesClient({
     setError(null);
 
     const payload: CategoryPayload = {
-      name_en: formData.name_en.trim(),
       name_zh: formData.name_zh.trim(),
       slug: formData.slug.trim(),
       sort_order: formData.sort_order,
@@ -108,7 +104,7 @@ export default function GalleryCategoriesClient({
     }
 
     if (!result.success) {
-      setError(result.error || 'An error occurred');
+      setError(result.error || '發生錯誤，請稍後再試。');
       return;
     }
 
@@ -119,17 +115,17 @@ export default function GalleryCategoriesClient({
   const handleDelete = async (category: CategoryWithCount) => {
     if (category.item_count > 0) {
       setError(
-        `Cannot delete category "${category.name_en}" because it has ${category.item_count} item(s). Please move or delete the items first.`
+        `無法刪除分類「${category.name_zh || category.name_en}」，因為此分類仍有 ${category.item_count} 件作品。請先移動或刪除作品。`
       );
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete "${category.name_en}"?`)) return;
+    if (!confirm(`確定要刪除分類「${category.name_zh || category.name_en}」嗎？`)) return;
 
     const result = await deleteGalleryCategory(category.id, locale);
 
     if (!result.success) {
-      setError(result.error || 'An error occurred');
+      setError(result.error || '發生錯誤，請稍後再試。');
       return;
     }
 
@@ -140,8 +136,8 @@ export default function GalleryCategoriesClient({
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gallery Categories</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage gallery categories</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">畫廊分類</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">管理畫廊作品分類</p>
         </div>
         <button
           onClick={() => {
@@ -153,7 +149,7 @@ export default function GalleryCategoriesClient({
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Category
+          新增分類
         </button>
       </div>
 
@@ -164,7 +160,7 @@ export default function GalleryCategoriesClient({
             onClick={() => setError(null)}
             className="text-xs text-red-500 hover:text-red-700 mt-1"
           >
-            Dismiss
+            關閉
           </button>
         </div>
       )}
@@ -172,37 +168,22 @@ export default function GalleryCategoriesClient({
       {showForm && (
         <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            {editingId ? 'Edit Category' : 'Add Category'}
+            {editingId ? '編輯分類' : '新增分類'}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name (English) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name_en}
-                  onChange={(e) => handleNameEnChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Paintings"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name (Chinese) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name_zh}
-                  onChange={(e) => setFormData({ ...formData, name_zh: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="繪畫"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                分類名稱 *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.name_zh}
+                onChange={(e) => handleNameChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="繪畫"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -221,7 +202,7 @@ export default function GalleryCategoriesClient({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Sort Order
+                  排序
                 </label>
                 <input
                   type="number"
@@ -240,7 +221,7 @@ export default function GalleryCategoriesClient({
                     onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked })}
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Visible</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">顯示</span>
                 </label>
               </div>
             </div>
@@ -251,13 +232,13 @@ export default function GalleryCategoriesClient({
                 onClick={resetForm}
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                Cancel
+                取消
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                {editingId ? 'Update' : 'Add'} Category
+                {editingId ? '更新' : '新增'}分類
               </button>
             </div>
           </form>
@@ -266,31 +247,28 @@ export default function GalleryCategoriesClient({
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
+          <div className="p-8 text-center text-gray-500">載入中...</div>
         ) : categories.length > 0 ? (
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Order
+                  排序
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Name (EN)
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  名稱 (ZH)
+                  名稱
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Slug
                 </th>
                 <th className="text-center px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Items
+                  作品
                 </th>
                 <th className="text-center px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Visible
+                  顯示
                 </th>
                 <th className="text-right px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Actions
+                  操作
                 </th>
               </tr>
             </thead>
@@ -304,9 +282,8 @@ export default function GalleryCategoriesClient({
                     {category.sort_order}
                   </td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                    {category.name_en}
+                    {category.name_zh || category.name_en}
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{category.name_zh}</td>
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400 font-mono text-sm">
                     {category.slug}
                   </td>
@@ -327,7 +304,7 @@ export default function GalleryCategoriesClient({
                       <button
                         onClick={() => handleEdit(category)}
                         className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
-                        title="Edit"
+                        title="編輯"
                       >
                         <svg
                           className="w-5 h-5"
@@ -346,7 +323,7 @@ export default function GalleryCategoriesClient({
                       <button
                         onClick={() => handleDelete(category)}
                         className="p-2 text-gray-500 hover:text-red-600 transition-colors"
-                        title="Delete"
+                        title="刪除"
                       >
                         <svg
                           className="w-5 h-5"
@@ -384,10 +361,10 @@ export default function GalleryCategoriesClient({
               />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
-              No categories yet
+              尚無分類
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Create your first category to organize gallery items.
+              建立第一個分類來整理畫廊作品。
             </p>
           </div>
         )}

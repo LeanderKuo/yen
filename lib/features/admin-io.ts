@@ -54,7 +54,7 @@ export async function setFeatureEnabled(
   // Check owner permission
   const ownerCheck = await isOwner(supabase);
   if (!ownerCheck) {
-    return { success: false, error: 'Only owner can toggle features' };
+    return { success: false, error: '僅限擁有者可切換功能' };
   }
 
   const { error } = await supabase
@@ -74,9 +74,7 @@ export async function setFeatureEnabled(
   revalidateTag('features', { expire: 0 });
   revalidateTag('site-content', { expire: 0 });
   revalidateTag('gallery', { expire: 0 });
-  revalidatePath('/en', 'page');
   revalidatePath('/zh', 'page');
-  revalidatePath(`/en/${key}`, 'page');
   revalidatePath(`/zh/${key}`, 'page');
   revalidatePath('/sitemap.xml', 'page');
 

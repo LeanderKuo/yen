@@ -11,7 +11,7 @@ import 'server-only';
 
 import { createAdminClient } from '@/lib/infrastructure/supabase/admin';
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { enqueueEmbedding } from '@/lib/modules/embedding/embedding-io';
+import { enqueueEmbedding } from '@/lib/embeddings';
 import type {
     SafetyDecision,
     SafetyRiskLevel,

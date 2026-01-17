@@ -13,7 +13,7 @@
  * Supported locales for page view tracking.
  * Must match DB constraint in 16_page_views.sql.
  */
-export type PageViewLocale = 'en' | 'zh';
+export type PageViewLocale = 'zh';
 
 /**
  * Page view tracking request payload.

@@ -69,7 +69,7 @@ const nextConfig: NextConfig = {
       },
       // Handle locale-prefixed index.html
       {
-        source: '/:locale(en|zh)/index.html',
+        source: '/:locale(zh)/index.html',
         destination: '/:locale',
         permanent: true,
       },

@@ -40,6 +40,20 @@ export type SimilarItemTargetType = 'post' | 'gallery_item';
 export type PreprocessableTargetType = 'post' | 'gallery_item' | 'comment';
 
 /**
+ * Shared enrichment context for preprocessing/embeddings.
+ * Produced by target-content fetchers and consumed by the preprocessing pipeline.
+ * @see doc/specs/completed/data-preprocessing-pipeline-spec.md
+ */
+export interface EnrichmentContext {
+  targetType: EmbeddingTargetType;
+  targetId: string;
+  parentTitle?: string;
+  category?: string;
+  tags?: string[];
+  locale?: 'en' | 'zh';
+}
+
+/**
  * Quality status for embedding verification.
  * @see SUPABASE_AI.md §5 for quality gate logic
  */

@@ -10,7 +10,7 @@
 import 'server-only';
 
 import { createAdminClient } from '@/lib/infrastructure/supabase/admin';
-import { semanticSearch } from '@/lib/modules/embedding/embedding-search-io';
+import { semanticSearch } from '@/lib/embeddings';
 import type { SafetyRagContext } from '@/lib/types/safety-risk-engine';
 
 // =============================================================================

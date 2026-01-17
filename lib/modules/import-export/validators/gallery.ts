@@ -43,33 +43,32 @@ export function validateGalleryItem(
 ): ValidationResult {
   const errors: ValidationError[] = [];
 
+  const canonicalTitle = (item.title_zh ?? item.title_en ?? '').trim();
+
   // Slug validation
   if (!item.slug) {
-    errors.push({ field: 'slug', message: 'Slug is required' });
+    errors.push({ field: 'slug', message: 'Slug 為必填' });
   } else if (!isValidSlug(item.slug)) {
-    errors.push({ field: 'slug', message: 'Invalid slug format (lowercase alphanumeric with hyphens)' });
+    errors.push({ field: 'slug', message: 'Slug 格式不正確' });
   }
 
   // Category validation
   if (!item.category_slug) {
-    errors.push({ field: 'category', message: 'Category is required' });
+    errors.push({ field: 'category', message: '分類為必填' });
   } else if (!existingCategorySlugs.has(item.category_slug)) {
-    errors.push({ field: 'category', message: `Category '${item.category_slug}' does not exist` });
+    errors.push({ field: 'category', message: `分類「${item.category_slug}」不存在` });
   }
 
   // Title validation
-  if (!item.title_en?.trim()) {
-    errors.push({ field: 'title_en', message: 'English title is required' });
-  }
-  if (!item.title_zh?.trim()) {
-    errors.push({ field: 'title_zh', message: 'Chinese title is required' });
+  if (!canonicalTitle) {
+    errors.push({ field: 'title_zh', message: '標題為必填' });
   }
 
   // Image URL validation
   if (!item.image_url?.trim()) {
-    errors.push({ field: 'image_url', message: 'Image URL is required' });
+    errors.push({ field: 'image_url', message: '圖片網址為必填' });
   } else if (!isValidUrl(item.image_url)) {
-    errors.push({ field: 'image_url', message: 'Invalid image URL format' });
+    errors.push({ field: 'image_url', message: '圖片網址格式不正確' });
   }
 
   return {
@@ -113,24 +112,23 @@ export function validateGalleryCategory(
 ): ValidationResult {
   const errors: ValidationError[] = [];
 
+  const canonicalName = (category.name_zh ?? category.name_en ?? '').trim();
+
   // Slug validation
   if (!category.slug) {
-    errors.push({ field: 'slug', message: 'Slug is required' });
+    errors.push({ field: 'slug', message: 'Slug 為必填' });
   } else if (!isValidSlug(category.slug)) {
-    errors.push({ field: 'slug', message: 'Invalid slug format (lowercase alphanumeric with hyphens)' });
+    errors.push({ field: 'slug', message: 'Slug 格式不正確' });
   }
 
-  // Name validation
-  if (!category.name_en?.trim()) {
-    errors.push({ field: 'name_en', message: 'English name is required' });
-  }
-  if (!category.name_zh?.trim()) {
-    errors.push({ field: 'name_zh', message: 'Chinese name is required' });
+  // Name validation (single-language)
+  if (!canonicalName) {
+    errors.push({ field: 'name_zh', message: '名稱為必填' });
   }
 
   // Sort order validation
   if (typeof category.sort_order !== 'number' || category.sort_order < 0) {
-    errors.push({ field: 'sort_order', message: 'Sort order must be a non-negative number' });
+    errors.push({ field: 'sort_order', message: '排序必須為非負整數' });
   }
 
   return {

@@ -84,6 +84,33 @@ function hasImport(source: string, modulePath: string): boolean {
   return new RegExp(`from\\s+['"]${modulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(source);
 }
 
+function getLibModulesFolderName(relPosixPath: string): string | null {
+  const match = relPosixPath.match(/^lib\/modules\/([^/]+)(?:\/|$)/);
+  return match ? match[1] : null;
+}
+
+function extractImportSpecifiers(source: string): string[] {
+  const code = stripComments(source);
+  const specifiers = new Set<string>();
+
+  // import/export ... from '...'
+  for (const match of code.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) {
+    specifiers.add(match[1]);
+  }
+
+  // import '...'
+  for (const match of code.matchAll(/\bimport\s+['"]([^'"]+)['"]/g)) {
+    specifiers.add(match[1]);
+  }
+
+  // import('...')
+  for (const match of code.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    specifiers.add(match[1]);
+  }
+
+  return [...specifiers];
+}
+
 test('Client/server boundaries are consistent', () => {
   const roots = ['app', 'components', 'lib']
     .map((p) => path.join(repoRoot, p))
@@ -210,6 +237,48 @@ test('Selected lib modules stay pure (no Next/React/Supabase/IO)', () => {
     for (const rule of forbidden) {
       if (rule.pattern.test(code)) {
         violations.push(`${path.relative(repoRoot, filePath)} contains forbidden dependency: ${rule.label}`);
+      }
+    }
+  }
+
+  assert.deepEqual(violations, []);
+});
+
+test('lib/modules/* do not cross-import other lib/modules/* domains', () => {
+  const modulesRoot = path.join(repoRoot, 'lib', 'modules');
+  if (!fs.existsSync(modulesRoot)) {
+    return;
+  }
+
+  const files = listSourceFiles(modulesRoot);
+  const violations: string[] = [];
+
+  for (const filePath of files) {
+    const rel = toPosixPath(path.relative(repoRoot, filePath));
+    const currentModule = getLibModulesFolderName(rel);
+    if (!currentModule) continue;
+
+    const source = fs.readFileSync(filePath, 'utf8');
+    const specifiers = extractImportSpecifiers(source);
+
+    for (const spec of specifiers) {
+      // Alias imports: @/lib/modules/<module>/...
+      if (spec.startsWith('@/lib/modules/')) {
+        const importedModule = spec.match(/^@\/lib\/modules\/([^/]+)(?:\/|$)/)?.[1] ?? null;
+        if (importedModule && importedModule !== currentModule) {
+          violations.push(`${rel} cross-imports "${spec}" (${currentModule} → ${importedModule})`);
+        }
+        continue;
+      }
+
+      // Relative imports: resolve and check if they land in a different module.
+      if (spec.startsWith('.')) {
+        const resolved = path.resolve(path.dirname(filePath), spec);
+        const resolvedRel = toPosixPath(path.relative(repoRoot, resolved));
+        const importedModule = getLibModulesFolderName(resolvedRel);
+        if (importedModule && importedModule !== currentModule) {
+          violations.push(`${rel} cross-imports "${spec}" (${currentModule} → ${importedModule})`);
+        }
       }
     }
   }

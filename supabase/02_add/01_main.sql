@@ -6,8 +6,8 @@
 -- 最後更新 Last Updated: 2025-12-16
 --
 -- 包含表格 TABLES:
--- - categories: 部落格分類 (雙語)
--- - posts: 部落格文章 (雙語)
+-- - categories: 部落格分類（單語：zh；en 欄位保留 legacy）
+-- - posts: 部落格文章（單語：zh；en 欄位保留 legacy）
 -- - site_content: 網站區塊內容
 -- - portfolio_items: 作品集
 -- - services: 服務項目

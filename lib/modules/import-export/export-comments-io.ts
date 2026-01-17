@@ -148,7 +148,7 @@ export async function exportCommentsBundle(
 
     // Get post slugs
     const { data: posts } = await supabase
-      .from('blog_posts')
+      .from('posts')
       .select('id, slug');
     for (const post of posts ?? []) {
       targetSlugMap.set(post.id, post.slug);

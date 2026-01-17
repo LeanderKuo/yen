@@ -180,10 +180,7 @@ export default function GalleryMasonry({
         }
 
         const tag = selectedTag.trim();
-        if (tag) {
-          const hasTag = item.tags_en.includes(tag) || item.tags_zh.includes(tag);
-          if (!hasTag) return false;
-        }
+        if (tag && !item.tags_zh.includes(tag)) return false;
 
         return true;
       })
@@ -206,7 +203,7 @@ export default function GalleryMasonry({
           <div className="bg-surface-raised rounded-xl border border-border-light overflow-hidden">
             <div className="bg-primary px-4 py-3">
               <h2 className="text-white font-semibold text-sm">
-                {locale === 'zh' ? '分類' : 'Categories'}
+                分類
               </h2>
             </div>
             <div className="p-3 space-y-1">
@@ -218,7 +215,7 @@ export default function GalleryMasonry({
                     : 'text-secondary hover:bg-surface'
                 }`}
               >
-                {locale === 'zh' ? '全部' : 'All'}
+                全部
               </button>
               {categories.map((cat) => (
                 <button
@@ -230,7 +227,7 @@ export default function GalleryMasonry({
                       : 'text-secondary hover:bg-surface'
                   }`}
                 >
-                  {locale === 'zh' ? cat.name_zh : cat.name_en}
+                  {cat.name_zh}
                 </button>
               ))}
             </div>
@@ -250,14 +247,14 @@ export default function GalleryMasonry({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={locale === 'zh' ? '搜尋作品...' : 'Search artworks...'}
+                  placeholder="搜尋作品..."
                   className="flex-1 px-4 py-2 border border-border-light rounded-l-lg bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
                   type="submit"
                   className="px-4 py-2 bg-primary text-white rounded-r-lg hover:bg-primary-dark transition-colors"
                 >
-                  {locale === 'zh' ? '搜尋' : 'Search'}
+                  搜尋
                 </button>
               </div>
             </form>
@@ -268,9 +265,9 @@ export default function GalleryMasonry({
               onChange={(e) => handleSortChange(e.target.value as GalleryListSort)}
               className="px-4 py-2 border border-border-light rounded-lg bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="newest">{locale === 'zh' ? '最新' : 'Newest'}</option>
-              <option value="popular">{locale === 'zh' ? '最受歡迎' : 'Most Popular'}</option>
-              <option value="featured">{locale === 'zh' ? '精選' : 'Featured'}</option>
+              <option value="newest">最新</option>
+              <option value="popular">最受歡迎</option>
+              <option value="featured">精選</option>
             </select>
           </div>
 
@@ -280,7 +277,7 @@ export default function GalleryMasonry({
               type="text"
               value={selectedTag}
               onChange={(e) => setSelectedTag(e.target.value)}
-              placeholder={locale === 'zh' ? '標籤篩選...' : 'Filter by tag...'}
+              placeholder="標籤篩選..."
               className="flex-1 max-w-xs px-4 py-2 border border-border-light rounded-lg bg-surface text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -296,7 +293,7 @@ export default function GalleryMasonry({
                   setTimeout(() => applyFilters({ tag: '' }), 0);
                 }}
                 className="text-secondary hover:text-foreground"
-                aria-label="Clear tag filter"
+                aria-label="清除標籤篩選"
               >
                 ✕
               </button>
@@ -308,7 +305,7 @@ export default function GalleryMasonry({
         {pinnedItems.length > 0 && (
           <section className="mb-10">
             <h2 className="text-xl font-semibold text-foreground mb-4">
-              {locale === 'zh' ? '精選' : 'Featured'}
+              精選
             </h2>
             <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
               {pinnedItems.map((item) => (
@@ -324,9 +321,7 @@ export default function GalleryMasonry({
 
         {/* Results Count */}
         <p className="text-sm text-secondary mb-4">
-          {locale === 'zh'
-            ? `共 ${displayCount} 件作品`
-            : `${displayCount} artwork${displayCount !== 1 ? 's' : ''}`}
+          {`共 ${displayCount} 件作品`}
         </p>
 
         {/* Masonry Grid */}
@@ -351,7 +346,7 @@ export default function GalleryMasonry({
         {!isLoading && displayCount === 0 && (
           <div className="text-center py-16">
             <p className="text-secondary text-lg">
-              {locale === 'zh' ? '找不到作品' : 'No artworks found'}
+              找不到作品
             </p>
             <button
               onClick={() => {
@@ -363,7 +358,7 @@ export default function GalleryMasonry({
               }}
               className="mt-4 text-primary hover:underline"
             >
-              {locale === 'zh' ? '清除篩選條件' : 'Clear filters'}
+              清除篩選條件
             </button>
           </div>
         )}
@@ -374,7 +369,7 @@ export default function GalleryMasonry({
         {/* End of Content */}
         {!hasMore && displayCount > 0 && (
           <p className="text-center text-secondary py-8">
-            {locale === 'zh' ? '已顯示全部作品' : 'All artworks loaded'}
+            已顯示全部作品
           </p>
         )}
       </div>

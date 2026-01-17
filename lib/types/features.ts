@@ -25,16 +25,14 @@ export interface FeatureSettingInput {
  */
 export const FEATURE_METADATA: Record<
   FeatureKey,
-  { icon: string; labelEn: string; labelZh: string }
+  { icon: string; label: string }
 > = {
   blog: {
     icon: '📝',
-    labelEn: 'Blog',
-    labelZh: '部落格',
+    label: '部落格',
   },
   gallery: {
     icon: '🖼️',
-    labelEn: 'Gallery',
-    labelZh: '畫廊',
+    label: '畫廊',
   },
 };

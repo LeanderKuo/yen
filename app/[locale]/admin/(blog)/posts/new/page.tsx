@@ -6,7 +6,6 @@
  */
 
 import { getCategories } from '@/lib/modules/blog/admin-io';
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getTranslations, getMessages } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 import PostForm from '../components/PostForm';
@@ -18,14 +17,11 @@ export default async function NewPostPage({
 }) {
   const { locale: routeLocale } = await params;
   
-  // Get admin UI locale
-  const adminLocale = await getAdminLocale();
-  
   // Get translations for admin blog namespace
-  const t = await getTranslations({ locale: adminLocale, namespace: 'admin.blog.postForm' });
+  const t = await getTranslations({ locale: routeLocale, namespace: 'admin.blog.postForm' });
   
   // Get messages for client component
-  const allMessages = await getMessages({ locale: adminLocale });
+  const allMessages = await getMessages({ locale: routeLocale });
   const adminMessages = { admin: allMessages.admin } as AbstractIntlMessages;
   
   const categories = await getCategories();

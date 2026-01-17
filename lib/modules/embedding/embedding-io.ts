@@ -104,17 +104,6 @@ export type { RawContentResult } from './embedding-target-content-io';
 export { getTargetContent } from './embedding-target-content-io';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Quality Metrics (LLM-as-a-Judge)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type { QualityMetrics, FailedSample } from '@/lib/modules/preprocessing/judge-io';
-
-export {
-  getQualityMetrics,
-  getFailedSamples,
-} from '@/lib/modules/preprocessing/judge-io';
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Re-ranking Operations (Phase 6.5+)
 // ─────────────────────────────────────────────────────────────────────────────
 

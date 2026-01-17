@@ -37,7 +37,7 @@ export async function saveGalleryItemAction(
     return { success: true };
   } catch (error) {
     console.error('Error saving gallery item:', error);
-    return { success: false, error: 'Failed to save gallery item' };
+    return { success: false, error: '儲存作品失敗' };
   }
 }
 
@@ -63,6 +63,6 @@ export async function deleteGalleryItemAction(
     return { success: true };
   } catch (error) {
     console.error('Error deleting gallery item:', error);
-    return { success: false, error: 'Failed to delete gallery item' };
+    return { success: false, error: '刪除作品失敗' };
   }
 }

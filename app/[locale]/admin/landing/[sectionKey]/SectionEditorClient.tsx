@@ -44,15 +44,13 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
   // Form state
   const [sortOrder, setSortOrder] = useState(section.sort_order);
   const [isVisible, setIsVisible] = useState(section.is_visible);
-  const [titleEn, setTitleEn] = useState(section.title_en || '');
   const [titleZh, setTitleZh] = useState(section.title_zh || '');
-  const [subtitleEn, setSubtitleEn] = useState(section.subtitle_en || '');
   const [subtitleZh, setSubtitleZh] = useState(section.subtitle_zh || '');
   const [sectionType, setSectionType] = useState<LandingSectionType>(section.section_type);
   const [galleryCategoryId, setGalleryCategoryId] = useState(section.gallery_category_id || '');
   const [gallerySurface, setGallerySurface] = useState<'home' | 'gallery' | ''>(section.gallery_surface || '');
   const [galleryLimit, setGalleryLimit] = useState(
-    (section.content_en as { limit?: number })?.limit || 12
+    (section.content_zh as { limit?: number })?.limit || 12
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,10 +66,11 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
 
       // Add fields based on section type
       if (isTitleEditable || isCustom) {
-        input.title_en = titleEn;
         input.title_zh = titleZh;
-        input.subtitle_en = subtitleEn;
         input.subtitle_zh = subtitleZh;
+        // Mirror to legacy en fields
+        input.title_en = titleZh;
+        input.subtitle_en = subtitleZh;
       }
 
       if (isCustom) {
@@ -92,32 +91,28 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
         setSuccess(true);
         router.refresh();
       } else {
-        setError(result.error || 'Failed to save');
+        setError(result.error || '儲存失敗');
       }
     });
   };
 
   const labels = {
-    title: locale === 'zh' ? '編輯區塊' : 'Edit Section',
-    back: locale === 'zh' ? '← 返回列表' : '← Back to List',
-    sectionKey: locale === 'zh' ? '區塊 Key' : 'Section Key',
-    sortOrder: locale === 'zh' ? '排序順序' : 'Sort Order',
-    visible: locale === 'zh' ? '顯示' : 'Visible',
-    titleEn: locale === 'zh' ? '標題 (English)' : 'Title (English)',
-    titleZh: locale === 'zh' ? '標題 (中文)' : 'Title (Chinese)',
-    subtitleEn: locale === 'zh' ? '副標題 (English)' : 'Subtitle (English)',
-    subtitleZh: locale === 'zh' ? '副標題 (中文)' : 'Subtitle (Chinese)',
-    type: locale === 'zh' ? '區塊類型' : 'Section Type',
-    gallerySource: locale === 'zh' ? '圖庫來源' : 'Gallery Source',
-    galleryLimit: locale === 'zh' ? '顯示數量' : 'Display Limit',
-    useCategory: locale === 'zh' ? '使用分類' : 'Use Category',
-    useFeatured: locale === 'zh' ? '使用精選' : 'Use Featured',
-    save: locale === 'zh' ? '儲存' : 'Save',
-    saving: locale === 'zh' ? '儲存中...' : 'Saving...',
-    saved: locale === 'zh' ? '已儲存！' : 'Saved!',
-    contentNote: locale === 'zh' 
-      ? '此區塊的內容在 Content 管理頁面編輯。' 
-      : 'Content for this section is managed in the Content admin page.',
+    title: '編輯區塊',
+    back: '← 返回列表',
+    sectionKey: '區塊 Key',
+    sortOrder: '排序順序',
+    visible: '顯示',
+    titleZh: '標題',
+    subtitleZh: '副標題',
+    type: '區塊類型',
+    gallerySource: '圖庫來源',
+    galleryLimit: '顯示數量',
+    useCategory: '使用分類',
+    useFeatured: '使用精選',
+    save: '儲存',
+    saving: '儲存中...',
+    saved: '已儲存！',
+    contentNote: '此區塊的內容在 Content 管理頁面編輯。',
   };
 
   return (
@@ -192,54 +187,28 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
         {/* Title/Subtitle (for title-editable and custom) */}
         {(isTitleEditable || isCustom) && (
           <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">
-                  {labels.titleEn}
-                </label>
-                <input
-                  type="text"
-                  value={titleEn}
-                  onChange={(e) => setTitleEn(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">
-                  {labels.titleZh}
-                </label>
-                <input
-                  type="text"
-                  value={titleZh}
-                  onChange={(e) => setTitleZh(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                {labels.titleZh}
+              </label>
+              <input
+                type="text"
+                value={titleZh}
+                onChange={(e) => setTitleZh(e.target.value)}
+                className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">
-                  {labels.subtitleEn}
-                </label>
-                <input
-                  type="text"
-                  value={subtitleEn}
-                  onChange={(e) => setSubtitleEn(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">
-                  {labels.subtitleZh}
-                </label>
-                <input
-                  type="text"
-                  value={subtitleZh}
-                  onChange={(e) => setSubtitleZh(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                {labels.subtitleZh}
+              </label>
+              <input
+                type="text"
+                value={subtitleZh}
+                onChange={(e) => setSubtitleZh(e.target.value)}
+                className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background"
+              />
             </div>
           </>
         )}
@@ -280,10 +249,10 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
                     }}
                     className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background mt-1"
                   >
-                    <option value="">-- {locale === 'zh' ? '不使用分類' : 'No Category'} --</option>
+                    <option value="">-- 不使用分類 --</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
-                        {locale === 'zh' ? cat.name_zh : cat.name_en}
+                        {cat.name_zh}
                       </option>
                     ))}
                   </select>
@@ -298,9 +267,9 @@ export default function SectionEditorClient({ section, categories, locale }: Pro
                     }}
                     className="w-full px-3 py-2 border border-border-light rounded-lg focus:ring-2 focus:ring-primary bg-background mt-1"
                   >
-                    <option value="">-- {locale === 'zh' ? '不使用精選' : 'No Featured'} --</option>
-                    <option value="home">Home</option>
-                    <option value="gallery">Gallery</option>
+                    <option value="">-- 不使用精選 --</option>
+                    <option value="home">首頁</option>
+                    <option value="gallery">畫廊</option>
                   </select>
                 </div>
               </div>

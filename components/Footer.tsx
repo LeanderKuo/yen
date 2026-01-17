@@ -22,7 +22,7 @@ interface FooterProps {
 }
 
 // Fallback footer for build-time safety
-function FallbackFooter({ locale = 'en' }: { locale?: string }) {
+function FallbackFooter({ locale = 'zh' }: { locale?: string }) {
   const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-surface text-secondary border-t border-border-light">
@@ -33,12 +33,12 @@ function FallbackFooter({ locale = 'en' }: { locale?: string }) {
               Quantum Nexus LNK
             </p>
             <p className="text-xs mt-2">
-              © {currentYear} All rights reserved
+              © {currentYear} 版權所有
             </p>
           </div>
           <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link href={`/${locale}/contact`} className="hover:text-primary transition-colors">Contact</Link>
-            <Link href={`/${locale}/privacy`} className="hover:text-primary transition-colors">Privacy</Link>
+            <Link href={`/${locale}/contact`} className="hover:text-primary transition-colors">聯絡我們</Link>
+            <Link href={`/${locale}/privacy`} className="hover:text-primary transition-colors">隱私權政策</Link>
           </nav>
         </div>
       </div>

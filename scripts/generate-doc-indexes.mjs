@@ -5,8 +5,6 @@ import process from 'node:process';
 const REPO_ROOT = process.cwd();
 const CHECK_ONLY = process.argv.includes('--check');
 
-const INLINE_LINK_RE = /!?\[([^\]]*)]\(([^)]+)\)/g;
-
 function repoPath(...segments) {
   return path.join(REPO_ROOT, ...segments);
 }
@@ -52,75 +50,6 @@ function extractBlockquoteMeta(markdownText) {
   }
 
   return meta;
-}
-
-function normalizeLinkTarget(rawTarget) {
-  let target = rawTarget.trim();
-  if (!target) return null;
-
-  if (target.startsWith('<') && target.includes('>')) {
-    target = target.slice(1, target.indexOf('>')).trim();
-  }
-
-  if (!target) return null;
-
-  if (
-    target.startsWith('http://') ||
-    target.startsWith('https://') ||
-    target.startsWith('mailto:') ||
-    target.startsWith('tel:') ||
-    target.startsWith('data:') ||
-    target.startsWith('//')
-  ) {
-    return null;
-  }
-
-  if (target.startsWith('#')) return null;
-  if (target.startsWith('/')) return null;
-
-  // Strip optional title: `path "title"` / `path 'title'`
-  const quoteIndex = Math.min(
-    ...['"', "'"]
-      .map((q) => target.indexOf(q))
-      .filter((idx) => idx !== -1)
-  );
-  if (Number.isFinite(quoteIndex) && quoteIndex > 0) {
-    target = target.slice(0, quoteIndex).trim();
-  }
-
-  // Keep only the first token if whitespace remains
-  const spaceIndex = target.search(/\s/);
-  if (spaceIndex !== -1) {
-    target = target.slice(0, spaceIndex).trim();
-  }
-
-  const hashIndex = target.indexOf('#');
-  const beforeHash = (hashIndex === -1 ? target : target.slice(0, hashIndex)).trim();
-  const rawAnchor = hashIndex === -1 ? null : target.slice(hashIndex + 1).trim();
-
-  const withoutQuery = (beforeHash.split('?')[0] ?? '').trim();
-  if (!withoutQuery) return null;
-
-  return { path: withoutQuery, anchor: rawAnchor || null };
-}
-
-function extractLinks(markdownText) {
-  const links = [];
-  const lines = markdownText.split(/\r?\n/);
-  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
-    const line = lines[lineIndex] ?? '';
-    INLINE_LINK_RE.lastIndex = 0;
-    let match = INLINE_LINK_RE.exec(line);
-    while (match) {
-      links.push({ text: match[1] ?? '', raw: match[2] ?? '' });
-      match = INLINE_LINK_RE.exec(line);
-    }
-  }
-  return links;
-}
-
-function resolveRelative(fromFilePath, relativePath) {
-  return path.resolve(path.dirname(fromFilePath), relativePath);
 }
 
 function relFromIndex(indexFilePath, targetFilePath) {
@@ -203,7 +132,6 @@ function inferDateFromFilename(filename) {
 }
 
 async function generateArchiveIndex() {
-  const indexPath = repoPath('doc', 'archive', 'README.md');
   const archiveDir = repoPath('doc', 'archive');
   const files = await listMarkdownFiles(archiveDir, {
     excludeNames: new Set(['README.md', 'TEMPLATE.md']),

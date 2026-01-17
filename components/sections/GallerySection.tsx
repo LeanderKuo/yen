@@ -49,7 +49,7 @@ export default function GallerySection({
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => {
-            const itemTitle = locale === 'zh' ? item.title_zh : item.title_en;
+            const itemTitle = item.title_zh;
             const category = (item as GalleryItem & { category?: GalleryCategory }).category;
             const categorySlug = category?.slug || 'gallery';
             const imageUrl = toWebp(item.image_url);
@@ -66,7 +66,7 @@ export default function GallerySection({
                 <div style={{ aspectRatio }} className="relative">
                   <Image
                     src={imageUrl}
-                    alt={itemTitle || item.title_en || 'Gallery item'}
+                    alt={itemTitle || '作品'}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

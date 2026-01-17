@@ -13,7 +13,7 @@ import {
   type PreprocessingConfig,
   validatePreprocessingConfig,
 } from '@/lib/validators/preprocessing-config';
-import { isOwner } from '@/lib/modules/auth';
+import { isOwner } from '@/lib/auth';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types

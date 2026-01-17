@@ -47,7 +47,7 @@ export default function SafetyQueueClient() {
     };
 
     const handleReject = async (commentId: string) => {
-        if (!confirm('Are you sure you want to reject this comment?')) return;
+        if (!confirm('確定要拒絕此留言嗎？')) return;
         const result = await rejectCommentAction(commentId);
         if (result.success) {
             fetchQueue();
@@ -100,8 +100,8 @@ export default function SafetyQueueClient() {
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                     <option value="">{t('filters.riskLevel')}</option>
-                    <option value="High">High Risk</option>
-                    <option value="Safe">Safe</option>
+                    <option value="High">高風險</option>
+                    <option value="Safe">安全</option>
                 </select>
 
                 <select
@@ -110,12 +110,12 @@ export default function SafetyQueueClient() {
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                     <option value="">{t('filters.targetType')}</option>
-                    <option value="post">Post</option>
-                    <option value="gallery_item">Gallery</option>
+                    <option value="post">文章</option>
+                    <option value="gallery_item">畫廊</option>
                 </select>
 
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {total} items
+                    {total} 則
                 </span>
             </div>
 
@@ -137,11 +137,11 @@ export default function SafetyQueueClient() {
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-50 dark:bg-gray-900">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Author</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">內容</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">風險</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">作者</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">操作</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">

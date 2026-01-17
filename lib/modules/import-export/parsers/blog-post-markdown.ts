@@ -26,7 +26,7 @@ import { LANG_MARKER_EN, LANG_MARKER_ZH } from '../formatters/blog-post-markdown
 // =============================================================================
 
 /** Required frontmatter fields */
-const REQUIRED_FIELDS = ['slug', 'category', 'visibility', 'title_en'] as const;
+const REQUIRED_FIELDS = ['slug', 'category', 'visibility'] as const;
 
 /** Valid visibility values */
 const VALID_VISIBILITIES = ['draft', 'private', 'public'] as const;
@@ -36,8 +36,11 @@ const VALID_VISIBILITIES = ['draft', 'private', 'public'] as const;
 // =============================================================================
 
 /**
- * Parse bilingual content from Markdown body.
- * Splits content by language markers.
+ * Parse content from Markdown body.
+ *
+ * Supports legacy bilingual markers, but for single-language project it always
+ * returns a single canonical content (prefer zh when present), mirrored to both
+ * `content_en` and `content_zh` for legacy DB fields.
  *
  * @param content - The Markdown body (after frontmatter)
  * @returns Object with content_en and optional content_zh
@@ -52,9 +55,9 @@ export function parseBilingualContent(content: string): {
   const hasEnMarker = trimmedContent.includes(LANG_MARKER_EN);
   const hasZhMarker = trimmedContent.includes(LANG_MARKER_ZH);
 
-  // No markers - treat entire content as English
+  // No markers - treat entire content as single-language content (zh)
   if (!hasEnMarker && !hasZhMarker) {
-    return { content_en: trimmedContent };
+    return trimmedContent ? { content_en: trimmedContent, content_zh: trimmedContent } : { content_en: '' };
   }
 
   // Split by markers
@@ -90,7 +93,9 @@ export function parseBilingualContent(content: string): {
     content_zh = trimmedContent.slice(zhIndex + LANG_MARKER_ZH.length).trim();
   }
 
-  return content_zh ? { content_en, content_zh } : { content_en };
+  // Single-language: prefer zh when available, otherwise fallback to en.
+  const canonical = (content_zh || content_en).trim();
+  return canonical ? { content_en: canonical, content_zh: canonical } : { content_en: '' };
 }
 
 /**
@@ -108,6 +113,11 @@ export function validateFrontmatterFields(
     if (!data[field] || (typeof data[field] === 'string' && !data[field])) {
       missing.push(field);
     }
+  }
+
+  const titleCandidate = data.title_zh ?? data.title_en ?? data.title;
+  if (!titleCandidate || (typeof titleCandidate === 'string' && titleCandidate.trim().length === 0)) {
+    missing.push('title');
   }
 
   return missing;
@@ -137,35 +147,46 @@ export function isValidVisibility(
 export function extractFrontmatterFromData(
   data: Record<string, unknown>
 ): BlogPostFrontmatter {
+  const titleCandidate = data.title_zh ?? data.title_en ?? data.title ?? '';
+  const title = String(titleCandidate || '');
+
+  const excerptCandidate = data.excerpt_zh ?? data.excerpt_en ?? data.excerpt ?? undefined;
+  const excerpt = excerptCandidate !== undefined ? String(excerptCandidate) : undefined;
+
+  const coverImageUrlCandidate =
+    data.cover_image_url_zh ?? data.cover_image_url_en ?? data.cover_image_url ?? undefined;
+  const coverImageUrl =
+    coverImageUrlCandidate !== undefined ? String(coverImageUrlCandidate) : undefined;
+
+  const coverImageAltCandidate =
+    data.cover_image_alt_zh ?? data.cover_image_alt_en ?? data.cover_image_alt ?? undefined;
+  const coverImageAlt =
+    coverImageAltCandidate !== undefined ? String(coverImageAltCandidate) : undefined;
+
   const frontmatter: BlogPostFrontmatter = {
     slug: String(data.slug || ''),
     category: String(data.category || ''),
     visibility: isValidVisibility(data.visibility) ? data.visibility : 'draft',
     created_at: String(data.created_at || new Date().toISOString()),
-    title_en: String(data.title_en || ''),
+    // Single-language: keep both fields identical for legacy schema.
+    title_en: title,
+    title_zh: title,
   };
 
-  // Add optional fields if present
-  if (data.title_zh) {
-    frontmatter.title_zh = String(data.title_zh);
+  // Optional fields (single-language; mirror to legacy en fields)
+  if (excerpt && excerpt.trim().length > 0) {
+    frontmatter.excerpt_en = excerpt;
+    frontmatter.excerpt_zh = excerpt;
   }
-  if (data.excerpt_en) {
-    frontmatter.excerpt_en = String(data.excerpt_en);
+
+  if (coverImageUrl && coverImageUrl.trim().length > 0) {
+    frontmatter.cover_image_url_en = coverImageUrl;
+    frontmatter.cover_image_url_zh = coverImageUrl;
   }
-  if (data.excerpt_zh) {
-    frontmatter.excerpt_zh = String(data.excerpt_zh);
-  }
-  if (data.cover_image_url_en) {
-    frontmatter.cover_image_url_en = String(data.cover_image_url_en);
-  }
-  if (data.cover_image_url_zh) {
-    frontmatter.cover_image_url_zh = String(data.cover_image_url_zh);
-  }
-  if (data.cover_image_alt_en) {
-    frontmatter.cover_image_alt_en = String(data.cover_image_alt_en);
-  }
-  if (data.cover_image_alt_zh) {
-    frontmatter.cover_image_alt_zh = String(data.cover_image_alt_zh);
+
+  if (coverImageAlt && coverImageAlt.trim().length > 0) {
+    frontmatter.cover_image_alt_en = coverImageAlt;
+    frontmatter.cover_image_alt_zh = coverImageAlt;
   }
 
   return frontmatter;
@@ -204,19 +225,11 @@ export function parseBlogPostMarkdown(content: string): ParseResult<ParsedBlogPo
     // Extract frontmatter
     const frontmatter = extractFrontmatterFromData(parsed.data);
 
-    // Parse bilingual content
+    // Parse content (single-language; legacy markers supported)
     const { content_en, content_zh } = parseBilingualContent(parsed.content);
 
-    // Warn if content_en is empty
     if (!content_en) {
-      warnings.push('English content is empty');
-    }
-
-    // Warn if no ZH content and title_zh exists
-    if (!content_zh && frontmatter.title_zh) {
-      warnings.push(
-        'Chinese title exists but Chinese content is missing'
-      );
+      warnings.push('Content is empty');
     }
 
     const result: ParsedBlogPost = {

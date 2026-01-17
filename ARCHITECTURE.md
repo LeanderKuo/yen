@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-> Last Updated: 2026-01-11
+> Last Updated: 2026-01-14
 > Status: Enforced
 > Role: Single source of truth for architecture and global constraints.
 
@@ -65,11 +65,13 @@ doc/           # documentation
     - Yes → 放 `lib/modules/<domain>/cached.ts`（`cachedQuery` + tags；fetcher **不得**讀 `cookies()`/`headers()`）
    - No → 繼續
 3. **純計算/映射/格式化/驗證（可單測、無 side effects）？**
-    - Yes → 放 pure module（`lib/modules/<domain>/*.ts`）或 validator（`lib/validators/*`），並加入/維護對應 tests
-   - No → 繼續
-4. **Client 端需要重複呼叫同一個 API（避免重複實作）？**
+     - Yes → 放 pure module（`lib/modules/<domain>/*.ts`）或 validator（`lib/validators/*`），並加入/維護對應 tests
+    - No → 繼續
+4. **需要跨 domain/module 的 orchestration？**（例：Comment submit 的 Spam → Safety、Landing → Gallery）
+   - Yes → 放 `lib/use-cases/**`（server-only；可組合多個 `lib/modules/*`；modules 保持隔離）
+5. **Client 端需要重複呼叫同一個 API（避免重複實作）？**
    - Yes → 建立/擴充 `hooks/use*Data.ts` 作為唯一呼叫點（Frontend Bridge Pattern）
-5. **需要對外提供 HTTP endpoint？**
+6. **需要對外提供 HTTP endpoint？**
    - API route → `app/api/<domain>/route.ts`（只做 parse/validate → call `lib/*` → return）
    - Admin 寫入 → `app/[locale]/admin/**/actions.ts`（只做 validate → call `lib/*` → revalidate）
 
@@ -168,7 +170,7 @@ interface ApiErrorResponse {
 | Reports   | `lib/modules/reports/admin-io.ts`       | 報告列表、建立、狀態更新               |
 | Reports   | `lib/modules/reports/reports-run-io.ts` | 報告執行（links/schema/lighthouse）    |
 | Landing   | `lib/modules/landing/io.ts`             | Landing sections 讀取                  |
-| Auth      | `lib/modules/auth/index.ts`             | `isSiteAdmin()`、`isOwner()` 等驗證函式 |
+| Auth      | `lib/auth/index.ts`                     | `isSiteAdmin()`、`isOwner()` 等驗證函式 |
 
 ### 3.8 Frontend Bridge Pattern (Phase 3 完成)
 
@@ -303,6 +305,12 @@ interface ApiErrorResponse {
 
 新增 pure 模組時需同步更新 `tests/architecture-boundaries.test.ts`。
 
+### 4.4 Modules Isolation（`lib/modules/*` 禁止跨模組依賴）
+
+- `lib/modules/<domain>/**` **不得** import `lib/modules/<other-domain>/**`（避免循環依賴與隱性耦合）。
+- Cross-domain orchestration 一律放 `lib/use-cases/**`（server-only）；由 use-case 組合多個 modules，modules 只保留單一職責。
+- **Guardrail**：`tests/architecture-boundaries.test.ts` 的 "lib/modules/* do not cross-import other lib/modules/* domains" 會自動掃描並阻擋違規。
+
 ### 4.5 Bundle / Dependency Guardrails
 
 - Public UI 禁止引入重型/管理端依賴：`react-image-crop`, `recharts`, `exceljs`, `papaparse`, `jszip`, `gray-matter`。
@@ -384,16 +392,23 @@ interface ApiErrorResponse {
 
 ## 附錄 A: §3.4.1 lib/ Canonical 結構 (Phase 2 — Shim 已移除)
 
-> Phase 2 已完成：canonical paths 為 `lib/infrastructure/*` 與 `lib/modules/*`；不再保留舊路徑 shim。
+> Phase 2 已完成：canonical `lib/` 結構以本附錄為準；不再保留舊路徑 shim。
 
 ```
 lib/
+├── analytics/         # Analytics IO + aggregation
+├── auth/              # RBAC helpers (server-only)
+├── cache/             # Cache wrappers (unstable_cache)
+├── embeddings/        # Embeddings platform facade (server-only)
+├── features/          # Feature gates (SSOT: feature_settings)
+├── i18n/              # Locale utils
 ├── infrastructure/    # 外部服務 (SDK wrappers, API clients)
 │   ├── supabase/      # Supabase client factories
 │   ├── openrouter/    # OpenRouter LLM client
 │   ├── cloudinary/    # Cloudinary SDK (placeholder)
 │   ├── akismet/       # Akismet spam API
 │   └── sentry/        # Sentry monitoring
+├── markdown/          # Markdown helpers
 ├── modules/           # 業務領域模組
 │   ├── blog/          # 部落格文章
 │   ├── gallery/       # 圖庫
@@ -408,15 +423,24 @@ lib/
 │   ├── landing/       # 首頁區塊
 │   ├── reports/       # 分析報表
 │   └── auth/          # 驗證輔助函式
-├── validators/        # 純驗證函式 (不變)
-├── utils/             # 純工具函式 (不變)
-└── types/             # 共用 TypeScript 型別 (不變)
+├── queue/             # QStash / background triggers
+├── reactions/         # Reactions IO (rate limit + toggle)
+├── rerank/            # Rerank (Cohere optional; server-only)
+├── security/          # Security helpers (sanitize/ip)
+├── seo/               # SEO helpers (hreflang/jsonld)
+├── site/              # SITE_URL SSOT
+├── spam/              # Spam pipeline (pure + IO)
+├── system/            # System ops (global cache version)
+├── types/             # 共用 TypeScript 型別 (SSOT)
+├── use-cases/         # Cross-domain orchestration (server-only)
+├── utils/             # 純工具函式
+└── validators/        # 純驗證函式
 ```
 
 **依賴規則 (Phase 2 強制)**:
 
 - `infrastructure/` → 無交叉依賴；各為獨立 SDK wrapper
-- `modules/` → 可依賴 `infrastructure/`、`validators/`、`utils/`、`types/`
+- `modules/` → 可依賴 `infrastructure/`、`types/`、`validators/`、`utils/`，以及明確列為 cross-cutting 的 `lib/*`（例如 `auth/`, `embeddings/`, `features/`, `spam/`, `security/`, `seo/`, `rerank/`）
 - `modules/` → **禁止**跨模組依賴（避免循環依賴）
 
 **Shim 策略（歷史）**:

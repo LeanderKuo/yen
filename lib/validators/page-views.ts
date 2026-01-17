@@ -28,7 +28,7 @@ const PATH_PATTERN = /^\/[a-zA-Z0-9/_-]*$/;
 const MAX_PATH_LENGTH = 500;
 
 /** Valid locales (matches DB constraint) */
-const VALID_LOCALES: readonly PageViewLocale[] = ['en', 'zh'] as const;
+const VALID_LOCALES: readonly PageViewLocale[] = ['zh'] as const;
 
 /** Paths to exclude from tracking (noise reduction) */
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/api', '/_next'] as const;
@@ -85,7 +85,7 @@ export function validatePageViewRequest(
 
   // Validate locale
   if (!isValidPageViewLocale(locale)) {
-    return invalidResult('Invalid locale: must be "en" or "zh"');
+    return invalidResult('Invalid locale: must be "zh"');
   }
 
   // Check excluded paths
@@ -98,7 +98,6 @@ export function validatePageViewRequest(
 
 /**
  * Extracts locale and canonical path from a full pathname.
- * e.g., '/en/blog/post' -> { locale: 'en', path: '/blog/post' }
  * e.g., '/zh' -> { locale: 'zh', path: '/' }
  *
  * Returns null if locale cannot be determined.
@@ -106,8 +105,8 @@ export function validatePageViewRequest(
 export function parsePathname(
   pathname: string
 ): { locale: PageViewLocale; path: string } | null {
-  // Match pattern: /en/... or /zh/...
-  const match = pathname.match(/^\/(en|zh)(\/.*)?$/);
+  // Match pattern: /zh/...
+  const match = pathname.match(/^\/(zh)(\/.*)?$/);
   if (!match) return null;
 
   const locale = match[1] as PageViewLocale;

@@ -7,7 +7,9 @@
  * All modules in lib/modules/preprocessing/* use these types.
  */
 
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
+import type { EmbeddingTargetType, EnrichmentContext } from '@/lib/types/embedding';
+
+export type { EnrichmentContext };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cleaner Types
@@ -114,16 +116,6 @@ export interface ChunkResult {
 // ─────────────────────────────────────────────────────────────────────────────
 // Enrichment Types
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** Context for enriching chunks */
-export interface EnrichmentContext {
-  targetType: EmbeddingTargetType;
-  targetId: string;
-  parentTitle?: string;
-  category?: string;
-  tags?: string[];
-  locale?: 'en' | 'zh';
-}
 
 /** Enriched chunk with additional context */
 export interface EnrichedChunk extends ContentChunk {

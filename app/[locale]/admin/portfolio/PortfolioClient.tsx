@@ -24,14 +24,20 @@ export default function PortfolioClient({ initialItems, locale }: PortfolioClien
   const handleSave = async (item: Partial<PortfolioItem>) => {
     setSaving(true);
     setMessage(null);
+
+    const titleZh = (item.title_zh || '').trim();
+    const descriptionZh = item.description_zh ?? undefined;
     
     const result = await savePortfolioAction(
       editingItem?.id || null,
       {
         ...item,
+        // Single-language site: mirror zh to legacy en columns
+        title_en: titleZh,
+        title_zh: titleZh,
         // Convert null to undefined for optional fields
-        description_en: item.description_en ?? undefined,
-        description_zh: item.description_zh ?? undefined,
+        description_en: descriptionZh,
+        description_zh: descriptionZh,
         url: item.url ?? undefined,
         badge_color: item.badge_color ?? undefined,
       },
@@ -41,61 +47,59 @@ export default function PortfolioClient({ initialItems, locale }: PortfolioClien
     setSaving(false);
     
     if (result.success) {
-      setMessage({ type: 'success', text: locale === 'zh' ? '已儲存' : 'Saved' });
+      setMessage({ type: 'success', text: '已儲存' });
       setShowForm(false);
       setEditingItem(null);
       router.refresh();
     } else {
-      setMessage({ type: 'error', text: result.error || (locale === 'zh' ? '儲存失敗' : 'Save failed') });
+      setMessage({ type: 'error', text: result.error || '儲存失敗' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(locale === 'zh' ? '確定要刪除嗎？' : 'Are you sure you want to delete?')) {
+    if (!confirm('確定要刪除嗎？')) {
       return;
     }
     
     const result = await deletePortfolioAction(id, locale);
     
     if (result.success) {
-      setMessage({ type: 'success', text: locale === 'zh' ? '已刪除' : 'Deleted' });
+      setMessage({ type: 'success', text: '已刪除' });
       router.refresh();
     } else {
-      setMessage({ type: 'error', text: result.error || (locale === 'zh' ? '刪除失敗' : 'Delete failed') });
+      setMessage({ type: 'error', text: result.error || '刪除失敗' });
     }
   };
 
   const handleToggleVisibility = async (id: string, visible: boolean) => {
     const result = await toggleVisibilityAction(id, visible, locale);
     if (result.success) {
-      setMessage({ type: 'success', text: locale === 'zh' ? '已更新' : 'Updated' });
+      setMessage({ type: 'success', text: '已更新' });
     } else {
-      setMessage({ type: 'error', text: result.error || (locale === 'zh' ? '更新失敗' : 'Update failed') });
+      setMessage({ type: 'error', text: result.error || '更新失敗' });
     }
     router.refresh();
   };
 
   const t = {
-    title: locale === 'zh' ? '作品集管理' : 'Portfolio Management',
-    description: locale === 'zh' ? '管理網站上顯示的作品項目' : 'Manage portfolio items displayed on the website',
-    add: locale === 'zh' ? '新增項目' : 'Add Item',
-    edit: locale === 'zh' ? '編輯' : 'Edit',
-    delete: locale === 'zh' ? '刪除' : 'Delete',
-    visible: locale === 'zh' ? '顯示' : 'Visible',
-    hidden: locale === 'zh' ? '隱藏' : 'Hidden',
-    history: locale === 'zh' ? '歷史' : 'History',
-    save: locale === 'zh' ? '儲存' : 'Save',
-    cancel: locale === 'zh' ? '取消' : 'Cancel',
-    titleEn: locale === 'zh' ? '英文標題' : 'English Title',
-    titleZh: locale === 'zh' ? '中文標題' : 'Chinese Title',
-    descEn: locale === 'zh' ? '英文描述' : 'English Description',
-    descZh: locale === 'zh' ? '中文描述' : 'Chinese Description',
-    url: locale === 'zh' ? '連結' : 'URL',
-    status: locale === 'zh' ? '狀態' : 'Status',
-    badgeColor: locale === 'zh' ? '標籤顏色' : 'Badge Color',
-    live: locale === 'zh' ? '已上線' : 'Live',
-    development: locale === 'zh' ? '開發中' : 'In Development',
-    noItems: locale === 'zh' ? '尚無項目' : 'No items yet',
+    title: '作品集管理',
+    description: '管理網站上顯示的作品項目',
+    add: '新增項目',
+    edit: '編輯',
+    delete: '刪除',
+    visible: '顯示',
+    hidden: '隱藏',
+    history: '歷史',
+    save: '儲存',
+    cancel: '取消',
+    titleLabel: '標題',
+    descLabel: '描述',
+    url: '連結',
+    status: '狀態',
+    badgeColor: '標籤顏色',
+    live: '已上線',
+    development: '開發中',
+    noItems: '尚無項目',
   };
 
   return (
@@ -148,7 +152,7 @@ export default function PortfolioClient({ initialItems, locale }: PortfolioClien
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {locale === 'zh' ? item.title_zh : item.title_en}
+                      {item.title_zh || item.title_en}
                     </h3>
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       item.status === 'live' 
@@ -164,7 +168,7 @@ export default function PortfolioClient({ initialItems, locale }: PortfolioClien
                     )}
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    {locale === 'zh' ? item.description_zh : item.description_en}
+                    {item.description_zh || item.description_en}
                   </p>
                   {item.url && (
                     <a
@@ -248,10 +252,8 @@ function PortfolioForm({
   t: Record<string, string>;
 }) {
   const [formData, setFormData] = useState({
-    title_en: item?.title_en || '',
-    title_zh: item?.title_zh || '',
-    description_en: item?.description_en || '',
-    description_zh: item?.description_zh || '',
+    title_zh: item?.title_zh || item?.title_en || '',
+    description_zh: item?.description_zh || item?.description_en || '',
     url: item?.url || '',
     status: item?.status || 'development',
     badge_color: item?.badge_color || 'blue',
@@ -266,43 +268,20 @@ function PortfolioForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.titleEn}</label>
-          <input
-            type="text"
-            value={formData.title_en}
-            onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.titleZh}</label>
-          <input
-            type="text"
-            value={formData.title_zh}
-            onChange={(e) => setFormData({ ...formData, title_zh: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700"
-            required
-          />
-        </div>
-      </div>
-      
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.descEn}</label>
-        <textarea
-          value={formData.description_en}
-          onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.titleLabel}</label>
+        <input
+          type="text"
+          value={formData.title_zh}
+          onChange={(e) => setFormData({ ...formData, title_zh: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700"
-          rows={3}
+          required
         />
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.descZh}</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.descLabel}</label>
         <textarea
-          value={formData.description_zh}
           onChange={(e) => setFormData({ ...formData, description_zh: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700"
           rows={3}
@@ -338,10 +317,10 @@ function PortfolioForm({
             onChange={(e) => setFormData({ ...formData, badge_color: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700"
           >
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="orange">Orange</option>
+            <option value="blue">藍色</option>
+            <option value="green">綠色</option>
+            <option value="purple">紫色</option>
+            <option value="orange">橘色</option>
           </select>
         </div>
       </div>

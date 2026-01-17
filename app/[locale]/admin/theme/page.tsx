@@ -5,12 +5,7 @@ import { getSiteConfigAdmin } from '@/lib/modules/theme/admin-io';
 import ThemeClient from './ThemeClient';
 
 
-export default async function ThemePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function ThemePage() {
   const supabase = await createClient();
   const ownerCheck = await isOwner(supabase);
   const config = await getSiteConfigAdmin();

@@ -7,10 +7,8 @@ import {
   getVisibleServicesCached,
   getCompanySettingsCached
 } from '@/lib/modules/content/cached';
-import {
-  getVisibleLandingSectionsCached,
-  fetchGalleryDataForSectionsCached,
-} from '@/lib/modules/landing/cached';
+import { getVisibleLandingSectionsCached } from '@/lib/modules/landing/cached';
+import { fetchGalleryDataForSectionsCached } from '@/lib/use-cases/landing/cached';
 import { getTranslations } from 'next-intl/server';
 import { getMetadataAlternates, SITE_URL } from '@/lib/seo';
 import { generateHomePageJsonLd } from '@/lib/seo/jsonld';
@@ -25,16 +23,16 @@ function getSetting(settings: CompanySetting[], key: string): string {
 }
 
 // Build UI labels for sections (server-only helper)
-function buildHomeLabels(locale: string) {
+function buildHomeLabels() {
   return {
     portfolio: {
-      title: locale === 'zh' ? '精選作品' : 'Selected Work',
-      intro: locale === 'zh' ? '打造有影響力的解決方案，解決社群和個人面臨的真實挑戰。' : 'Building impactful solutions that address real-world challenges across communities and individuals.',
-      visit: locale === 'zh' ? '了解更多' : 'Learn More',
-      inDevelopment: locale === 'zh' ? '開發中' : 'In Development',
+      title: '精選作品',
+      intro: '打造有影響力的解決方案，解決社群和個人面臨的真實挑戰。',
+      visit: '了解更多',
+      inDevelopment: '開發中',
     },
     services: {
-      title: locale === 'zh' ? '我們的建構項目' : 'What We Build',
+      title: '我們的建構項目',
     },
   };
 }
@@ -114,7 +112,7 @@ export default async function HomePage({
     : null;
 
   // Build UI labels
-  const uiLabels = buildHomeLabels(locale);
+  const uiLabels = buildHomeLabels();
 
   // JSON-LD for SEO (Organization + WebSite + Services + FAQ + Breadcrumb)
   const siteUrl = SITE_URL;
@@ -122,24 +120,20 @@ export default async function HomePage({
   const githubUrl = companyMeta?.githubUrl || '';
 
   // Build FAQ list from services/features
-  const faqs = locale === 'zh' ? [
+  const faqs = [
     { question: '你們提供哪些服務？', answer: '我們提供全端網頁開發、雲端基礎設施部署，以及 AI 與大型語言模型整合服務。' },
     { question: '你們使用什麼技術？', answer: '我們使用 React、Next.js、TypeScript、Supabase、GCP 和 Docker 等現代技術。' },
     { question: '如何聯繫你們？', answer: `您可以透過 ${emailAddress} 與我們聯繫，或透過 GitHub 與我們交流。` },
-  ] : [
-    { question: 'What services do you offer?', answer: 'We offer full-stack web development, cloud infrastructure deployment, and AI/LLM integration services.' },
-    { question: 'What technologies do you use?', answer: 'We use modern technologies including React, Next.js, TypeScript, Supabase, GCP, and Docker.' },
-    { question: 'How can I contact you?', answer: `You can reach us at ${emailAddress} or connect with us on GitHub.` },
   ];
 
   // Build breadcrumbs for homepage
   const breadcrumbs = [
-    { name: locale === 'zh' ? '首頁' : 'Home', url: `${siteUrl}/${locale}` },
+    { name: '首頁', url: `${siteUrl}/${locale}` },
   ];
 
   // Get siteName from settings or use locale-aware fallback
   const siteName = getSetting(settings, 'company_name_short') || 
-    (locale === 'zh' ? 'QN LNK' : 'Quantum Nexus LNK');
+    'QN LNK';
 
   const jsonLd = generateHomePageJsonLd({
     siteName,
@@ -147,13 +141,11 @@ export default async function HomePage({
     logo: `${siteUrl}/logo.png`,
     email: emailAddress,
     githubUrl,
-    description: locale === 'zh'
-      ? '建構連結社群的量子啟發數位解決方案'
-      : 'Building quantum-inspired digital solutions that connect communities',
+    description: '建構連結社群的量子啟發數位解決方案',
     locale,
     services: services.map((s) => ({
-      name: locale === 'zh' ? s.title_zh : s.title_en,
-      description: (locale === 'zh' ? s.description_zh : s.description_en) || undefined,
+      name: s.title_zh,
+      description: s.description_zh || undefined,
     })),
     faqs,
     breadcrumbs,

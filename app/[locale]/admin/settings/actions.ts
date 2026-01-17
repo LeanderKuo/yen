@@ -29,13 +29,13 @@ export async function saveSettingAction(
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
     
     const result = await updateCompanySetting(key, value, user.id);
     
     if (!result) {
-      return { success: false, error: 'Save failed' };
+      return { success: false, error: '儲存失敗' };
     }
     
     // Revalidate relevant paths
@@ -45,7 +45,7 @@ export async function saveSettingAction(
     return { success: true };
   } catch (err) {
     console.error('Save setting action error:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 
@@ -59,13 +59,13 @@ export async function purgeAllCache(): Promise<PurgeCacheResult> {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: '尚未登入' };
     }
 
     // Check admin role via JWT claims
     const role = user.app_metadata?.role;
     if (role !== 'owner' && role !== 'editor') {
-      return { success: false, error: 'Unauthorized' };
+      return { success: false, error: '權限不足' };
     }
 
     // Increment global cache version to invalidate all cached queries
@@ -81,7 +81,7 @@ export async function purgeAllCache(): Promise<PurgeCacheResult> {
     return { success: true, newVersion };
   } catch (err) {
     console.error('Purge cache action error:', err);
-    return { success: false, error: 'An unexpected error occurred' };
+    return { success: false, error: '發生未預期的錯誤' };
   }
 }
 

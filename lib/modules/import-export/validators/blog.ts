@@ -55,7 +55,7 @@ export function isValidVisibility(value: unknown): value is Visibility {
 export function validateVisibility(value: string): ValidationResult<Visibility> {
   if (!isValidVisibility(value)) {
     return invalidResult(
-      `Invalid visibility "${value}". Must be one of: ${VALID_VISIBILITIES.join(', ')}`
+      `可見性（visibility）不正確：「${value}」。允許值：${VALID_VISIBILITIES.join(', ')}`
     );
   }
   return validResult(value);
@@ -87,35 +87,47 @@ export function validateBlogPostData(
 ): ValidationResult<BlogPostImportData> {
   const errors: Record<string, string> = {};
 
+  const title = (data.frontmatter.title_zh ?? data.frontmatter.title_en ?? '').trim();
+  const content = (data.content_zh ?? data.content_en ?? '').trim();
+  const excerpt = (data.frontmatter.excerpt_zh ?? data.frontmatter.excerpt_en ?? '').trim();
+  const coverImageUrl = (
+    data.frontmatter.cover_image_url_zh ?? data.frontmatter.cover_image_url_en ?? ''
+  ).trim();
+  const coverImageAlt = (
+    data.frontmatter.cover_image_alt_zh ?? data.frontmatter.cover_image_alt_en ?? ''
+  ).trim();
+
   // Validate slug
   if (!data.frontmatter.slug) {
-    errors.slug = 'Slug is required';
+    errors.slug = 'Slug 為必填';
   } else if (!isValidSlug(data.frontmatter.slug)) {
-    errors.slug =
-      'Invalid slug format. Must be lowercase alphanumeric with hyphens.';
+    errors.slug = 'Slug 格式不正確';
   }
 
   // Validate category
   if (!data.frontmatter.category) {
-    errors.category = 'Category slug is required';
+    errors.category = '分類 slug 為必填';
   } else if (!isValidSlug(data.frontmatter.category)) {
-    errors.category =
-      'Invalid category slug format. Must be lowercase alphanumeric with hyphens.';
+    errors.category = '分類 slug 格式不正確';
   }
 
   // Validate visibility
   if (!isValidVisibility(data.frontmatter.visibility)) {
-    errors.visibility = `Invalid visibility. Must be one of: ${VALID_VISIBILITIES.join(', ')}`;
+    errors.visibility = `可見性（visibility）不正確。允許值：${VALID_VISIBILITIES.join(', ')}`;
   }
 
-  // Validate title_en
-  if (!data.frontmatter.title_en || !data.frontmatter.title_en.trim()) {
-    errors.title_en = 'English title is required';
+  // Validate title/content (single-language)
+  if (!title) {
+    errors.title_en = '標題為必填';
   }
 
-  // Validate content_en
-  if (!data.content_en || !data.content_en.trim()) {
-    errors.content_en = 'English content is required';
+  if (!content) {
+    errors.content_en = '內容為必填';
+  }
+
+  // If cover image exists, alt text is required (SEO/accessibility)
+  if (coverImageUrl && !coverImageAlt) {
+    errors.cover_image_alt_en = '封面圖片描述（Alt 文字）為必填';
   }
 
   // Return errors if any
@@ -129,16 +141,17 @@ export function validateBlogPostData(
     category_slug: data.frontmatter.category,
     visibility: data.frontmatter.visibility,
     created_at: data.frontmatter.created_at,
-    title_en: data.frontmatter.title_en,
-    title_zh: data.frontmatter.title_zh ?? null,
-    content_en: data.content_en,
-    content_zh: data.content_zh ?? null,
-    excerpt_en: data.frontmatter.excerpt_en ?? null,
-    excerpt_zh: data.frontmatter.excerpt_zh ?? null,
-    cover_image_url_en: data.frontmatter.cover_image_url_en ?? null,
-    cover_image_url_zh: data.frontmatter.cover_image_url_zh ?? null,
-    cover_image_alt_en: data.frontmatter.cover_image_alt_en ?? null,
-    cover_image_alt_zh: data.frontmatter.cover_image_alt_zh ?? null,
+    // Single-language: mirror into legacy en/zh fields
+    title_en: title,
+    title_zh: title,
+    content_en: content,
+    content_zh: content,
+    excerpt_en: excerpt || null,
+    excerpt_zh: excerpt || null,
+    cover_image_url_en: coverImageUrl || null,
+    cover_image_url_zh: coverImageUrl || null,
+    cover_image_alt_en: coverImageAlt || null,
+    cover_image_alt_zh: coverImageAlt || null,
   };
 
   return validResult(importData);
@@ -159,22 +172,20 @@ export function validateBlogCategoryData(
 ): ValidationResult<BlogCategoryImportData> {
   const errors: Record<string, string> = {};
 
+  const nameZh = (data.name_zh ?? '').trim();
+  const nameEn = (data.name_en ?? '').trim();
+  const canonicalName = nameZh || nameEn;
+
   // Validate slug
   if (!data.slug) {
-    errors.slug = 'Slug is required';
+    errors.slug = 'Slug 為必填';
   } else if (!isValidSlug(data.slug)) {
-    errors.slug =
-      'Invalid slug format. Must be lowercase alphanumeric with hyphens.';
+    errors.slug = 'Slug 格式不正確';
   }
 
-  // Validate name_en
-  if (!data.name_en || !data.name_en.trim()) {
-    errors.name_en = 'English name is required';
-  }
-
-  // Validate name_zh
-  if (!data.name_zh || !data.name_zh.trim()) {
-    errors.name_zh = 'Chinese name is required';
+  // Validate name (single-language)
+  if (!canonicalName) {
+    errors.name_zh = '名稱為必填';
   }
 
   // Return errors if any
@@ -185,8 +196,9 @@ export function validateBlogCategoryData(
   // Build import data
   const importData: BlogCategoryImportData = {
     slug: data.slug,
-    name_en: data.name_en.trim(),
-    name_zh: data.name_zh.trim(),
+    // Single-language: mirror into legacy en/zh fields
+    name_en: canonicalName,
+    name_zh: canonicalName,
   };
 
   return validResult(importData);

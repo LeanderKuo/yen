@@ -40,32 +40,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Add static pages with language alternates
   for (const page of activeStaticPages) {
-    // English version
-    sitemapEntries.push({
-      url: `${SITE_URL}/en${page}`,
-      lastModified: new Date(),
-      changeFrequency: page === '' ? 'weekly' : 'monthly',
-      priority: page === '' ? 1.0 : 0.8,
-      alternates: {
-        languages: {
-          en: `${SITE_URL}/en${page}`,
-          'zh-Hant': `${SITE_URL}/zh${page}`,
-        },
-      },
-    });
-    
-    // Chinese version
     sitemapEntries.push({
       url: `${SITE_URL}/zh${page}`,
       lastModified: new Date(),
       changeFrequency: page === '' ? 'weekly' : 'monthly',
       priority: page === '' ? 1.0 : 0.8,
-      alternates: {
-        languages: {
-          en: `${SITE_URL}/en${page}`,
-          'zh-Hant': `${SITE_URL}/zh${page}`,
-        },
-      },
     });
   }
   
@@ -77,22 +56,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const blogPath = `/blog/${post.categorySlug}/${post.slug}`;
       const lastModified = new Date(post.updatedAt);
       
-      // Only add English version if post has English content
-      if (post.hasEnglish) {
-        sitemapEntries.push({
-          url: `${SITE_URL}/en${blogPath}`,
-          lastModified,
-          changeFrequency: 'weekly',
-          priority: 0.7,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${blogPath}`,
-              ...(post.hasChinese && { 'zh-Hant': `${SITE_URL}/zh${blogPath}` }),
-            },
-          },
-        });
-      }
-      
       // Only add Chinese version if post has Chinese content
       if (post.hasChinese) {
         sitemapEntries.push({
@@ -100,12 +63,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           lastModified,
           changeFrequency: 'weekly',
           priority: 0.7,
-          alternates: {
-            languages: {
-              ...(post.hasEnglish && { en: `${SITE_URL}/en${blogPath}` }),
-              'zh-Hant': `${SITE_URL}/zh${blogPath}`,
-            },
-          },
         });
       }
     }
@@ -121,33 +78,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const item of galleryItems) {
         const galleryPath = `/gallery/${item.categorySlug}/${item.itemSlug}`;
         const lastModified = new Date(item.updatedAt);
-        
-        // English version
-        sitemapEntries.push({
-          url: `${SITE_URL}/en${galleryPath}`,
-          lastModified,
-          changeFrequency: 'weekly',
-          priority: 0.7,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${galleryPath}`,
-              'zh-Hant': `${SITE_URL}/zh${galleryPath}`,
-            },
-          },
-        });
-        
-        // Chinese version
+
         sitemapEntries.push({
           url: `${SITE_URL}/zh${galleryPath}`,
           lastModified,
           changeFrequency: 'weekly',
           priority: 0.7,
-          alternates: {
-            languages: {
-              en: `${SITE_URL}/en${galleryPath}`,
-              'zh-Hant': `${SITE_URL}/zh${galleryPath}`,
-            },
-          },
         });
       }
     } catch (error) {

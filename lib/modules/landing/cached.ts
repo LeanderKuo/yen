@@ -10,11 +10,9 @@
 
 import { cachedQuery } from '@/lib/cache/wrapper';
 import type { LandingSection } from '@/lib/types/landing';
-import type { GalleryItem } from '@/lib/types/gallery';
 import {
   getVisibleLandingSections,
   getVisibleLandingSectionByKey,
-  fetchGalleryDataForSections,
 } from '@/lib/modules/landing/io';
 
 const CACHE_REVALIDATE_SECONDS = 60;
@@ -51,10 +49,3 @@ export const getVisibleLandingSectionByKeyCached = cachedQuery(
  * @param sections - The sections to fetch gallery data for
  * @returns Record mapping section ID to gallery items
  */
-export const fetchGalleryDataForSectionsCached = cachedQuery(
-  async (sections: LandingSection[]): Promise<Record<string, GalleryItem[]>> =>
-    fetchGalleryDataForSections(sections),
-  ['landing-gallery-data'],
-  ['landing-sections', 'gallery'],
-  CACHE_REVALIDATE_SECONDS
-);

@@ -14,8 +14,8 @@
 
 import React, { useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { zhTW, enUS } from 'date-fns/locale';
-import { useLocale, useTranslations } from 'next-intl';
+import { zhTW } from 'date-fns/locale';
+import { useTranslations } from 'next-intl';
 import LikeButton from '@/components/reactions/LikeButton';
 import styles from './CommentItem.module.css';
 
@@ -49,7 +49,6 @@ export default function CommentItem({
   depth = 0,
 }: CommentItemProps) {
   const t = useTranslations('comments');
-  const locale = useLocale();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -60,7 +59,7 @@ export default function CommentItem({
     setEditContent(comment.content);
   }, [comment.content]);
 
-  const dateLocale = locale === 'zh' ? zhTW : enUS;
+  const dateLocale = zhTW;
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
     locale: dateLocale,

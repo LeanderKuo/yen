@@ -11,9 +11,9 @@ import type { SiteContent, CompanySetting } from '@/lib/types/content';
 import { ContactSection } from '@/components/sections';
 
 // Helper to get localized content
-function getContent<T>(content: SiteContent | undefined, locale: string): T | null {
+function getContent<T>(content: SiteContent | undefined, _locale: string): T | null {
   if (!content) return null;
-  return (locale === 'zh' ? content.content_zh : content.content_en) as T;
+  return content.content_zh as T;
 }
 
 // Helper to get setting value
@@ -39,10 +39,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const alternates = getMetadataAlternates('/contact', locale);
   
-  const title = locale === 'zh' ? '聯絡我們 | Quantum Nexus LNK' : 'Contact Us | Quantum Nexus LNK';
-  const description = locale === 'zh' 
-    ? '與 Quantum Nexus LNK 團隊取得聯繫，討論您的專案需求'
-    : 'Get in touch with the Quantum Nexus LNK team to discuss your project needs';
+  const title = '聯絡我們｜Quantum Nexus LNK';
+  const description = '與 Quantum Nexus LNK 團隊取得聯繫，討論您的專案需求';
 
   return {
     title,
@@ -77,8 +75,8 @@ export default async function ContactPage({
   
   // JSON-LD breadcrumbs
   const breadcrumbs = [
-    { name: locale === 'zh' ? '首頁' : 'Home', url: `${SITE_URL}/${locale}` },
-    { name: locale === 'zh' ? '聯絡我們' : 'Contact', url: `${SITE_URL}/${locale}/contact` },
+    { name: '首頁', url: `${SITE_URL}/${locale}` },
+    { name: '聯絡我們', url: `${SITE_URL}/${locale}/contact` },
   ];
   const breadcrumbJsonLd = generateBreadcrumbJsonLd(breadcrumbs);
 
@@ -88,7 +86,7 @@ export default async function ContactPage({
         <Header locale={locale} />
         <main className="pt-24 md:pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-secondary">Content not available</p>
+            <p className="text-secondary">內容不存在</p>
           </div>
         </main>
         <Footer locale={locale} />

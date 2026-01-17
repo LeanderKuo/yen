@@ -3,10 +3,9 @@
  * 
  * Renders the CommentsClient component with locale and searchParams.
  * No 'use client' - keeps page as server component per ARCHITECTURE.md.
- * Uses admin i18n via getAdminLocale.
+ * Uses route locale messages (single-language zh).
  */
 
-import { getAdminLocale } from '@/lib/i18n/admin-locale.server';
 import { getMessages } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 import CommentsClient from './CommentsClient';
@@ -24,9 +23,7 @@ export default async function CommentsPage({ params, searchParams }: PageProps) 
   const { locale: routeLocale } = await params;
   const resolvedSearchParams = await searchParams;
   
-  // Get admin UI locale and messages
-  const adminLocale = await getAdminLocale();
-  const allMessages = await getMessages({ locale: adminLocale });
+  const allMessages = await getMessages({ locale: routeLocale });
   const adminMessages = { admin: allMessages.admin } as AbstractIntlMessages;
   
   return (

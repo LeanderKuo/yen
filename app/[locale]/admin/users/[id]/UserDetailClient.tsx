@@ -23,7 +23,6 @@ import AppointmentCalendar from './components/AppointmentCalendar';
 interface UserDetailClientProps {
   userDetail: UserDetail;
   routeLocale: string;
-  adminLocale: string;
   notesPreview: boolean;
   adminNotesHtml?: string;
   isOwner: boolean;
@@ -33,7 +32,6 @@ interface UserDetailClientProps {
 function UserDetailClientContent({
   userDetail,
   routeLocale,
-  adminLocale,
   notesPreview,
   adminNotesHtml,
   isOwner,
@@ -42,14 +40,9 @@ function UserDetailClientContent({
 
   const { directory, adminProfile, appointments, comments = [] } = userDetail;
 
-  // Get locale-specific markdown for admin notes (based on admin UI locale)
-  const adminNotesMd =
-    adminLocale === 'zh'
-      ? adminProfile?.descriptionZhMd
-      : adminProfile?.descriptionEnMd;
+  const adminNotesMd = adminProfile?.descriptionZhMd;
 
-  // Get locale-specific tags (based on admin UI locale)
-  const tags = adminLocale === 'zh' ? adminProfile?.tagsZh : adminProfile?.tagsEn;
+  const tags = adminProfile?.tagsZh;
 
   return (
     <div className="space-y-6">
@@ -98,7 +91,6 @@ function UserDetailClientContent({
 export default function UserDetailClient({
   userDetail,
   routeLocale,
-  adminLocale,
   notesPreview,
   adminNotesHtml,
   isOwner,
@@ -109,7 +101,6 @@ export default function UserDetailClient({
       <UserDetailClientContent
         userDetail={userDetail}
         routeLocale={routeLocale}
-        adminLocale={adminLocale}
         notesPreview={notesPreview}
         adminNotesHtml={adminNotesHtml}
         isOwner={isOwner}

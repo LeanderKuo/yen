@@ -59,7 +59,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
     };
 
     const handleReject = async () => {
-        if (!confirm('Are you sure you want to reject this comment?')) return;
+        if (!confirm('確定要拒絕此留言嗎？')) return;
         const result = await rejectDetailCommentAction(commentId);
         if (result.success) {
             router.push('/admin/comments/safety');
@@ -78,7 +78,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
             setShowPromoteModal(false);
             setPromoteText('');
             setPromoteLabel('');
-            alert('Added to corpus as draft');
+            alert('已加入語料庫（草稿）');
         }
     };
 
@@ -109,7 +109,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Queue
+                返回佇列
             </button>
 
             {/* Header */}
@@ -137,7 +137,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
                                     {assessment.layer1Hit}
                                 </span>
                             ) : (
-                                <span className="text-gray-400">None</span>
+                                <span className="text-gray-400">無</span>
                             )}
                         </div>
 
@@ -154,7 +154,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
                                     ))}
                                 </div>
                             ) : (
-                                <span className="text-gray-400">None</span>
+                                <span className="text-gray-400">無</span>
                             )}
                         </div>
 
@@ -191,7 +191,7 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
 
                     {/* Actions */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">操作</h3>
 
                         {/* Main Actions */}
                         <div className="flex flex-wrap gap-3 mb-6">
@@ -286,13 +286,13 @@ export default function SafetyDetailClient({ commentId }: SafetyDetailClientProp
                                 onClick={() => setShowPromoteModal(false)}
                                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                             >
-                                Cancel
+                                取消
                             </button>
                             <button
                                 onClick={handlePromoteToCorpus}
                                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                             >
-                                Add to Corpus
+                                加入語料庫
                             </button>
                         </div>
                     </div>

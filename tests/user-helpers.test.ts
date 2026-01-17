@@ -12,17 +12,7 @@ import {
 // formatDateLocalized
 // =============================================================================
 
-test('formatDateLocalized formats date for English locale', () => {
-  const dateStr = '2024-12-29T12:30:00Z';
-  const result = formatDateLocalized(dateStr, 'en');
-
-  // Should contain year, month abbreviation, and time
-  assert.ok(result.includes('2024'), 'Should include year');
-  assert.ok(result.includes('Dec'), 'Should include month abbreviation');
-  assert.ok(result.includes('29'), 'Should include day');
-});
-
-test('formatDateLocalized formats date for Chinese locale', () => {
+test('formatDateLocalized formats date in zh-TW', () => {
   const dateStr = '2024-12-29T12:30:00Z';
   const result = formatDateLocalized(dateStr, 'zh');
 
@@ -31,31 +21,20 @@ test('formatDateLocalized formats date for Chinese locale', () => {
   assert.ok(result.includes('29'), 'Should include day');
 });
 
-test('formatDateLocalized defaults to English for unknown locale', () => {
+test('formatDateLocalized ignores locale and still uses zh-TW', () => {
   const dateStr = '2024-12-29T12:30:00Z';
-  const result = formatDateLocalized(dateStr, 'fr');
+  const result = formatDateLocalized(dateStr, 'en');
 
-  // Should use en-US format (default)
-  assert.ok(result.includes('Dec'), 'Should fallback to English month');
+  assert.ok(result.includes('2024'), 'Should include year');
+  assert.ok(result.includes('29'), 'Should include day');
+  assert.ok(!result.includes('Dec'), 'Should not use English month');
 });
 
 // =============================================================================
 // formatDateShortLocalized
 // =============================================================================
 
-test('formatDateShortLocalized formats date for English locale (no time)', () => {
-  const dateStr = '2024-12-29T12:30:00Z';
-  const result = formatDateShortLocalized(dateStr, 'en');
-
-  // Should contain year, month abbreviation, day, but NOT time
-  assert.ok(result.includes('2024'), 'Should include year');
-  assert.ok(result.includes('Dec'), 'Should include month abbreviation');
-  assert.ok(result.includes('29'), 'Should include day');
-  // Should not include time components
-  assert.ok(!result.includes(':'), 'Should NOT include time separator');
-});
-
-test('formatDateShortLocalized formats date for Chinese locale (no time)', () => {
+test('formatDateShortLocalized formats date in zh-TW (no time)', () => {
   const dateStr = '2024-12-29T12:30:00Z';
   const result = formatDateShortLocalized(dateStr, 'zh');
 
@@ -66,12 +45,13 @@ test('formatDateShortLocalized formats date for Chinese locale (no time)', () =>
   assert.ok(!result.includes(':'), 'Should NOT include time separator');
 });
 
-test('formatDateShortLocalized defaults to English for unknown locale', () => {
+test('formatDateShortLocalized ignores locale and still uses zh-TW', () => {
   const dateStr = '2024-12-29T12:30:00Z';
-  const result = formatDateShortLocalized(dateStr, 'fr');
+  const result = formatDateShortLocalized(dateStr, 'en');
 
-  // Should use en-US format (default)
-  assert.ok(result.includes('Dec'), 'Should fallback to English month');
+  assert.ok(result.includes('2024'), 'Should include year');
+  assert.ok(result.includes('29'), 'Should include day');
+  assert.ok(!result.includes('Dec'), 'Should not use English month');
 });
 
 // =============================================================================

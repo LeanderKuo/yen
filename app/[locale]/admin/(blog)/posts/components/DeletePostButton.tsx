@@ -20,7 +20,7 @@ export default function DeletePostButton({ postId, routeLocale }: DeletePostButt
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this post?')) {
+    if (confirm('確定要刪除此文章嗎？')) {
       setError(null);
       startTransition(async () => {
         const result = await deletePostAction(postId, routeLocale);
@@ -38,7 +38,7 @@ export default function DeletePostButton({ postId, routeLocale }: DeletePostButt
         onClick={handleDelete}
         disabled={isPending}
         className={`p-2 text-gray-500 hover:text-red-600 transition-colors ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-        title="Delete"
+        title="刪除"
       >
         {isPending ? (
           <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

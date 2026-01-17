@@ -11,10 +11,10 @@ import type { SiteContent } from '@/lib/types/content';
 
 /**
  * Pick localized content from a SiteContent row.
- * Selects content_zh for 'zh' locale, content_en otherwise.
+ * Single-language project: always selects `content_zh`.
  *
  * @param content - SiteContent row from database (or undefined)
- * @param locale - Current locale ('en' | 'zh')
+ * @param locale - Legacy param (ignored; kept for callsite compatibility)
  * @returns Typed content object or null if content is undefined
  *
  * @example
@@ -22,23 +22,8 @@ import type { SiteContent } from '@/lib/types/content';
  */
 export function pickLocaleContent<T>(
   content: SiteContent | undefined,
-  locale: string
+  _locale: string
 ): T | null {
   if (!content) return null;
-  return (locale === 'zh' ? content.content_zh : content.content_en) as T;
-}
-
-/**
- * Pick between en/zh values based on locale.
- * Useful for simple bilingual string/object mappings.
- *
- * @param values - Object with 'en' and 'zh' keys
- * @param locale - Current locale ('en' | 'zh')
- * @returns The value corresponding to the locale
- *
- * @example
- * const title = pickLocale({ en: 'Hello', zh: '你好' }, locale);
- */
-export function pickLocale<T>(values: { en: T; zh: T }, locale: string): T {
-  return locale === 'zh' ? values.zh : values.en;
+  return content.content_zh as T;
 }

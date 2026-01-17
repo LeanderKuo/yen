@@ -67,17 +67,22 @@ export function validateLandingSectionFields(
 export function transformToImportData(
   data: LandingSectionExportData
 ): LandingSectionImportData {
+  const title = (data.title_zh ?? data.title_en ?? null) as string | null;
+  const subtitle = (data.subtitle_zh ?? data.subtitle_en ?? null) as string | null;
+  const content = (data.content_zh ?? data.content_en ?? null) as Record<string, unknown> | null;
+
   return {
     section_key: data.section_key,
     section_type: data.section_type,
     sort_order: typeof data.sort_order === 'number' ? data.sort_order : 0,
     is_visible: typeof data.is_visible === 'boolean' ? data.is_visible : true,
-    title_en: data.title_en ?? null,
-    title_zh: data.title_zh ?? null,
-    subtitle_en: data.subtitle_en ?? null,
-    subtitle_zh: data.subtitle_zh ?? null,
-    content_en: data.content_en ?? null,
-    content_zh: data.content_zh ?? null,
+    // Single-language: mirror into legacy en/zh fields
+    title_en: title,
+    title_zh: title,
+    subtitle_en: subtitle,
+    subtitle_zh: subtitle,
+    content_en: content,
+    content_zh: content,
   };
 }
 

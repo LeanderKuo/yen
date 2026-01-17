@@ -1,6 +1,6 @@
 # Quantum Nexus LNK Website
 
-Modern bilingual corporate website (EN / zh-Hant) built with Next.js (App Router) + Supabase.
+Modern corporate website (zh-Hant) built with Next.js (App Router) + Supabase.
 
 ---
 
@@ -28,7 +28,7 @@ Modern bilingual corporate website (EN / zh-Hant) built with Next.js (App Router
 
 ## Features
 
-- **Bilingual**: EN / zh-Hant, SEO-friendly (`hreflang`)
+- **Single language**: zh-Hant
 - **Blog**: Markdown editor (GFM + code highlight + math), categories, SEO metadata
 - **Gallery**: masonry layout, infinite scroll, anonymous reactions
 - **Admin CMS**: content/landing/theme/features/users + data modules (Import/Export, AI Analysis, Preprocessing)
@@ -42,7 +42,7 @@ Modern bilingual corporate website (EN / zh-Hant) built with Next.js (App Router
 | --------- | ----------------------------------------------- |
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript |
 | Styling   | Tailwind CSS 3.4.x                              |
-| i18n      | next-intl (en/zh)                               |
+| i18n      | next-intl (zh)                                  |
 | Database  | Supabase (PostgreSQL + Auth + RLS)              |
 | Images    | Cloudinary                                      |
 | Deploy    | Vercel                                          |
@@ -157,7 +157,7 @@ myownwebsite/
   components/    # React components (public + admin)
   hooks/         # Client-only React Hooks
   lib/           # Domain logic (pure + IO)
-  messages/      # i18n translation files (en.json, zh.json)
+  messages/      # i18n translation file (zh.json)
   supabase/      # DB scripts (COMBINED_ADD/SEED)
   tests/         # Architecture boundary tests + unit tests
   doc/           # Specs, roadmap, archives, runbook

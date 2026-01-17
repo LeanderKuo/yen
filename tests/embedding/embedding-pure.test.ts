@@ -141,10 +141,10 @@ test('composePostContent combines title and excerpt', () => {
     excerpt_en: 'English excerpt',
     excerpt_zh: '中文摘要',
   });
-  assert.ok(result.includes('English Title'));
   assert.ok(result.includes('中文標題'));
-  assert.ok(result.includes('English excerpt'));
   assert.ok(result.includes('中文摘要'));
+  assert.ok(!result.includes('English Title'));
+  assert.ok(!result.includes('English excerpt'));
 });
 
 test('composeGalleryItemContent combines title and description', () => {

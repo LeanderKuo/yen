@@ -9,8 +9,7 @@
 import 'server-only';
 
 import { createAdminClient } from '@/lib/infrastructure/supabase/admin';
-import type { EmbeddingTargetType } from '@/lib/types/embedding';
-import type { EnrichmentContext } from '@/lib/modules/preprocessing/types';
+import type { EmbeddingTargetType, EnrichmentContext } from '@/lib/types/embedding';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -27,7 +26,7 @@ export interface RawContentResult {
 
 /**
  * Fetch raw content for a post.
- * Composition: title_en + title_zh + excerpt_en + excerpt_zh
+ * Single-language composition: title + excerpt (prefer zh, fallback to en)
  * @see SUPABASE_AI.md §2.2
  */
 async function getPostContent(targetId: string): Promise<RawContentResult | null> {
@@ -57,12 +56,13 @@ async function getPostContent(targetId: string): Promise<RawContentResult | null
     return null;
   }
 
-  // Compose content for embedding
+  // Compose content for embedding (single-language; avoid duplicating mirrored fields)
+  const title = (data.title_zh ?? data.title_en ?? '').trim();
+  const excerpt = (data.excerpt_zh ?? data.excerpt_en ?? '').trim();
+
   const parts: string[] = [];
-  if (data.title_en) parts.push(data.title_en);
-  if (data.title_zh) parts.push(data.title_zh);
-  if (data.excerpt_en) parts.push(data.excerpt_en);
-  if (data.excerpt_zh) parts.push(data.excerpt_zh);
+  if (title) parts.push(title);
+  if (excerpt) parts.push(excerpt);
 
   const rawContent = parts.join('\n\n');
 
@@ -77,7 +77,7 @@ async function getPostContent(targetId: string): Promise<RawContentResult | null
     context: {
       targetType: 'post',
       targetId: data.id,
-      parentTitle: data.title_en ?? data.title_zh ?? undefined,
+      parentTitle: data.title_zh ?? data.title_en ?? undefined,
       category: categorySlug ?? undefined,
     },
   };
@@ -85,7 +85,7 @@ async function getPostContent(targetId: string): Promise<RawContentResult | null
 
 /**
  * Fetch raw content for a gallery item.
- * Composition: title_en + title_zh + description_en + description_zh
+ * Single-language composition: title + description (prefer zh, fallback to en)
  * @see SUPABASE_AI.md §2.2
  */
 async function getGalleryItemContent(targetId: string): Promise<RawContentResult | null> {
@@ -115,12 +115,13 @@ async function getGalleryItemContent(targetId: string): Promise<RawContentResult
     return null;
   }
 
-  // Compose content for embedding
+  // Compose content for embedding (single-language; avoid duplicating mirrored fields)
+  const title = (data.title_zh ?? data.title_en ?? '').trim();
+  const description = (data.description_zh ?? data.description_en ?? '').trim();
+
   const parts: string[] = [];
-  if (data.title_en) parts.push(data.title_en);
-  if (data.title_zh) parts.push(data.title_zh);
-  if (data.description_en) parts.push(data.description_en);
-  if (data.description_zh) parts.push(data.description_zh);
+  if (title) parts.push(title);
+  if (description) parts.push(description);
 
   const rawContent = parts.join('\n\n');
 
@@ -136,7 +137,7 @@ async function getGalleryItemContent(targetId: string): Promise<RawContentResult
     context: {
       targetType: 'gallery_item',
       targetId: data.id,
-      parentTitle: data.title_en ?? data.title_zh ?? undefined,
+      parentTitle: data.title_zh ?? data.title_en ?? undefined,
       category: categorySlug ?? undefined,
     },
   };

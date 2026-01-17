@@ -9,7 +9,7 @@ import BlogCategorySidebar from '@/components/blog/BlogCategorySidebar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format } from 'date-fns';
-import { zhTW, enUS } from 'date-fns/locale';
+import { zhTW } from 'date-fns/locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -53,8 +53,8 @@ export default async function BlogPage({
   const { categories, uncategorizedCount } = await getCategoriesWithCountsCached();
 
   // Pre-compute locale-specific date formatting
-  const dateLocale = locale === 'zh' ? zhTW : enUS;
-  const readMoreLabel = locale === 'zh' ? '閱讀更多' : 'Read Article';
+  const dateLocale = zhTW;
+  const readMoreLabel = '閱讀更多';
 
   return (
     <div className="min-h-screen">
@@ -73,7 +73,7 @@ export default async function BlogPage({
           </div>
           
           {/* Search */}
-          <BlogSearch locale={locale} placeholder={locale === 'zh' ? '搜索文章...' : 'Search posts...'} />
+          <BlogSearch locale={locale} placeholder="搜尋文章..." />
           
           {/* Main Content with Sidebar */}
           <div className="flex flex-col lg:flex-row gap-8">
@@ -113,7 +113,7 @@ export default async function BlogPage({
                           : 'bg-surface-raised text-secondary hover:bg-surface-raised-hover hover:text-foreground'
                       }`}
                     >
-                      {locale === 'zh' ? cat.name_zh : cat.name_en}
+                      {cat.name_zh}
                     </a>
                   ))}
                 </div>
@@ -123,10 +123,10 @@ export default async function BlogPage({
               {(search || categorySlug) && (
                 <div className="text-center lg:text-left mb-6">
                   <p className="text-sm text-secondary">
-                    {locale === 'zh' ? `找到 ${posts.length} 篇文章` : `Found ${posts.length} posts`}
+                    {`找到 ${posts.length} 篇文章`}
                     {search && (
                       <span className="ml-2">
-                        {locale === 'zh' ? `含「${search}」` : `containing "${search}"`}
+                        {`含「${search}」`}
                       </span>
                     )}
                   </p>
@@ -138,17 +138,15 @@ export default async function BlogPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {posts.map((post) => {
                     // Pre-compute all locale-specific values for BlogCard (server component)
-                    const title = locale === 'zh' && post.title_zh ? post.title_zh : post.title_en;
-                    const excerpt = locale === 'zh' && post.excerpt_zh ? post.excerpt_zh : post.excerpt_en;
+                    const title = post.title_zh || '（無標題）';
+                    const excerpt = post.excerpt_zh || '';
                     const categoryName = post.category 
-                      ? (locale === 'zh' ? post.category.name_zh : post.category.name_en)
+                      ? post.category.name_zh
                       : null;
                     const formattedDate = post.published_at 
                       ? format(new Date(post.published_at), 'PPP', { locale: dateLocale })
                       : null;
-                    const imageAlt = locale === 'zh' 
-                      ? (post.cover_image_alt_zh || post.cover_image_alt_en || title)
-                      : (post.cover_image_alt_en || post.cover_image_alt_zh || title);
+                    const imageAlt = post.cover_image_alt_zh || title;
                     const postCategorySlug = post.category?.slug || 'uncategorized';
                     const postUrl = `/${locale}/blog/${postCategorySlug}/${post.slug}`;
 

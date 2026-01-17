@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { LOCALES } from '@/lib/i18n/locales';
+import { usePathname } from 'next/navigation';
 
 interface NavItem {
   key: string;
@@ -20,18 +19,9 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ companyName, navItems, locale }: HeaderClientProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const localePrefixPattern = new RegExp(`^/(${LOCALES.join('|')})(?=/|$)`);
+  const localePrefixPattern = new RegExp(`^/${locale}(?=/|$)`);
   const pathnameWithoutLocale = pathname.replace(localePrefixPattern, '') || '/';
-
-  const toggleLanguage = () => {
-    const newLocale = locale === 'en' ? 'zh' : 'en';
-    const basePath = pathnameWithoutLocale === '/' ? `/${newLocale}` : `/${newLocale}${pathnameWithoutLocale}`;
-    const search = typeof window === 'undefined' ? '' : window.location.search;
-    const hash = typeof window === 'undefined' ? '' : window.location.hash;
-    router.replace(`${basePath}${search}${hash}`);
-  };
 
   // Check if nav item is active based on current pathname (locale-stripped)
   const isActive = (itemKey: string) => {
@@ -74,16 +64,8 @@ export default function HeaderClient({ companyName, navItems, locale }: HeaderCl
             })}
           </nav>
 
-          {/* Language Switcher & Mobile Toggle */}
+          {/* Mobile Toggle */}
           <div className="flex items-center space-x-3">
-            <button
-              onClick={toggleLanguage}
-              className="px-3 py-1 text-xs font-medium text-secondary hover:text-foreground border border-border rounded-full hover:border-foreground transition-all"
-              aria-label={locale === 'en' ? 'Switch to Chinese' : '切換至英文'}
-            >
-              {locale === 'en' ? '中文' : 'EN'}
-            </button>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

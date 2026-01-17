@@ -31,8 +31,8 @@ test('generateArticleJsonLd emits BlogPosting with expected fields', () => {
 
 test('generateBreadcrumbJsonLd positions items starting from 1', () => {
   const jsonLd = generateBreadcrumbJsonLd([
-    { name: 'Home', url: 'https://example.com/en' },
-    { name: 'Blog', url: 'https://example.com/en/blog' },
+    { name: '首頁', url: 'https://example.com/zh' },
+    { name: '部落格', url: 'https://example.com/zh/blog' },
   ]) as Record<string, unknown>;
 
   assert.equal(jsonLd['@type'], 'BreadcrumbList');
@@ -49,10 +49,10 @@ test('generateHomePageJsonLd emits graph with Organization and WebSite', () => {
     email: 'hello@example.com',
     githubUrl: 'https://github.com/example',
     description: 'Example',
-    locale: 'en',
+    locale: 'zh',
     services: [{ name: 'Build', description: 'Build stuff' }],
     faqs: [{ question: 'Q', answer: 'A' }],
-    breadcrumbs: [{ name: 'Home', url: 'https://example.com/en' }],
+    breadcrumbs: [{ name: '首頁', url: 'https://example.com/zh' }],
   }) as Record<string, unknown>;
 
   assert.equal(jsonLd['@context'], 'https://schema.org');
@@ -66,5 +66,10 @@ test('generateHomePageJsonLd emits graph with Organization and WebSite', () => {
   assert.ok(org);
   assert.ok(website);
   assert.ok(faq);
+
+  const websiteNode = website as Record<string, unknown>;
+  const potentialAction = websiteNode.potentialAction as Record<string, unknown>;
+  const target = potentialAction.target as Record<string, unknown>;
+  assert.equal(target.urlTemplate, 'https://example.com/zh/blog?search={search_term_string}');
 });
 

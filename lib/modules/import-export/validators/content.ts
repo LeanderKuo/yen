@@ -68,15 +68,14 @@ export function validateSiteContent(
 
   // Section key validation
   if (!content.section_key?.trim()) {
-    errors.push({ field: 'section_key', message: 'Section key is required' });
+    errors.push({ field: 'section_key', message: 'section_key 為必填' });
   }
 
   // Content structure validation
-  if (typeof content.content_en !== 'object' || content.content_en === null) {
-    errors.push({ field: 'content_en', message: 'English content must be a valid object' });
-  }
-  if (typeof content.content_zh !== 'object' || content.content_zh === null) {
-    errors.push({ field: 'content_zh', message: 'Chinese content must be a valid object' });
+  const hasContentEn = typeof content.content_en === 'object' && content.content_en !== null;
+  const hasContentZh = typeof content.content_zh === 'object' && content.content_zh !== null;
+  if (!hasContentEn && !hasContentZh) {
+    errors.push({ field: 'content', message: '內容必須為有效的物件' });
   }
 
   return {
@@ -120,35 +119,35 @@ export function validateLandingSection(
 
   // Section key validation
   if (!section.section_key?.trim()) {
-    errors.push({ field: 'section_key', message: 'Section key is required' });
+    errors.push({ field: 'section_key', message: 'section_key 為必填' });
   } else if (!VALID_SECTION_KEYS.includes(section.section_key)) {
     errors.push({
       field: 'section_key',
-      message: `Invalid section key. Must be one of: ${VALID_SECTION_KEYS.slice(0, 7).join(', ')}, or custom_1 to custom_10`,
+      message: `section_key 不正確。允許值：${VALID_SECTION_KEYS.slice(0, 7).join(', ')}，或 custom_1 到 custom_10`,
     });
   }
 
   // Section type validation
   if (!section.section_type?.trim()) {
-    errors.push({ field: 'section_type', message: 'Section type is required' });
+    errors.push({ field: 'section_type', message: 'section_type 為必填' });
   } else if (!VALID_SECTION_TYPES.includes(section.section_type)) {
     errors.push({
       field: 'section_type',
-      message: `Invalid section type. Must be one of: ${VALID_SECTION_TYPES.join(', ')}`,
+      message: `section_type 不正確。允許值：${VALID_SECTION_TYPES.join(', ')}`,
     });
   }
 
   // Sort order validation
   if (typeof section.sort_order !== 'number' || section.sort_order < 0) {
-    errors.push({ field: 'sort_order', message: 'Sort order must be a non-negative number' });
+    errors.push({ field: 'sort_order', message: 'sort_order 必須為非負數' });
   }
 
   // Content structure validation (if provided)
   if (section.content_en !== null && typeof section.content_en !== 'object') {
-    errors.push({ field: 'content_en', message: 'English content must be an object or null' });
+    errors.push({ field: 'content_en', message: 'content_en 必須為物件或 null' });
   }
   if (section.content_zh !== null && typeof section.content_zh !== 'object') {
-    errors.push({ field: 'content_zh', message: 'Chinese content must be an object or null' });
+    errors.push({ field: 'content_zh', message: 'content_zh 必須為物件或 null' });
   }
 
   return {

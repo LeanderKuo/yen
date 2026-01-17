@@ -40,15 +40,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
   
-  const title = locale === 'zh' ? item.title_zh : item.title_en;
-  const description = locale === 'zh' 
-    ? (item.description_zh || `${item.title_zh} - 作品詳情`)
-    : (item.description_en || `${item.title_en} - Artwork details`);
+  const title = item.title_zh;
+  const description = item.description_zh || `${item.title_zh}－作品詳情`;
   
   const ogImageUrl = toOgImage(item.image_url, item.og_image_format);
   
   return {
-    title: `${title} | ${locale === 'zh' ? '畫廊' : 'Gallery'}`,
+    title: `${title}｜畫廊`,
     description,
     alternates: getMetadataAlternates(`/gallery/${categorySlug}/${slug}`, locale),
     openGraph: {
@@ -60,7 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: (locale === 'zh' ? item.image_alt_zh : item.image_alt_en) || title,
+          alt: item.image_alt_zh || title,
         },
       ],
     },
@@ -106,12 +104,12 @@ export default async function GalleryItemPage({ params }: PageProps) {
   const commentMessages = { comments: allMessages.comments };
 
   // Localized content
-  const title = locale === 'zh' ? item.title_zh : item.title_en;
-  const description = locale === 'zh' ? item.description_zh : item.description_en;
-  const categoryName = locale === 'zh' ? item.category.name_zh : item.category.name_en;
-  const material = locale === 'zh' ? item.material_zh : item.material_en;
-  const tags = locale === 'zh' ? item.tags_zh : item.tags_en;
-  const imageAlt = (locale === 'zh' ? item.image_alt_zh : item.image_alt_en) || title;
+  const title = item.title_zh;
+  const description = item.description_zh;
+  const categoryName = item.category.name_zh;
+  const material = item.material_zh;
+  const tags = item.tags_zh;
+  const imageAlt = item.image_alt_zh || title;
   
   // Convert image to WebP
   const imageUrl = toWebp(item.image_url);
@@ -123,7 +121,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
         {/* Breadcrumb */}
         <nav className="mb-4 text-sm text-secondary">
           <a href={`/${locale}/gallery`} className="hover:text-primary transition-colors">
-            {locale === 'zh' ? '畫廊' : 'Gallery'}
+            畫廊
           </a>
           <span className="mx-2">/</span>
           <a href={`/${locale}/gallery/${categorySlug}`} className="hover:text-primary transition-colors">
@@ -174,7 +172,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
           {material && (
             <div className="mb-6">
               <h2 className="text-sm font-medium text-secondary uppercase tracking-wide mb-2">
-                {locale === 'zh' ? '材質' : 'Material'}
+                材質
               </h2>
               <p className="text-foreground">{material}</p>
             </div>
@@ -184,7 +182,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
           {tags.length > 0 && (
             <div className="mb-8">
               <h2 className="text-sm font-medium text-secondary uppercase tracking-wide mb-2">
-                {locale === 'zh' ? '標籤' : 'Tags'}
+                標籤
               </h2>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag, index) => (
@@ -210,7 +208,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
             </a>
             <span>•</span>
             <time dateTime={item.created_at}>
-              {new Date(item.created_at).toLocaleDateString(locale === 'zh' ? 'zh-TW' : 'en-US', {
+              {new Date(item.created_at).toLocaleDateString('zh-TW', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',

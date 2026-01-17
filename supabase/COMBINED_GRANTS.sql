@@ -76,7 +76,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.comment_blacklist TO authenticate
 GRANT SELECT, UPDATE, DELETE ON public.spam_decision_log TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.comment_moderation TO authenticated;
 
-GRANT SELECT, INSERT, DELETE ON public.reactions TO anon, authenticated;
+GRANT SELECT ON public.reactions TO authenticated;
 GRANT SELECT ON public.reaction_rate_limits TO authenticated;
 
 -- ============================================

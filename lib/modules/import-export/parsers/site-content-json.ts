@@ -37,8 +37,10 @@ export function validateSiteContentFields(
   const missing: string[] = [];
 
   if (!isNonEmptyString(data.section_key)) missing.push('section_key');
-  if (typeof data.content_en !== 'object' || data.content_en === null) missing.push('content_en');
-  if (typeof data.content_zh !== 'object' || data.content_zh === null) missing.push('content_zh');
+
+  const hasContentEn = typeof data.content_en === 'object' && data.content_en !== null;
+  const hasContentZh = typeof data.content_zh === 'object' && data.content_zh !== null;
+  if (!hasContentEn && !hasContentZh) missing.push('content');
 
   return missing;
 }
@@ -56,11 +58,19 @@ export function validateSiteContentFields(
 export function transformToImportData(
   data: SiteContentExportData
 ): SiteContentImportData {
+  const content =
+    (typeof data.content_zh === 'object' && data.content_zh !== null
+      ? data.content_zh
+      : typeof data.content_en === 'object' && data.content_en !== null
+        ? data.content_en
+        : {}) ?? {};
+
   return {
     section_key: data.section_key,
     is_published: typeof data.is_published === 'boolean' ? data.is_published : true,
-    content_en: data.content_en ?? {},
-    content_zh: data.content_zh ?? {},
+    // Single-language: mirror into legacy en/zh fields
+    content_en: content,
+    content_zh: content,
   };
 }
 

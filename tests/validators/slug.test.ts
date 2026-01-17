@@ -12,11 +12,13 @@ describe('slug validator', () => {
       assert.ok(SLUG_REGEX.test('a1b2c3'));
       assert.ok(SLUG_REGEX.test('a'));
       assert.ok(SLUG_REGEX.test('1'));
+      assert.ok(SLUG_REGEX.test('foo_bar'));
+      assert.ok(SLUG_REGEX.test('中文-測試'));
+      assert.ok(SLUG_REGEX.test('hello世界'));
     });
 
     it('rejects invalid slugs', () => {
       assert.ok(!SLUG_REGEX.test('Hello')); // uppercase
-      assert.ok(!SLUG_REGEX.test('a__b')); // underscore
       assert.ok(!SLUG_REGEX.test('-abc')); // leading hyphen
       assert.ok(!SLUG_REGEX.test('abc-')); // trailing hyphen
       assert.ok(!SLUG_REGEX.test('a b')); // space
@@ -24,6 +26,7 @@ describe('slug validator', () => {
       assert.ok(!SLUG_REGEX.test('a--b')); // double hyphen
       assert.ok(!SLUG_REGEX.test('ABC')); // all uppercase
       assert.ok(!SLUG_REGEX.test('a-B-c')); // mixed case
+      assert.ok(!SLUG_REGEX.test('a/b')); // slash
     });
   });
 
@@ -61,19 +64,19 @@ describe('slug validator', () => {
     it('returns error for empty string', () => {
       const result = validateSlug('');
       assert.equal(result.valid, false);
-      assert.ok(result.error?.includes('required'));
+      assert.ok(result.error?.includes('必填'));
     });
 
     it('returns error for whitespace-only string', () => {
       const result = validateSlug('   ');
       assert.equal(result.valid, false);
-      assert.ok(result.error?.includes('required'));
+      assert.ok(result.error?.includes('必填'));
     });
 
     it('returns error for invalid format', () => {
       const result = validateSlug('Hello-World');
       assert.equal(result.valid, false);
-      assert.ok(result.error?.includes('URL-safe'));
+      assert.ok(result.error?.includes('格式不正確'));
     });
 
     it('returns error for leading hyphen', () => {

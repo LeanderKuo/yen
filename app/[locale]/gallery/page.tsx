@@ -35,10 +35,8 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   
-  const title = locale === 'zh' ? '畫廊' : 'Gallery';
-  const description = locale === 'zh' 
-    ? '探索我們的作品集'
-    : 'Explore our artwork collection';
+  const title = '畫廊';
+  const description = '探索我們的作品集';
   
   return {
     title,
@@ -107,7 +105,7 @@ export default async function GalleryPage({ params, searchParams }: PageProps) {
     };
   });
   
-  const title = locale === 'zh' ? '畫廊' : 'Gallery';
+  const title = '畫廊';
   
   return (
     <div className="min-h-screen">

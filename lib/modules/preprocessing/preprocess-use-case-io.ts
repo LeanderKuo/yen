@@ -11,16 +11,16 @@ import 'server-only';
 import pLimit from 'p-limit';
 import type { EmbeddingTargetType } from '@/lib/types/embedding';
 import { getConfigForType } from './config-io';
-import { getTargetContent } from '@/lib/modules/embedding/embedding-target-content-io';
 import { preprocessAndFilter } from './preprocess-pure';
-import { hashContent } from '@/lib/modules/embedding/embedding-pure';
 import {
+  deleteStaleChunks,
   generateEmbedding,
+  getExistingEmbeddingsForIdempotency,
+  getTargetContent,
+  hashContent,
   updateQueueItemStatus,
   updateQueueItemWithToken,
-  getExistingEmbeddingsForIdempotency,
-  deleteStaleChunks,
-} from '@/lib/modules/embedding/embedding-generate-io';
+} from '@/lib/embeddings';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuration

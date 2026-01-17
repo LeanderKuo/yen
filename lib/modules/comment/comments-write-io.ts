@@ -18,11 +18,6 @@ import { insertCommentModeration } from '@/lib/modules/comment/admin-io';
 import { transformComment, type Comment as _Comment, type CommentResult } from '@/lib/modules/comment/mappers';
 import type { CommentTargetType } from '@/lib/types/comments';
 
-// Safety Risk Engine imports
-import { runSafetyCheck, type SafetyCheckResult } from '@/lib/modules/safety-risk-engine/safety-check-io';
-import { isSafetyEngineEnabled } from '@/lib/modules/safety-risk-engine/settings-io';
-import { persistSafetyAssessment } from '@/lib/modules/safety-risk-engine/admin-io';
-
 export interface CreateCommentParams {
   /** Target type for polymorphic comments */
   targetType: CommentTargetType;
@@ -41,18 +36,81 @@ export interface CreateCommentParams {
   recaptchaToken?: string;
 }
 
+export interface InsertCommentWithModerationParams {
+  targetType: CommentTargetType;
+  targetId: string;
+  userId: string;
+  userDisplayName: string;
+  userAvatarUrl?: string;
+  userEmail: string;
+  content: string;
+  parentId?: string;
+  isSpam: boolean;
+  isApproved: boolean;
+  ipHash: string;
+  spamScore?: number | null;
+  spamReason?: string | null;
+  linkCount: number;
+}
+
+/**
+ * Insert a comment row and its moderation record.
+ * Does not run spam/safety checks — callers own those pipelines.
+ */
+export async function insertCommentWithModeration(
+  params: InsertCommentWithModerationParams
+): Promise<{ success: true; comment: _Comment } | { success: false; error: string }> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('comments')
+    .insert({
+      target_type: params.targetType,
+      target_id: params.targetId,
+      user_id: params.userId,
+      user_display_name: params.userDisplayName,
+      user_avatar_url: params.userAvatarUrl || null,
+      content: params.content,
+      parent_id: params.parentId || null,
+      is_spam: params.isSpam,
+      is_approved: params.isApproved,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[insertCommentWithModeration] Failed to insert comment:', error);
+    return { success: false, error: error.message };
+  }
+
+  const moderationResult = await insertCommentModeration({
+    comment_id: data.id,
+    user_email: params.userEmail,
+    ip_hash: params.ipHash,
+    spam_score: params.spamScore ?? null,
+    spam_reason: params.spamReason ?? null,
+    link_count: params.linkCount,
+  });
+
+  if (!moderationResult.success) {
+    console.error('[insertCommentWithModeration] Failed to insert moderation record:', moderationResult.error);
+  }
+
+  return { success: true, comment: transformComment(data) };
+}
+
 /**
  * Create a new comment
  *
  * Pipeline order per spec §4.2.0:
  * 1. Spam check (local → external)
- * 2. Safety check (Layer 1-3) only if spam decision is 'allow'
- * 3. Insert comment with appropriate is_approved status
- * 4. Persist moderation and safety assessment records
+ * 2. Insert comment with appropriate is_approved status
+ * 3. Persist moderation record
+ *
+ * Note: Safety Risk Engine integration is a cross-domain use case and is handled
+ * outside `lib/modules/comment/*` to preserve module isolation (ARCHITECTURE.md Appendix A).
  */
 export async function createComment(params: CreateCommentParams): Promise<CommentResult> {
-  const supabase = await createClient();
-
   // ==========================================================================
   // Phase 1: Spam Check Pipeline
   // ==========================================================================
@@ -93,102 +151,42 @@ export async function createComment(params: CreateCommentParams): Promise<Commen
   }
 
   // ==========================================================================
-  // Phase 2: Safety Check Pipeline (only if spam allows)
+  // Phase 2: Insert Comment
   // ==========================================================================
-  let safetyResult: SafetyCheckResult | null = null;
-  let finalIsApproved = spamResult.isApproved;
+  const insertResult = await insertCommentWithModeration({
+    targetType: params.targetType,
+    targetId: params.targetId,
+    userId: params.userId,
+    userDisplayName: params.userDisplayName,
+    userAvatarUrl: params.userAvatarUrl,
+    userEmail: params.userEmail,
+    content: spamResult.content,
+    parentId: params.parentId,
+    isSpam: spamResult.isSpam,
+    isApproved: spamResult.isApproved,
+    ipHash: spamResult.ipHash,
+    spamScore: spamResult.spamScore ?? null,
+    spamReason: spamResult.spamReason ?? null,
+    linkCount: spamResult.linkCount,
+  });
 
-  // Only run safety check if spam allows AND candidateToPublish
-  if (spamResult.decision === 'allow') {
-    const safetyEnabled = await isSafetyEngineEnabled();
-
-    if (safetyEnabled) {
-      safetyResult = await runSafetyCheck(spamResult.content);
-
-      // REJECTED: Do not store comment at all
-      if (safetyResult.decision === 'REJECTED') {
-        return {
-          success: false,
-          decision: 'reject',
-          safetyDecision: 'REJECTED',
-          error: 'Content rejected by safety check',
-          message: safetyResult.message,
-        };
-      }
-
-      // Override is_approved based on safety decision
-      // HELD: is_approved=false (not visible to public)
-      // APPROVED: is_approved=true (visible to public)
-      finalIsApproved = safetyResult.isApproved;
-    }
-  }
-
-  // ==========================================================================
-  // Phase 3: Insert Comment
-  // ==========================================================================
-  const { data, error } = await supabase
-    .from('comments')
-    .insert({
-      target_type: params.targetType,
-      target_id: params.targetId,
-      user_id: params.userId,
-      user_display_name: params.userDisplayName,
-      user_avatar_url: params.userAvatarUrl || null,
-      content: spamResult.content, // Use sanitized content
-      parent_id: params.parentId || null,
-      is_spam: spamResult.isSpam,
-      is_approved: finalIsApproved,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Failed to create comment:', error);
+  if (!insertResult.success) {
     return {
       success: false,
-      error: error.message,
+      error: insertResult.error,
       message: 'Failed to submit comment. Please try again.',
     };
   }
 
-  // ==========================================================================
-  // Phase 4: Persist Moderation & Safety Assessment
-  // ==========================================================================
-  const moderationResult = await insertCommentModeration({
-    comment_id: data.id,
-    user_email: params.userEmail,
-    ip_hash: spamResult.ipHash,
-    spam_score: spamResult.spamScore || null,
-    spam_reason: spamResult.spamReason || null,
-    link_count: spamResult.linkCount,
-  });
-
-  if (!moderationResult.success) {
-    console.error('Failed to create comment moderation record:', moderationResult.error);
-  }
-
-  // Persist safety assessment if safety check was run
-  if (safetyResult?.assessmentDraft) {
-    const assessmentId = await persistSafetyAssessment(data.id, safetyResult.assessmentDraft);
-    if (!assessmentId) {
-      // Log but don't fail - Fail Closed means comment stays as HELD
-      console.error('Failed to persist safety assessment, comment remains HELD');
-    }
-  }
-
-  const comment = transformComment(data);
+  const comment = insertResult.comment;
 
   // ==========================================================================
-  // Phase 5: Build Response
+  // Phase 3: Build Response
   // ==========================================================================
   let message = 'Comment posted successfully!';
-  let responseDecision = spamResult.decision;
+  const responseDecision = spamResult.decision;
 
-  // Safety HELD takes precedence in messaging
-  if (safetyResult?.decision === 'HELD') {
-    message = safetyResult.message;
-    responseDecision = 'pending'; // Map to pending for public API
-  } else if (spamResult.decision === 'pending') {
+  if (spamResult.decision === 'pending') {
     message = 'Your comment has been submitted and is awaiting moderation.';
   } else if (spamResult.decision === 'spam') {
     message = 'Your comment has been submitted for review.';
@@ -198,7 +196,6 @@ export async function createComment(params: CreateCommentParams): Promise<Commen
     success: true,
     comment,
     decision: responseDecision,
-    safetyDecision: safetyResult?.decision,
     message,
   };
 }

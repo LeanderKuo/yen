@@ -10,8 +10,7 @@ import 'server-only';
 
 import type { EmbeddingTargetType, EmbeddingPriority } from '@/lib/types/embedding';
 import { preprocessAndFilter } from './preprocess-pure';
-import { getTargetContent } from '@/lib/modules/embedding/embedding-target-content-io';
-import { enqueueEmbeddingBatch } from '@/lib/modules/embedding/embedding-generate-io';
+import { enqueueEmbeddingBatch, getTargetContent } from '@/lib/embeddings';
 import { getConfigForType } from './config-io';
 
 // ─────────────────────────────────────────────────────────────────────────────

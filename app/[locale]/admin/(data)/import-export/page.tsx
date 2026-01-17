@@ -8,13 +8,10 @@
  */
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from 'next-intl/server';
 
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { getAdminRole } from "@/lib/modules/auth";
-import {
-  getAdminLocale,
-  getAdminMessages,
-} from "@/lib/i18n/admin-locale.server";
 
 import { ImportExportClient } from "./ImportExportClient";
 
@@ -28,14 +25,13 @@ export default async function ImportExportPage({ params }: Props) {
   const role = await getAdminRole(supabase);
 
   if (!role) {
-    redirect("/");
+    redirect(`/${locale}`);
   }
 
-  const adminLocale = await getAdminLocale();
-  const messages = await getAdminMessages(adminLocale);
+  const messages = await getMessages({ locale });
 
   return (
-    <NextIntlClientProvider locale={adminLocale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <ImportExportClient role={role} />
     </NextIntlClientProvider>
   );

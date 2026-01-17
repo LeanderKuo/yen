@@ -157,9 +157,9 @@ describe('Blog Categories JSON Parser', () => {
       assert.ok(validateCategoryObject(cat, 0)?.includes('slug'));
     });
 
-    it('rejects empty name_en', () => {
-      const cat = { slug: 'tech', name_en: '', name_zh: '科技' };
-      assert.ok(validateCategoryObject(cat, 0)?.includes('name_en'));
+    it('rejects empty name', () => {
+      const cat = { slug: 'tech', name_en: '', name_zh: '' };
+      assert.ok(validateCategoryObject(cat, 0)?.includes('name'));
     });
   });
 
@@ -232,10 +232,10 @@ describe('Blog Category Validators', () => {
       const result = validateBlogCategoryData({
         slug: 'tech',
         name_en: '',
-        name_zh: '科技',
+        name_zh: '',
       });
       assert.equal(result.valid, false);
-      assert.ok(result.errors?.name_en);
+      assert.ok(result.errors?.name_zh);
     });
   });
 

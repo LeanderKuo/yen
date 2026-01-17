@@ -87,7 +87,7 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_auth_user_sync();
 -- ============================================
 --
 -- Owner-authored markdown descriptions and tags for users.
--- Following gallery-style bilingual tag structure.
+-- Following gallery-style tag structure (single-language zh; en fields kept for legacy).
 -- RLS: Owner can write, Owner/Editor can read.
 --
 -- ============================================
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS public.user_admin_profiles (
   description_en_md TEXT,
   description_zh_md TEXT,
   
-  -- Bilingual tags (follow gallery pattern but NOT shared with gallery)
+  -- Tags (legacy en/zh columns; single-language uses zh and mirrors to en)
   tags_en TEXT[] NOT NULL DEFAULT '{}',
   tags_zh TEXT[] NOT NULL DEFAULT '{}',
   

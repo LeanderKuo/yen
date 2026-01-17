@@ -29,7 +29,7 @@ interface HeaderProps {
 const LANDING_SECTION_KEYS = ['about', 'services', 'platforms', 'product_design', 'portfolio', 'contact'];
 
 // Fallback header for build-time safety
-function FallbackHeader({ locale = 'en' }: { locale?: string }) {
+function FallbackHeader({ locale = 'zh' }: { locale?: string }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border/10 shadow-soft">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -37,9 +37,9 @@ function FallbackHeader({ locale = 'en' }: { locale?: string }) {
           Quantum Nexus
         </Link>
         <div className="hidden md:flex items-center gap-6">
-          <Link href={`/${locale}#about`} className="text-secondary hover:text-foreground transition-colors">About</Link>
-          <Link href={`/${locale}#services`} className="text-secondary hover:text-foreground transition-colors">Services</Link>
-          <Link href={`/${locale}#contact`} className="text-secondary hover:text-foreground transition-colors">Contact</Link>
+          <Link href={`/${locale}#about`} className="text-secondary hover:text-foreground transition-colors">關於我們</Link>
+          <Link href={`/${locale}#services`} className="text-secondary hover:text-foreground transition-colors">服務項目</Link>
+          <Link href={`/${locale}#contact`} className="text-secondary hover:text-foreground transition-colors">聯絡我們</Link>
         </div>
       </nav>
     </header>

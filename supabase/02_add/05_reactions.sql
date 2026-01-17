@@ -39,29 +39,17 @@ ALTER TABLE public.reaction_rate_limits ENABLE ROW LEVEL SECURITY;
 -- ============================================
 -- Reactions RLS Policies
 -- ============================================
--- Design: Anyone (anon + authenticated) can like/unlike gallery items and comments.
--- Reactions use anon_id (client-side UUID) for deduplication, not user_id.
+-- Design: Reaction writes happen server-side via service_role (to enforce rate limits and cookie-based anon_id).
+-- Like counts are denormalized into gallery_items/comments via triggers; raw reactions are not public.
 
--- 1. Anyone can read reactions (needed for like counts)
-CREATE POLICY "Anyone can read reactions"
+-- Reactions are mutated via server-only API (service_role) to enforce rate limits and anon_id cookie checks.
+-- Keep raw reaction rows private; admins can read for debugging.
+CREATE POLICY "Admins can read reactions"
   ON public.reactions FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- 2. Anyone can insert reactions (anonymous like)
-CREATE POLICY "Anyone can insert reactions"
-  ON public.reactions FOR INSERT
-  TO anon, authenticated
-  WITH CHECK (true);
-
--- 3. Anyone can delete their own reaction (unlike via anon_id match)
-CREATE POLICY "Anyone can delete reactions"
-  ON public.reactions FOR DELETE
-  TO anon, authenticated
-  USING (true);
-
--- Admin read for debugging (already covered by "Anyone can read" above, but explicit)
--- Note: Admin can also manage via service_role if needed
+  TO authenticated
+  USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('owner', 'editor')
+  );
 
 -- Rate limits are server-only (no RLS policy = service_role only)
 CREATE POLICY "Admins can read reaction rate limits"
@@ -76,8 +64,8 @@ CREATE POLICY "Admins can read reaction rate limits"
 -- ============================================
 -- RLS policies control WHICH rows; GRANT controls table-level access.
 
--- 1. reactions: anon + authenticated can SELECT/INSERT/DELETE (for like/unlike)
-GRANT SELECT, INSERT, DELETE ON public.reactions TO anon, authenticated;
+-- 1. reactions: admin read only (mutations via service_role)
+GRANT SELECT ON public.reactions TO authenticated;
 
 -- 2. reaction_rate_limits: NO GRANT for public (server-only via createAdminClient)
 -- Admin can read via RLS policy above

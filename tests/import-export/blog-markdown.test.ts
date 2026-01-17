@@ -160,18 +160,18 @@ describe('Blog Post Markdown Formatter', () => {
       assert.ok(md.includes('---\n\n'));
     });
 
-    it('includes language markers for bilingual content', () => {
+    it('exports single-language content without markers', () => {
       const md = formatBlogPostToMarkdown(MOCK_POST);
-      assert.ok(md.includes(LANG_MARKER_EN));
-      assert.ok(md.includes(LANG_MARKER_ZH));
-      assert.ok(md.includes('# Welcome'));
+      assert.ok(!md.includes(LANG_MARKER_EN));
+      assert.ok(!md.includes(LANG_MARKER_ZH));
       assert.ok(md.includes('# 歡迎'));
     });
 
-    it('omits ZH marker for English-only content', () => {
+    it('falls back to content_en when content_zh is missing', () => {
       const md = formatBlogPostToMarkdown(MOCK_POST_MINIMAL);
-      assert.ok(md.includes(LANG_MARKER_EN));
       assert.ok(!md.includes(LANG_MARKER_ZH));
+      assert.ok(!md.includes(LANG_MARKER_EN));
+      assert.ok(md.includes('Just English content.'));
     });
   });
 
@@ -220,7 +220,7 @@ describe('Blog Post Markdown Parser', () => {
       const missing = validateFrontmatterFields(data);
       assert.ok(missing.includes('category'));
       assert.ok(missing.includes('visibility'));
-      assert.ok(missing.includes('title_en'));
+      assert.ok(missing.includes('title'));
     });
   });
 
@@ -228,7 +228,7 @@ describe('Blog Post Markdown Parser', () => {
     it('parses content with both markers', () => {
       const content = `${LANG_MARKER_EN}\n\nEnglish here\n\n${LANG_MARKER_ZH}\n\n中文在這`;
       const result = parseBilingualContent(content);
-      assert.equal(result.content_en, 'English here');
+      assert.equal(result.content_en, '中文在這');
       assert.equal(result.content_zh, '中文在這');
     });
 
@@ -236,14 +236,14 @@ describe('Blog Post Markdown Parser', () => {
       const content = `${LANG_MARKER_EN}\n\nEnglish only`;
       const result = parseBilingualContent(content);
       assert.equal(result.content_en, 'English only');
-      assert.equal(result.content_zh, undefined);
+      assert.equal(result.content_zh, 'English only');
     });
 
-    it('treats content without markers as English', () => {
+    it('treats content without markers as single-language content', () => {
       const content = 'Plain content without markers';
       const result = parseBilingualContent(content);
       assert.equal(result.content_en, 'Plain content without markers');
-      assert.equal(result.content_zh, undefined);
+      assert.equal(result.content_zh, 'Plain content without markers');
     });
   });
 
@@ -288,8 +288,8 @@ Content`;
       assert.equal(result.success, true);
       assert.ok(result.data);
       assert.equal(result.data.frontmatter.slug, MOCK_POST.slug);
-      assert.equal(result.data.frontmatter.title_en, MOCK_POST.title_en);
-      assert.ok(result.data.content_en.includes('Welcome'));
+      assert.equal(result.data.frontmatter.title_en, MOCK_POST.title_zh!);
+      assert.ok(result.data.content_en.includes('歡迎'));
       assert.ok(result.data.content_zh?.includes('歡迎'));
     });
   });

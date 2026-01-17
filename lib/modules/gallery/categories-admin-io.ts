@@ -55,7 +55,7 @@ export async function getAllGalleryCategories(): Promise<GalleryCategory[]> {
 
 /**
  * Get all gallery categories with item counts for admin page
- * Returns categories ordered by sort_order and name_en
+ * Returns categories ordered by sort_order and name_zh
  */
 export async function getGalleryCategoriesWithCounts(): Promise<CategoryWithCount[]> {
   const supabase = await createClient();
@@ -65,7 +65,7 @@ export async function getGalleryCategoriesWithCounts(): Promise<CategoryWithCoun
     .from('gallery_categories')
     .select('*')
     .order('sort_order')
-    .order('name_en');
+    .order('name_zh');
 
   if (error) {
     console.error('Error fetching gallery categories:', error);
@@ -111,7 +111,7 @@ export async function createGalleryCategoryAdmin(
 
   if (error) {
     if (error.code === '23505') {
-      return { error: 'This slug already exists. Please use a different slug.' };
+      return { error: '此 Slug 已存在，請使用其他 Slug。' };
     }
     return { error: error.message };
   }
@@ -141,7 +141,7 @@ export async function updateGalleryCategoryAdmin(
 
   if (error) {
     if (error.code === '23505') {
-      return { error: 'This slug already exists. Please use a different slug.' };
+      return { error: '此 Slug 已存在，請使用其他 Slug。' };
     }
     return { error: error.message };
   }

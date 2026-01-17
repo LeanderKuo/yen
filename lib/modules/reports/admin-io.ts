@@ -11,7 +11,7 @@
 
 import 'server-only';
 import { createClient } from '@/lib/infrastructure/supabase/server';
-import { isSiteAdmin } from '@/lib/modules/auth';
+import { isSiteAdmin } from '@/lib/auth';
 import type { ReportType, ReportStatus, ReportRow } from '@/lib/types/reports';
 
 // Re-export for backward compatibility

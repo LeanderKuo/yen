@@ -3,23 +3,18 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import type { Locale } from '@/lib/i18n/locales';
 
 interface TabItem {
   href: string;
   /** Translation key under admin namespace (e.g., 'gallery.tabs.dashboard') */
   labelKey?: string;
-  /** @deprecated Use labelKey instead */
-  labelEn?: string;
-  /** @deprecated Use labelKey instead */
-  labelZh?: string;
+  /** Static label (single-language admin) */
+  label?: string;
 }
 
 interface AdminTabsProps {
   /** Route locale for href construction */
   locale: string;
-  /** Admin UI locale for label display (optional, defaults to route locale) */
-  adminLocale?: Locale;
   items: TabItem[];
 }
 
@@ -27,15 +22,12 @@ interface AdminTabsProps {
  * Reusable admin module tabs component.
  * Renders a horizontal tab bar with active state detection.
  *
- * Supports i18n via labelKey (preferred) or legacy labelEn/labelZh.
+ * Supports i18n via labelKey or static label.
  */
-export default function AdminTabs({ locale, adminLocale, items }: AdminTabsProps) {
+export default function AdminTabs({ locale, items }: AdminTabsProps) {
   const pathname = usePathname();
   const t = useTranslations('admin');
   
-  // Use adminLocale for labels if provided, otherwise fall back to route locale
-  const displayLocale = adminLocale ?? locale;
-
   const isActive = (href: string): boolean => {
     const fullHref = `/${locale}${href}`;
     return pathname === fullHref || pathname.startsWith(fullHref + '/');
@@ -45,8 +37,7 @@ export default function AdminTabs({ locale, adminLocale, items }: AdminTabsProps
     if (item.labelKey) {
       return t(item.labelKey);
     }
-    // Fallback to legacy labelEn/labelZh for backward compatibility
-    return displayLocale === 'zh' ? (item.labelZh ?? '') : (item.labelEn ?? '');
+    return item.label ?? '';
   };
 
   return (

@@ -60,11 +60,11 @@ test('isValidPageViewPath: max length', () => {
 // =============================================================================
 
 test('isValidPageViewLocale: valid locales', () => {
-  assert.ok(isValidPageViewLocale('en'));
   assert.ok(isValidPageViewLocale('zh'));
 });
 
 test('isValidPageViewLocale: invalid locales', () => {
+  assert.ok(!isValidPageViewLocale('en'));
   assert.ok(!isValidPageViewLocale('fr'));
   assert.ok(!isValidPageViewLocale('EN'));
   assert.ok(!isValidPageViewLocale(''));
@@ -99,9 +99,9 @@ test('isExcludedPath: non-excluded paths', () => {
 // =============================================================================
 
 test('validatePageViewRequest: valid request', () => {
-  const result = validatePageViewRequest({ path: '/blog/post', locale: 'en' });
+  const result = validatePageViewRequest({ path: '/blog/post', locale: 'zh' });
   assert.ok(result.valid);
-  assert.deepEqual(result.data, { path: '/blog/post', locale: 'en' });
+  assert.deepEqual(result.data, { path: '/blog/post', locale: 'zh' });
 });
 
 test('validatePageViewRequest: home page', () => {
@@ -118,7 +118,7 @@ test('validatePageViewRequest: invalid body type', () => {
 });
 
 test('validatePageViewRequest: invalid path', () => {
-  const result = validatePageViewRequest({ path: '', locale: 'en' });
+  const result = validatePageViewRequest({ path: '', locale: 'zh' });
   assert.ok(!result.valid);
   assert.ok(result.error?.includes('path'));
 });
@@ -130,7 +130,7 @@ test('validatePageViewRequest: invalid locale', () => {
 });
 
 test('validatePageViewRequest: excluded path', () => {
-  const result = validatePageViewRequest({ path: '/admin/dashboard', locale: 'en' });
+  const result = validatePageViewRequest({ path: '/admin/dashboard', locale: 'zh' });
   assert.ok(!result.valid);
   assert.ok(result.error?.includes('excluded'));
 });
@@ -140,11 +140,8 @@ test('validatePageViewRequest: excluded path', () => {
 // =============================================================================
 
 test('parsePathname: valid pathnames', () => {
-  assert.deepEqual(parsePathname('/en/blog/post'), { locale: 'en', path: '/blog/post' });
   assert.deepEqual(parsePathname('/zh/gallery/item'), { locale: 'zh', path: '/gallery/item' });
-  assert.deepEqual(parsePathname('/en'), { locale: 'en', path: '/' });
   assert.deepEqual(parsePathname('/zh'), { locale: 'zh', path: '/' });
-  assert.deepEqual(parsePathname('/en/'), { locale: 'en', path: '/' });
 });
 
 test('parsePathname: invalid pathnames', () => {

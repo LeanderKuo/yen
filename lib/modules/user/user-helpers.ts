@@ -12,12 +12,12 @@
 /**
  * Format date string with locale-aware display.
  * @param dateStr - ISO 8601 date string
- * @param locale - 'en' | 'zh'
- * @returns Formatted date string (e.g., "Dec 29, 2024, 08:15 PM" or "2024年12月29日 20:15")
+ * @param locale - Legacy param (ignored; single-language zh-TW)
+ * @returns Formatted date string (e.g., "2024年12月29日 20:15")
  */
-export function formatDateLocalized(dateStr: string, locale: string): string {
+export function formatDateLocalized(dateStr: string, _locale: string): string {
   return new Date(dateStr).toLocaleDateString(
-    locale === 'zh' ? 'zh-TW' : 'en-US',
+    'zh-TW',
     {
       year: 'numeric',
       month: 'short',
@@ -31,15 +31,15 @@ export function formatDateLocalized(dateStr: string, locale: string): string {
 /**
  * Format date string with locale-aware display (date only, no time).
  * @param dateStr - ISO 8601 date string
- * @param locale - 'en' | 'zh'
- * @returns Formatted date string (e.g., "Dec 29, 2024" or "2024年12月29日")
+ * @param locale - Legacy param (ignored; single-language zh-TW)
+ * @returns Formatted date string (e.g., "2024年12月29日")
  */
 export function formatDateShortLocalized(
   dateStr: string,
-  locale: string
+  _locale: string
 ): string {
   return new Date(dateStr).toLocaleDateString(
-    locale === 'zh' ? 'zh-TW' : 'en-US',
+    'zh-TW',
     {
       year: 'numeric',
       month: 'short',

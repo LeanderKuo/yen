@@ -45,8 +45,10 @@ export function validateGalleryItemFields(
 
   if (!isNonEmptyString(data.slug)) missing.push('slug');
   if (!isNonEmptyString(data.category)) missing.push('category');
-  if (!isNonEmptyString(data.title_en)) missing.push('title_en');
-  if (!isNonEmptyString(data.title_zh)) missing.push('title_zh');
+
+  const titleCandidate = data.title_zh ?? data.title_en;
+  if (!isNonEmptyString(titleCandidate)) missing.push('title');
+
   if (!isNonEmptyString(data.image_url)) missing.push('image_url');
 
   return missing;
@@ -65,20 +67,32 @@ export function validateGalleryItemFields(
 export function transformToImportData(
   data: GalleryItemExportData
 ): GalleryItemImportData {
+  const title = (data.title_zh ?? data.title_en ?? '').trim();
+  const description = (data.description_zh ?? data.description_en ?? '').trim();
+  const imageAlt = (data.image_alt_zh ?? data.image_alt_en ?? null) as string | null;
+  const material = (data.material_zh ?? data.material_en ?? null) as string | null;
+
+  const tagsZh = isStringArray(data.tags_zh)
+    ? data.tags_zh
+    : isStringArray(data.tags_en)
+      ? data.tags_en
+      : [];
+
   return {
     slug: data.slug,
     category_slug: data.category,
-    title_en: data.title_en,
-    title_zh: data.title_zh,
-    description_en: data.description_en ?? '',
-    description_zh: data.description_zh ?? '',
+    // Single-language: mirror into legacy en/zh fields
+    title_en: title,
+    title_zh: title,
+    description_en: description,
+    description_zh: description,
     image_url: data.image_url,
-    image_alt_en: data.image_alt_en ?? null,
-    image_alt_zh: data.image_alt_zh ?? null,
-    material_en: data.material_en ?? null,
-    material_zh: data.material_zh ?? null,
-    tags_en: isStringArray(data.tags_en) ? data.tags_en : [],
-    tags_zh: isStringArray(data.tags_zh) ? data.tags_zh : [],
+    image_alt_en: imageAlt,
+    image_alt_zh: imageAlt,
+    material_en: material,
+    material_zh: material,
+    tags_en: tagsZh,
+    tags_zh: tagsZh,
     is_visible: typeof data.is_visible === 'boolean' ? data.is_visible : true,
   };
 }
