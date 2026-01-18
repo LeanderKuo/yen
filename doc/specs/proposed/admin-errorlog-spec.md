@@ -8,7 +8,7 @@ Background: this and the admin i18n toggle spec were previously drafted together
 
 See also:
 
-- i18n toggle spec: [Admin i18n Toggle — Spec](admin-i18n-toggle-spec.md)
+- i18n toggle spec: [Admin i18n Toggle — Spec](../completed/admin-i18n-toggle-spec.md)
 - Implemented behavior (SSoT): [`doc/SPEC.md`](../../SPEC.md)
 - Constraints: [`ARCHITECTURE.md`](../../../ARCHITECTURE.md)
 - Drift tracker: [`uiux_refactor.md`](../../../uiux_refactor.md)

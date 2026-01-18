@@ -31,7 +31,7 @@ Out of Scope（由其他模組處理 / V2）:
 - Security / RLS / secrets: `doc/SECURITY.md`
 - Ops / DB scripts: `doc/RUNBOOK.md`（details: `doc/runbook/*`）
 - Drift tracker + remediation playbooks: `uiux_refactor.md`（stable `@see` index）
-- Spec (design + contracts): `doc/specs/proposed/safety-risk-engine-spec.md`
+- Spec (design + contracts): `doc/specs/completed/safety-risk-engine-spec.md`
 - Reusable platform specs:
   - `doc/specs/completed/embeddings-semantic-search-spec.md`
   - `doc/specs/completed/data-preprocessing-pipeline-spec.md`

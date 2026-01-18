@@ -5,7 +5,7 @@
 -- Version: 1.0
 -- Last Updated: 2026-01-17
 --
--- @see doc/specs/proposed/safety-risk-engine-spec.md
+-- @see doc/specs/completed/safety-risk-engine-spec.md
 -- @see doc/meta/STEP_PLAN.md PR-1
 --
 -- ============================================

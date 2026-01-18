@@ -7,7 +7,7 @@
 --
 -- Inserts default safety_settings singleton row.
 --
--- @see doc/specs/proposed/safety-risk-engine-spec.md
+-- @see doc/specs/completed/safety-risk-engine-spec.md
 --
 -- ============================================
 

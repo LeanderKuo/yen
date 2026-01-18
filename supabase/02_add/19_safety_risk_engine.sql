@@ -15,7 +15,7 @@
 -- - 01_main.sql (auth.users reference)
 -- - 02_comments.sql (comments.id FK)
 --
--- @see doc/specs/proposed/safety-risk-engine-spec.md §9
+-- @see doc/specs/completed/safety-risk-engine-spec.md §9
 -- @see doc/meta/STEP_PLAN.md PR-1
 --
 -- ============================================

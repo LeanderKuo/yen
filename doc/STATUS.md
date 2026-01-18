@@ -1,6 +1,6 @@
 # Owner Dashboard（只看這份就好）
 
-> Last Updated: 2026-01-03  
+> Last Updated: 2026-01-17  
 > Status: ACTIVE  
 > Audience: Owner（只關心「沒做的」與「飄移」）
 
@@ -8,6 +8,13 @@
 細節（實作方法 / prompts / 步驟 / 歷史）全部交給 agent，請看各文件連結。
 
 ---
+
+## 0) 入口（避免迷路）
+
+- 現況（已落地行為）：`doc/SPEC.md`
+- 計畫（what/why/status）：`doc/ROADMAP.md`
+- 可立即開工的 steps：`doc/TASKS.md`（unblocked）
+- 外部阻塞：`doc/BLOCKERS.md`
 
 ## 1) 已實作（現況 SSoT）
 

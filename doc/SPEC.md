@@ -1,256 +1,262 @@
-# Feature Specification
+# 功能規格（已實作行為 / SSoT）
 
-> Implemented features and their technical details
-> Last Updated: 2026-01-14
-> Status: Active
+> 已落地功能與技術細節（Single Source of Truth）  
+> 最後更新: 2026-01-17  
+> 狀態: Active
 
-This document describes **implemented** behavior and its technical details.
+本文件描述「**已實作**」的行為與其技術細節（以本檔為準）。
 
-- Architecture and global constraints: see [ARCHITECTURE.md](../ARCHITECTURE.md)
-- Single-feature contracts / flows (stable specs): see [`specs/README.md`](specs/README.md)
-- Drift tracking / remediation playbooks: see [uiux_refactor.md](../uiux_refactor.md) (stable `@see` index + active drift tracker)
-- Historical implementation logs / code maps: see [archive/README.md](archive/README.md)
-- Pending/planned work: see [ROADMAP.md](ROADMAP.md)
-- Intentionally incomplete / gated items (to avoid confusing “implemented” with “fully complete”): see [Known Gaps](#known-gaps-roadmap-links)
+- 架構與全域約束：`../ARCHITECTURE.md`
+- 單一功能契約 / 流程（穩定 specs）：`specs/README.md`
+- Drift 追蹤與修復手冊：`../uiux_refactor.md`（stable `@see` index + active drift tracker）
+- 歷史實作記錄 / code maps：`archive/README.md`
+- 待辦/計畫（what/why/status）：`ROADMAP.md`
+- 刻意保留的不完整 / gated（避免把「implemented」誤看成「fully complete」）：見 [已知缺口](#known-gaps-roadmap-links)
 
 ---
 
-## Table of Contents
+## 目錄
 
-- [Blog System](#blog-system)
-- [Gallery](#gallery)
-- [Comments](#comments)
-- [Reactions](#reactions)
-- [Users (Admin)](#users-admin)
-- [Theme System](#theme-system)
-- [Admin CMS](#admin-cms)
-- [Import/Export (Admin-only)](#importexport-admin-only)
-- [AI Analysis (Admin-only)](#ai-analysis-admin-only)
-- [Embeddings and Semantic Search (Admin-only)](#embeddings-and-semantic-search-admin-only)
-- [Preprocessing (Admin-only)](#preprocessing-admin-only)
-- [i18n](#i18n)
+- [部落格系統](#blog-system)
+- [圖庫](#gallery)
+- [留言](#comments)
+- [按讚 / 反應](#reactions)
+- [使用者（後台）](#users-admin)
+- [主題系統](#theme-system)
+- [後台 CMS](#admin-cms)
+- [匯入 / 匯出（後台）](#importexport-admin-only)
+- [AI 分析（後台）](#ai-analysis-admin-only)
+- [Embeddings 與語意搜尋（後台）](#embeddings-and-semantic-search-admin-only)
+- [資料預處理（後台）](#preprocessing-admin-only)
+- [多語系（i18n）](#i18n)
 - [SEO](#seo)
-- [Known Gaps (Roadmap Links)](#known-gaps-roadmap-links)
-- [Module Inventory (Single Source)](#module-inventory-single-source)
+- [已知缺口（連到 Roadmap）](#known-gaps-roadmap-links)
+- [模組清單（單一真相來源）](#module-inventory-single-source)
 
 ---
 
-## Blog System
+<a id="blog-system"></a>
+## 部落格系統
 
-### Features
+### 功能
 
-- Markdown editor (GFM, code highlighting, math formulas)
-- Category management
-- Visibility control (draft/private/public)
-- Reading time estimation
-- Auto-generated SEO metadata
+- Markdown 編輯器（GFM、程式碼高亮、數學公式）
+- 分類管理
+- 可見性控制（draft/private/public）
+- 估算閱讀時間
+- 自動產生 SEO metadata
 
-### Routes
+### 路由
 
-| Route                              | Description   |
+| 路由                               | 說明 |
 | ---------------------------------- | ------------- |
-| `/[locale]/blog`                   | Blog list (supports `?category=<slug>&search=<q>&sort=<...>`) |
-| `/[locale]/blog/[category]/[slug]` | Post detail (canonical URL includes category segment) |
+| `/[locale]/blog`                   | 部落格列表（支援 `?category=<slug>&search=<q>&sort=<...>`） |
+| `/[locale]/blog/[category]/[slug]` | 文章頁（canonical URL 會包含 category segment） |
 
-### Data Model
+### 資料模型
 
-- `categories` - Post categories
-- `posts` - Post content
+- `categories`：文章分類
+- `posts`：文章內容
 
-### Implementation Notes
+### 實作備註
 
 - Admin posts create/update/delete 已走 server actions（`app/[locale]/admin/(blog)/posts/actions.ts`）；client form 僅負責互動，IO 由 `lib/modules/blog/admin-io.ts`。
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Gallery
+<a id="gallery"></a>
+## 圖庫
 
-### Features
+### 功能
 
-- Pinterest-style masonry layout (CSS Columns)
-- Infinite scroll
-- Image cropping and upload
-- Category filtering
-- Sort options
+- Pinterest 風格瀑布流（CSS Columns）
+- 無限捲動
+- 圖片裁切與上傳
+- 分類篩選
+- 排序選項
 
-### Routes
+### 路由
 
-| Route                                 | Description   |
+| 路由                                  | 說明 |
 | ------------------------------------- | ------------- |
-| `/[locale]/gallery`                   | Gallery list  |
-| `/[locale]/gallery/[category]`        | Category list |
-| `/[locale]/gallery/[category]/[slug]` | Item detail   |
+| `/[locale]/gallery`                   | 圖庫列表 |
+| `/[locale]/gallery/[category]`        | 分類列表 |
+| `/[locale]/gallery/[category]/[slug]` | 單一作品頁 |
 
-### API Endpoints
+### API 端點
 
-| Route                | Method | Description                                                                                     |
+| 路由                 | 方法 | 說明 |
 | -------------------- | ------ | ----------------------------------------------------------------------------------------------- |
-| `/api/gallery/items` | GET    | Paginated gallery items for infinite scroll (includes `likedByMe` via `anon_id`; feature-gated) |
+| `/api/gallery/items` | GET    | 圖庫列表分頁（供 infinite scroll；包含 `likedByMe` via `anon_id`；feature-gated） |
 
-### Pinned/Featured Items
+### 置頂 / 精選項目
 
-- Pinned items display in "Featured" section at top
-- Main list auto-filters pinned items to avoid duplication
-- Featured section hidden when sort is set to "featured"
+- 置頂項目會顯示在列表上方的「Featured」區塊
+- 主列表會自動排除置頂項目，避免重複
+- 當排序設為 `featured` 時隱藏 Featured 區塊
 
-### Data Model
+### 資料模型
 
-- `gallery_categories` - Gallery categories
-- `gallery_items` - Gallery items
+- `gallery_categories`：圖庫分類
+- `gallery_items`：圖庫作品
 
-### Implementation Notes
+### 實作備註
 
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Comments
+<a id="comments"></a>
+## 留言
 
-### Features
+### 功能
 
-- Supports Blog and Gallery comments
-- Threaded replies
-- Spam protection (honeypot + Akismet + reCAPTCHA)
-- **Safety Risk Engine** (three-layer defense: Layer 1 rules + Layer 2 RAG + Layer 3 LLM)
+- 支援 Blog / Gallery 留言
+- 串狀回覆（threaded replies）
+- Spam 防護（honeypot + Akismet + reCAPTCHA）
+- **Safety Risk Engine**（三層防禦：Layer 1 rules + Layer 2 RAG + Layer 3 LLM）
 - Rate limiting
-- Admin moderation tools (approve/spam/delete, blacklist, Akismet feedback)
-- Admin Safety Queue (HELD comments review + corpus management + settings)
+- 後台審核工具（approve/spam/delete、blacklist、Akismet feedback）
+- 後台 Safety Queue（`HELD` 留言審核 + corpus 維護 + settings）
 
-### API Endpoints
+### API 端點
 
-| Route                           | Method | Description                                 |
+| 路由                            | 方法 | 說明 |
 | ------------------------------- | ------ | ------------------------------------------- |
-| `/api/comments`                 | GET    | Public: get comment list                    |
-| `/api/comments`                 | POST   | Public: create comment                      |
-| `/api/comments/public-settings` | GET    | Public: get public comment settings         |
-| `/api/comments/admin`           | GET    | Admin: list comments (filters + pagination) |
-| `/api/comments/admin`           | PATCH  | Admin: approve/spam/bulk actions            |
-| `/api/comments/admin`           | DELETE | Admin: delete comment                       |
-| `/api/comments/settings`        | GET    | Admin: get settings + blacklist             |
-| `/api/comments/settings`        | PATCH  | Admin: update settings                      |
-| `/api/comments/settings`        | POST   | Admin: add blacklist item                   |
-| `/api/comments/settings`        | DELETE | Admin: remove blacklist item                |
-| `/api/comments/feedback`        | POST   | Admin: report spam/ham feedback to Akismet  |
+| `/api/comments`                 | GET    | Public：取得留言列表 |
+| `/api/comments`                 | POST   | Public：建立留言 |
+| `/api/comments/public-settings` | GET    | Public：取得公開 settings |
+| `/api/comments/admin`           | GET    | Admin：留言列表（filters + pagination） |
+| `/api/comments/admin`           | PATCH  | Admin：approve/spam/bulk actions |
+| `/api/comments/admin`           | DELETE | Admin：刪除留言 |
+| `/api/comments/settings`        | GET    | Admin：取得 settings + blacklist |
+| `/api/comments/settings`        | PATCH  | Admin：更新 settings |
+| `/api/comments/settings`        | POST   | Admin：新增 blacklist item |
+| `/api/comments/settings`        | DELETE | Admin：移除 blacklist item |
+| `/api/comments/feedback`        | POST   | Admin：回報 spam/ham feedback 給 Akismet |
 
-### Data Protection
+### 資料保護
 
-- Canonical constraints (no PII in public responses): `../ARCHITECTURE.md` §3.12 (Comments API Sensitive Data Protection)
-- Security policies (RLS/server-only tables): `SECURITY.md`
+- Canonical constraints（public responses 不含 PII）：`../ARCHITECTURE.md` §3.12（Comments API Sensitive Data Protection）
+- 安全規則（RLS/server-only tables）：`SECURITY.md`
 
-### Safety Risk Engine
+### Safety Risk Engine（風險引擎）
 
-- Spec: `specs/proposed/safety-risk-engine-spec.md`
-- Decision semantics (V1):
-  - Safety decisions: `APPROVED` / `HELD` (Safety V1 does not emit `REJECTED`)
+- Spec: `specs/completed/safety-risk-engine-spec.md`
+- 決策語意（V1）：
+  - Safety 決策：`APPROVED` / `HELD`（Safety V1 不會產生 `REJECTED`）
   - `High_Risk` / `Uncertain` → `HELD`
-  - `Safe` + `confidence >= threshold` → `APPROVED` (else `HELD`)
-- Fail Closed: Any timeout/error → HELD (safe default)
-- PII de-identification before sending to external AI
-- Admin routes:
+  - `Safe` + `confidence >= threshold` → `APPROVED`（否則 `HELD`）
+- Fail Closed：任何 timeout/error → `HELD`（safe default）
+- 送外部 AI 前需先去識別化（PII de-identification）
+- 後台路由：
   - `/admin/comments/safety` — Safety queue (HELD comments)
   - `/admin/comments/safety/[commentId]` — Assessment detail + review actions
   - `/admin/comments/safety/corpus` — Safety corpus management (slang/cases)
   - `/admin/comments/safety/settings` — Safety engine settings
 
-### Implementation Notes
+### 實作備註
 
 - Public API adds `isMine` (server-computed ownership flag) without exposing `userId`.
 - Safety Risk Engine modules: `lib/modules/safety-risk-engine/*`
 - Comment submit use-case (Spam → Safety → Persist): `lib/use-cases/comments/create-comment.ts` (called by `app/api/comments/route.ts`)
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Reactions
+<a id="reactions"></a>
+## 按讚 / 反應
 
-### Features
+### 功能
 
-- Anonymous likes (using `anon_id`)
-- Supports Gallery items and Comments
+- 匿名按讚（使用 `anon_id`）
+- 支援 Gallery items 與 Comments
 - Rate limiting
 
-### API Endpoints
+### API 端點
 
-| Route            | Method | Description        |
+| 路由            | 方法 | 說明 |
 | ---------------- | ------ | ------------------ |
-| `/api/reactions` | POST   | Toggle like status |
+| `/api/reactions` | POST   | 切換 like 狀態 |
 
-### Implementation Notes
+### 實作備註
 
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Users (Admin)
+<a id="users-admin"></a>
+## 使用者（後台）
 
-### Features
+### 功能
 
-- Users list (SSOT: `user_directory`, synced from `auth.users`)
-- User detail:
-  - Directory info (id/email/created/updated)
-  - Admin notes (Owner-only write): Markdown (`description_zh_md`) + tags (`tags_zh`)
-  - Schedule (Owner-only write): appointment calendar (DB stores UTC; UI edits in local time)
-  - Comment history (read-only)
+- 使用者列表（SSoT: `user_directory`，由 `auth.users` 同步）
+- 使用者詳情：
+  - Directory info（id/email/created/updated）
+  - 管理員備註（Owner-only write）：Markdown（`description_zh_md`）+ tags（`tags_zh`）
+  - 行程（Owner-only write）：appointment calendar（DB 存 UTC；UI 以 local time 編輯）
+  - 留言歷史（read-only）
 
-### Routes
+### 路由
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (single locale: `zh`, e.g. `/zh/admin/users`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes 會掛在 `/[locale]/admin/*` 下（single locale: `zh`，例如 `/zh/admin/users`）。下表為了可讀性省略 `/[locale]` 前綴。
 
-| Route               | Description                                         |
+| 路由                | 說明 |
 | ------------------- | --------------------------------------------------- |
-| `/admin/users`      | Users list                                          |
-| `/admin/users/[id]` | User detail (notes/tags/schedule + comments)        |
+| `/admin/users`      | 使用者列表 |
+| `/admin/users/[id]` | 使用者詳情（notes/tags/schedule + comments） |
 
-### Data Model
+### 資料模型
 
-- `user_directory` - Users list/email SSOT (admin-only read)
-- `user_admin_profiles` - Owner-only admin notes + tags (admin read; owner write)
-- `user_appointments` - Owner-only calendar events (admin read; owner write)
+- `user_directory`：使用者列表/email SSoT（admin-only read）
+- `user_admin_profiles`：Owner-only admin notes + tags（admin read；owner write）
+- `user_appointments`：Owner-only calendar events（admin read；owner write）
 
-### Security Notes
+### 安全備註
 
-- Writes are Owner-only (server actions + IO layer gate; RLS is the final boundary)
-- `description_zh_md` is treated as **owner-authored admin-controlled markdown** (do not reuse this rendering pipeline for user-submitted content)
+- 寫入為 Owner-only（server actions + IO layer gate；RLS 是最終安全邊界）
+- `description_zh_md` 視為 **owner-authored / admin-controlled markdown**（不要把這套 rendering pipeline 拿去渲染 user-submitted content）
 
-### Known Limitations (V1)
+### 已知限制（V1）
 
-- Tag filtering works server-side via `/admin/users?tag=...`, but there is no tag selection UI yet (manual URL only).
-- Users list search/pagination are not implemented yet.
-- Admin notes are stored as Markdown; view mode defaults to raw text (preview is optional; for LLM/ETL normalize Markdown to plain text — do not analyze HTML)
+- Tag filtering 目前可透過 `/admin/users?tag=...` 在 server-side 生效，但尚未提供 tag selection UI（需手動 URL）
+- Users list 的 search/pagination 尚未實作
+- Admin notes 以 Markdown 存放；view mode 預設 raw text（preview optional；LLM/ETL 需把 Markdown normalize 成 plain text，避免分析 HTML）
 
-### Implementation Notes
+### 實作備註
 
-- Server-first: server components fetch via `lib/modules/user/*-io.ts`; mutations via `app/[locale]/admin/users/actions.ts`
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- Server-first：server components 讀取走 `lib/modules/user/*-io.ts`；寫入走 `app/[locale]/admin/users/actions.ts`
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Theme System
+<a id="theme-system"></a>
+## 主題系統
 
-### Current Status (v2)
+### 現況（v2）
 
-- 4 layout presets (ThemeKey): Tech Pro, Japanese Airy, Glassmorphism, Scrollytelling
-- Per-page theme assignment (home/blog/gallery) via `site_config.page_themes`
-- Per-layout token overrides via `site_config.theme_overrides` (allowlist in `lib/types/theme.ts`)
-- SSR inline CSS variable injection (FOUC-free)
-- Admin preview fixed (2025-12-24): iframe injects CSS vars to the same targets as runtime SSR
-- RBAC: Owner can edit, Editor read-only
+- 4 種 layout presets（ThemeKey）：Tech Pro / Japanese Airy / Glassmorphism / Scrollytelling
+- Per-page theme：透過 `site_config.page_themes`（home/blog/gallery）
+- Per-layout token overrides：透過 `site_config.theme_overrides`（allowlist 在 `lib/types/theme.ts`）
+- SSR inline CSS variables 注入（FOUC-free）
+- Admin preview 已修正（2025-12-24）：iframe 注入 CSS vars 與 runtime SSR 一致
+- RBAC：Owner 可編輯、Editor read-only
 
-### Admin Routes
+### 後台路由
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (e.g. `/zh/admin/theme`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes 會掛在 `/[locale]/admin/*` 下（例如 `/zh/admin/theme`）。下表為了可讀性省略 `/[locale]` 前綴。
 
 
-| Route                  | Description                                         |
+| 路由                   | 說明 |
 | ---------------------- | --------------------------------------------------- |
-| `/admin/theme`         | Global theme selection                              |
-| `/admin/theme/pages`   | Per-page theme settings                             |
-| `/admin/theme/fonts`   | Font selection                                      |
-| `/admin/theme/layouts` | Per-layout token customization (Theme v2)           |
-| `/admin/theme/preview` | Admin-only preview (noindex, accepts ?path=&theme=) |
+| `/admin/theme`         | 全站主題選擇 |
+| `/admin/theme/pages`   | Per-page 主題設定 |
+| `/admin/theme/fonts`   | 字體選擇 |
+| `/admin/theme/layouts` | Per-layout token 自訂（Theme v2） |
+| `/admin/theme/preview` | 後台 preview（noindex；接受 `?path=&theme=`） |
 
-### Technical Details
+### 技術細節
 
 - Theme preset single source: `lib/modules/theme/presets.ts`
 - Theme type single source: `lib/types/theme.ts` (`ThemeKey`, `ThemeScopeKey`, and customizable var allowlist)
@@ -264,201 +270,208 @@ This document describes **implemented** behavior and its technical details.
 - `data-theme` attribute set for semantic/debug purposes (avoid hardcoding preset values in CSS selectors)
 - Public SSR reads use `lib/modules/theme/cached.ts` (tag: `site-config`)
 
-### Data Model
+### 資料模型
 
-- `site_config` (singleton, id=1)
+- `site_config`（singleton, id=1）
   - `global_theme`: ThemeKey
   - `page_themes`: JSONB `{ home?, blog?, gallery? }`
   - `theme_overrides`: JSONB `{ [ThemeKey]: { [CustomizableCssVar]: string | null } }`
   - `updated_at`, `updated_by`
 
-### Implementation Notes
+### 實作備註
 
-- Implementation file map: see [Module Inventory](#module-inventory-single-source).
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
 
-## Admin CMS
+<a id="admin-cms"></a>
+## 後台 CMS
 
-### Features
+### 功能
 
-- Google OAuth login (email whitelist)
+- Google OAuth login（email whitelist）
 - Live preview editor
-- Image upload to Cloudinary
+- 圖片上傳到 Cloudinary
 - Markdown toolbar
-- Report system (auto-detection: Lighthouse/Schema/Links; JSON summary)
-- Role-based access (Owner/Editor)
+- Report system（auto-detection: Lighthouse/Schema/Links；JSON summary）
+- Role-based access（Owner/Editor）
 
-### Routes
+### 路由
 
-> Note: Admin routes are localized under `/[locale]/admin/*` (single locale: `zh`, e.g. `/zh/admin/posts`). Tables below omit the `/[locale]` prefix for readability.
+> Note: Admin routes 會掛在 `/[locale]/admin/*` 下（single locale: `zh`，例如 `/zh/admin/posts`）。下表為了可讀性省略 `/[locale]` 前綴。
 
-**Dashboard**
+**Dashboard（儀表板）**
 
-| Route    | Description |
+| 路由     | 說明 |
 | -------- | ----------- |
-| `/admin` | Dashboard   |
+| `/admin` | Dashboard |
 
-**Website / CMS / Settings**
+**Website / CMS / Settings（網站 / 內容 / 設定）**
 
-| Route                         | Description                                           |
+| 路由                          | 說明 |
 | ----------------------------- | ----------------------------------------------------- |
-| `/admin/features`             | Feature toggles                                       |
-| `/admin/theme`                | Global theme                                          |
-| `/admin/theme/pages`          | Per-page theme settings                               |
-| `/admin/theme/fonts`          | Font selection                                        |
-| `/admin/theme/layouts`        | Theme layout token editor                             |
-| `/admin/content`              | Site content                                          |
-| `/admin/content/[section]`    | Section content editor                                |
-| `/admin/landing`              | Landing page                                          |
-| `/admin/landing/[sectionKey]` | Landing section editor                                |
-| `/admin/portfolio`            | Portfolio management                                  |
-| `/admin/settings`             | Company settings (theme is managed in `/admin/theme`) |
+| `/admin/features`             | Feature toggles |
+| `/admin/theme`                | 全站主題 |
+| `/admin/theme/pages`          | Per-page 主題 |
+| `/admin/theme/fonts`          | 字體 |
+| `/admin/theme/layouts`        | Theme layout token editor |
+| `/admin/content`              | Site content |
+| `/admin/content/[section]`    | Section content editor |
+| `/admin/landing`              | Landing page |
+| `/admin/landing/[sectionKey]` | Landing section editor |
+| `/admin/portfolio`            | Portfolio 管理 |
+| `/admin/settings`             | Company settings（theme 由 `/admin/theme` 管） |
 
 **Blog**
 
-| Route                    | Description         |
+| 路由                     | 說明 |
 | ------------------------ | ------------------- |
-| `/admin/posts`           | Post list           |
-| `/admin/posts/new`       | Create post         |
-| `/admin/posts/[id]/edit` | Edit post           |
-| `/admin/categories`      | Category management |
+| `/admin/posts`           | 文章列表 |
+| `/admin/posts/new`       | 新增文章 |
+| `/admin/posts/[id]/edit` | 編輯文章 |
+| `/admin/categories`      | 分類管理 |
 
-**Engagement**
+**Engagement（互動）**
 
-| Route                      | Description        |
+| 路由                       | 說明 |
 | -------------------------- | ------------------ |
-| `/admin/comments`          | Comment moderation |
-| `/admin/comments/settings` | Comment settings   |
+| `/admin/comments`          | 留言審核 |
+| `/admin/comments/settings` | 留言設定 |
 
-**Gallery**
+**Gallery（圖庫）**
 
-| Route                       | Description               |
+| 路由                        | 說明 |
 | --------------------------- | ------------------------- |
-| `/admin/gallery`            | Gallery items             |
-| `/admin/gallery/categories` | Gallery categories        |
-| `/admin/gallery/featured`   | Featured items management |
+| `/admin/gallery`            | 圖庫作品 |
+| `/admin/gallery/categories` | 圖庫分類 |
+| `/admin/gallery/featured`   | Featured items 管理 |
 
-**Users**
+**Users（使用者）**
 
-| Route               | Description |
+| 路由                | 說明 |
 | ------------------- | ----------- |
-| `/admin/users`      | Users list  |
-| `/admin/users/[id]` | User detail |
+| `/admin/users`      | 使用者列表 |
+| `/admin/users/[id]` | 使用者詳情 |
 
-**System**
+**System（系統）**
 
-| Route                  | Description       |
+| 路由                   | 說明 |
 | ---------------------- | ----------------- |
-| `/admin/import-export` | Import / Export   |
+| `/admin/import-export` | 匯入 / 匯出 |
 | `/admin/reports`       | Report generation |
-| `/admin/history`       | Audit history     |
+| `/admin/history`       | Audit history |
 
-### Role System
+### 角色權限（RBAC）
 
-| Role   | Permissions                          |
+| 角色   | 權限 |
 | ------ | ------------------------------------ |
-| Owner  | Full access, theme editing, settings |
-| Editor | Content editing, read-only settings  |
+| Owner  | Full access、theme editing、settings |
+| Editor | Content editing、read-only settings |
 
-### Authentication Flow
+### 驗證流程
 
 - Canonical decision order: `SECURITY.md` → Admin Role 判斷（JWT role → `site_admins` → env fallback）
 
-### Content Sources (Public Navigation / Landing)
+### 內容來源（Public Navigation / Landing）
 
-- Header nav labels: `site_content(section_key='nav')` (fallback: `messages/*`)
-- Footer copy: `site_content(section_key='footer')` (fallback: `messages/*`)
-- Company short name: `site_content(section_key='company')` (fallback: `messages/*`)
-- Landing page ordering/visibility: `landing_sections` table (`lib/modules/landing/*`; rendered by `app/[locale]/page.tsx`)
-  - Preset sections (`hero/about/services/platforms/product_design/portfolio/contact`): main content comes from external sources (`site_content`, `services`, `portfolio_items`, `gallery`)
-  - Custom sections (`custom_1...custom_10`): content stored in `landing_sections.content_en/zh`
+- Header nav labels：`site_content(section_key='nav')`（fallback：`messages/*`）
+- Footer copy：`site_content(section_key='footer')`（fallback：`messages/*`）
+- Company short name：`site_content(section_key='company')`（fallback：`messages/*`）
+- Landing page ordering/visibility：`landing_sections` table（`lib/modules/landing/*`；由 `app/[locale]/page.tsx` render）
+  - Preset sections（`hero/about/services/platforms/product_design/portfolio/contact`）：主內容來自其他資料來源（`site_content`, `services`, `portfolio_items`, `gallery`）
+  - Custom sections（`custom_1...custom_10`）：內容存於 `landing_sections.content_en/zh`
 
 ---
 
-## Import/Export (Admin-only)
+<a id="importexport-admin-only"></a>
+## 匯入 / 匯出（後台）
 
-> Route: `/admin/import-export` (localized under `/[locale]/admin/*`)
+> 路由：`/admin/import-export`（掛在 `/[locale]/admin/*` 下）
 
 - PRD: [IMPORT_EXPORT.md](specs/completed/IMPORT_EXPORT.md)
 
-### Technical Spec (Single Source)
+### 技術規格（單一真相來源）
 
 - Spec (formats/flows/invariants): `specs/completed/import-export-spec.md`
-- Implementation file map: see [Module Inventory](#module-inventory-single-source)
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)
 
 ---
 
-## AI Analysis (Admin-only)
+<a id="ai-analysis-admin-only"></a>
+## AI 分析（後台）
 
-> Route: `/admin/ai-analysis` (localized under `/[locale]/admin/*`)
+> 路由：`/admin/ai-analysis`（掛在 `/[locale]/admin/*` 下）
 
 - PRD: [AI_ANALYSIS_v2.md](specs/completed/AI_ANALYSIS_v2.md)
 
-### Technical Spec (Single Source)
+### 技術規格（單一真相來源）
 
 - Spec (contracts/flows): `specs/completed/ai-analysis-spec.md`
 - Ops enablement / cron verification: `runbook/ai-analysis.md`
-- Implementation file map: see [Module Inventory](#module-inventory-single-source)
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)
 
 ---
 
-## Embeddings and Semantic Search (Admin-only)
+<a id="embeddings-and-semantic-search-admin-only"></a>
+## Embeddings 與語意搜尋（後台）
 
-> Routes:
+> 路由：
 >
-> - Search UI: `/admin/control-center`
-> - Embeddings management: `/admin/embeddings`
+> - Search UI：`/admin/control-center`
+> - Embeddings management：`/admin/embeddings`
 
 - PRD: [SUPABASE_AI.md](specs/completed/SUPABASE_AI.md)
 
-### Technical Spec (Single Source)
+### 技術規格（單一真相來源）
 
 - Embeddings/search/RAG contracts: `specs/completed/embeddings-semantic-search-spec.md`
 - Queue dispatcher/worker contracts: `specs/completed/embedding-queue-dispatcher-worker-spec.md`
 - Ops enablement / cron verification: `runbook/embeddings-preprocessing.md`
-- Implementation file map: see [Module Inventory](#module-inventory-single-source)
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)
 
 ---
 
-## Preprocessing (Admin-only)
+<a id="preprocessing-admin-only"></a>
+## 資料預處理（後台）
 
-> Route: `/admin/preprocessing`
+> 路由：`/admin/preprocessing`
 
 - PRD: [DATA_PREPROCESSING.md](specs/completed/DATA_PREPROCESSING.md)
 
-### Technical Spec (Single Source)
+### 技術規格（單一真相來源）
 
 - Pipeline contracts: `specs/completed/data-preprocessing-pipeline-spec.md`
 - Queue dispatcher/worker contracts: `specs/completed/embedding-queue-dispatcher-worker-spec.md`
 - Ops enablement / cron verification: `runbook/embeddings-preprocessing.md`
-- Implementation file map: see [Module Inventory](#module-inventory-single-source)
+- 實作入口對照：見 [模組清單](#module-inventory-single-source)
 
 ---
 
-## i18n
+<a id="i18n"></a>
+## 多語系（i18n）
 
-### Implementation
+### 實作
 
-- Using `next-intl` package
-- Supported locale: Traditional Chinese (`zh`)
-- Translation file: `messages/zh.json`
+- 使用 `next-intl`
+- 支援語系：繁體中文（`zh`）
+- 翻譯檔：`messages/zh.json`
 
-### Route Structure
+### 路由結構
 
-- All routes use `/[locale]/*` pattern
-- Locale prefix always present (e.g. `/zh/...`)
-- Default language: `zh`
+- 所有 routes 皆使用 `/[locale]/*` pattern
+- URL 一律帶 locale prefix（例如 `/zh/...`）
+- 預設語言：`zh`
 
-### Single Source
+### 單一真相來源
 
-- `lib/i18n/locales.ts` is the only locale source (no hardcoding)
+- `lib/i18n/locales.ts` 是唯一 locale 來源（禁止硬編）
 
 ---
 
+<a id="seo"></a>
 ## SEO
 
-### Features
+### 功能
 
 - Dynamic `sitemap.xml` (`app/sitemap.ts`)
 - Dynamic `robots.txt` (`app/robots.ts`) — disallows `/admin/*` for SEO isolation
@@ -466,32 +479,34 @@ This document describes **implemented** behavior and its technical details.
 - JSON-LD structured data
 - Auto-generated hreflang tags
 
-### URL Single Source
+### URL 單一來源
 
 - Canonical constraints: `../ARCHITECTURE.md` §3.11 (SEO / URL 單一來源)
 - Drift guardrails / grep checklist: `../uiux_refactor.md` §2
 
 ---
 
-## Known Gaps (Roadmap Links)
+<a id="known-gaps-roadmap-links"></a>
+## 已知缺口（連到 Roadmap）
 
 > 目的：避免把「未完成/刻意 gated」敘述散落在各 feature 章節，造成讀者誤以為本文件描述的是「全功能已完成」狀態。
 
-### Data Intelligence (Admin-only)
+### Data Intelligence（後台）
 
 - Data Intelligence Platform：
   - Module B（AI Analysis）：reports/schedules + share links 已落地；custom templates backend 已落地（DB/worker），Admin UI（Owner CRUD + selection）待補（see `doc/specs/completed/ai-analysis-spec.md`）
   - Module C / Module C Extension：Phase 7+（Hybrid Search / 可配置 pipeline 等）以 `doc/ROADMAP.md` 為準
   - 入口（localized）：`/[locale]/admin/(data)/import-export`, `/[locale]/admin/(data)/ai-analysis`, `/[locale]/admin/(data)/control-center`, `/[locale]/admin/(data)/embeddings`, `/[locale]/admin/(data)/preprocessing`（AI Analysis 需啟用 cron 或使用 owner-only manual processing）
 
-### Analytics
+### Analytics（分析）
 
 - Page view tracking（ingestion + privacy-first aggregation）已落地：`specs/completed/page-views-analytics-spec.md`
 - Dashboard UI 尚未實作（目前僅做到寫入 + 驗證）
 
 ---
 
-## Module Inventory (Single Source)
+<a id="module-inventory-single-source"></a>
+## 模組清單（單一真相來源）
 
 > 本節只列出各 domain 的**入口點**（facade / cached / admin-io）。
 > 完整檔案清單請用 `ls lib/modules/<domain>/`（業務模組）或 `ls lib/<domain>/`（cross-cutting）查看。
@@ -509,7 +524,7 @@ This document describes **implemented** behavior and its technical details.
 | Landing   | `lib/modules/landing/io.ts` | `lib/modules/landing/cached.ts` | `lib/modules/landing/admin-io.ts` | —                        |
 | Features  | `lib/features/io.ts`        | `lib/features/cached.ts`        | `lib/features/admin-io.ts`        | —                        |
 
-### Data Intelligence Modules (Admin-only)
+### Data Intelligence 模組（後台）
 
 | Module        | Facade                              | Types                              | Spec / Code Map                                        |
 | ------------- | --------------------------- | ---------------------------- | ------------------------------------------------------ |
@@ -519,7 +534,7 @@ This document describes **implemented** behavior and its technical details.
 | Preprocessing | `lib/modules/preprocessing/io.ts`   | `lib/modules/preprocessing/types.ts` | `specs/completed/data-preprocessing-pipeline-spec.md`  |
 | Rerank        | `lib/rerank/io.ts`          | `lib/rerank/types.ts`        | —                                                      |
 
-### Cross-cutting
+### Cross-cutting（跨領域 / 共用）
 
 - SEO: `lib/seo/hreflang.ts`, `lib/seo/jsonld.ts`, `lib/site/site-url.ts`
 - Analytics: `lib/analytics/pageviews-io.ts`, `lib/validators/page-views.ts`, `lib/types/page-views.ts`
@@ -531,9 +546,9 @@ This document describes **implemented** behavior and its technical details.
 
 ---
 
-## Related Documents
+## 相關文件
 
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Architecture constraints
-- [SECURITY.md](SECURITY.md) - Security policies
-- [ROADMAP.md](ROADMAP.md) - Pending/planned items
-- [uiux_refactor.md](../uiux_refactor.md) - Drift tracking / remediation steps
+- [ARCHITECTURE.md](../ARCHITECTURE.md)：架構約束
+- [SECURITY.md](SECURITY.md)：安全規則
+- [ROADMAP.md](ROADMAP.md)：待辦 / 計畫（what/why/status）
+- [uiux_refactor.md](../uiux_refactor.md)：Drift 追蹤 / 修復手冊

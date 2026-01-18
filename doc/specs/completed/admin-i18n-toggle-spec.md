@@ -8,7 +8,7 @@
 
 相關文件：
 
-- Error log spec: [Admin Error Log — Spec](admin-errorlog-spec.md)
+- Error log spec: [Admin Error Log — Spec](../proposed/admin-errorlog-spec.md)
 - Implemented behavior (SSoT): [`doc/SPEC.md`](../../SPEC.md)
 - Constraints: [`ARCHITECTURE.md`](../../../ARCHITECTURE.md)
 

@@ -144,7 +144,7 @@ DB constraints（see `supabase/02_add/17_ai_analysis_custom_template_refs.sql`�
 
 #### 5.1.1 Admin UI i18n / icon policy（cross-cutting）
 
-- Admin UI 文案需支援 `adminLocale`（UI preference）且不依賴 URL locale（see: `doc/specs/proposed/admin-i18n-toggle-spec.md`）。
+- Admin UI 文案需支援 `adminLocale`（UI preference）且不依賴 URL locale（see: `doc/specs/completed/admin-i18n-toggle-spec.md`）。
 - 專有名詞不翻譯：`Prompt`, `Data Types`, `RAG`, `Embedding`, `Token` 等維持英文。
 - 除 AdminSidebar 導航 icon 外，AI Analysis panel content 不使用 icon/emoji/svg（避免 UI/文案 drift）。
 

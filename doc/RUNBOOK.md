@@ -68,7 +68,7 @@ Admin Safety Queue is accessible at `/admin/comments/safety`. Operations include
 - Manage safety corpus items
 - Configure safety settings
 
-Spec: `specs/proposed/safety-risk-engine-spec.md`
+Spec: `specs/completed/safety-risk-engine-spec.md`
 
 ---
 

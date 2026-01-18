@@ -4,7 +4,7 @@
  * Server-only module for reading safety settings from database.
  * Provides default values when settings are null or missing.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §9.2
+ * @see doc/specs/completed/safety-risk-engine-spec.md §9.2
  * @see ARCHITECTURE.md §3.13 - IO boundaries
  */
 import 'server-only';

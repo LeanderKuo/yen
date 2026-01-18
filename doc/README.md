@@ -2,7 +2,7 @@
 
 > Canonical doc root: `doc/`
 
-## Project Snapshot (Only These 3 Things)
+## Project Snapshot (Only These 4 Things)
 
 - **Owner dashboard (one page)**: `STATUS.md` (unimplemented + drift summary)
 - **Architecture compliance**: `../ARCHITECTURE.md` + guardrail tests (`npm test`, see `tests/architecture-boundaries.test.ts`)

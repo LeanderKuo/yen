@@ -125,5 +125,5 @@
 ## Follow-ups
 
 - Active step plan（pending work only）：`doc/meta/STEP_PLAN.md`
-- Spec（source of truth for requirements）：`doc/specs/proposed/admin-i18n-toggle-spec.md`
+- Spec（source of truth for requirements）：`doc/specs/completed/admin-i18n-toggle-spec.md`
 

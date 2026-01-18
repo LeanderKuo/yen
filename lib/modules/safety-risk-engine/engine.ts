@@ -7,7 +7,7 @@
  * Pattern similar to lib/spam/engine.ts for consistency.
  *
  * @see lib/spam/engine.ts - Similar pattern
- * @see doc/specs/proposed/safety-risk-engine-spec.md §3
+ * @see doc/specs/completed/safety-risk-engine-spec.md §3
  */
 
 import type {

@@ -6,7 +6,7 @@
 > Scope: Admin Panel bilingual（EN / zh）for all admin routes（AdminSidebar + panels；URL 不變）+ AI Analysis Custom Prompt templates UI/UX（Owner-only CRUD + selection）。  
 > Audience: executor agent（照本檔逐 PR 執行；每個 PR merge 後更新本檔）  
 > Mode: **B — Alignment gate**（偵測 drift/歧義/衝突時：先對齊再規劃 PR）  
-> PRD / Spec Input: `doc/specs/proposed/admin-i18n-toggle-spec.md`（primary; `doc/PRD_ACTIVE.md` 仍為 template）
+> PRD / Spec Input: `doc/specs/completed/admin-i18n-toggle-spec.md`（primary; `doc/PRD_ACTIVE.md` 仍為 template）
 
 ## Inputs（以 SSoT 為準；tracking docs 只當線索）
 
@@ -16,7 +16,7 @@
 - Ops / verification: `../RUNBOOK.md`（details: `../runbook/*`）
 - Docs SRP + update matrix: `../GOVERNANCE.md`
 - Drift tracker + playbooks（stable `@see`）: `../../uiux_refactor.md`
-- Feature spec (this work): `../specs/proposed/admin-i18n-toggle-spec.md`
+- Feature spec (this work): `../specs/completed/admin-i18n-toggle-spec.md`
 - Related spec (reserve keys): `../specs/proposed/admin-errorlog-spec.md`
 
 ## Historical / Completed References（不要再當成 active plan）
@@ -38,7 +38,7 @@
 
 ## 1. Constraints（Non‑Negotiables）
 
-- **URL 不變**：Admin 語言 toggle 只影響後台 UI 文案；URL 仍維持 `/{routeLocale}/admin/**`（見 `doc/specs/proposed/admin-i18n-toggle-spec.md`）。
+- **URL 不變**：Admin 語言 toggle 只影響後台 UI 文案；URL 仍維持 `/{routeLocale}/admin/**`（見 `doc/specs/completed/admin-i18n-toggle-spec.md`）。
 - **不新增 admin 專用翻譯檔案**：只擴充既有 `messages/en.json` 與 `messages/zh.json`（新增 `admin` namespace；見 spec §1.7）。
 - **不把 NextIntl provider 放到 root layout**（避免擴大 public bundle）：遵守 `ARCHITECTURE.md` bundle/provider 約束；僅在 admin layout / admin islands 引入需要的 provider/messages。
 - **Locale 單一來源**：locale 值與型別以 `lib/i18n/locales.ts` 為準（`LOCALES`, `Locale`）。
@@ -67,7 +67,7 @@
 ### Drift List（ACTIVE）
 
 1. **Spec: AdminSidebar + Admin Panel 內容都要切換** vs **Implementation: 多數 panels 仍 hard-coded / route-locale**
-   - Doc claim: `doc/specs/proposed/admin-i18n-toggle-spec.md` §1.1/§1.2
+   - Doc claim: `doc/specs/completed/admin-i18n-toggle-spec.md` §1.1/§1.2
    - Evidence: `app/[locale]/admin/(data)/ai-analysis/AIAnalysisClient.tsx`, `app/[locale]/admin/features/page.tsx`
    - 分類：implementation drift（需逐模組 migration）
 2. **Non-Sidebar 禁用 icon** vs **Implementation: panel 內容仍含 emoji/icon**
@@ -234,7 +234,7 @@
 4. 特別處理「格式化」類文案：
    - 日期：`adminLocale === 'zh'` 時用 `zh-TW`，否則 `en-US`
    - 單位/數字/幣別：保持既有 format 行為（只翻譯 label）
-5. Error Log keys sweep（依 `doc/specs/proposed/admin-i18n-toggle-spec.md` §1.2）：
+5. Error Log keys sweep（依 `doc/specs/completed/admin-i18n-toggle-spec.md` §1.2）：
    - 確認 `admin.errorLog.*` keys 已預留（即便 UI 尚未實作）
 6. 跑 guardrails：`npm test` + `npm run type-check` + `npm run lint` + manual QA（charts 特別看 tooltip/empty state）
 
@@ -338,7 +338,7 @@
 
 - 更新 `doc/SPEC.md`（i18n/admin 章節：描述 adminLocale 行為與 storage keys）
 - 更新 specs/PRDs（狀態調整；如仍有未覆蓋的 admin 模組或 AI Analysis UI gaps，需在 spec/PRD 說清楚）：
-  - `doc/specs/proposed/admin-i18n-toggle-spec.md`
+  - `doc/specs/completed/admin-i18n-toggle-spec.md`
   - `doc/specs/completed/ai-analysis-spec.md`
   - `doc/specs/completed/AI_ANALYSIS_v2.md`（必要時）
   - `doc/specs/README.md`
@@ -348,7 +348,7 @@
 
 - `doc/SPEC.md`
 - `doc/specs/README.md`
-- `doc/specs/proposed/admin-i18n-toggle-spec.md`
+- `doc/specs/completed/admin-i18n-toggle-spec.md`
 - `doc/specs/completed/ai-analysis-spec.md`
 - （必要時）`doc/specs/completed/AI_ANALYSIS_v2.md`
 - （必要時）`doc/archive/<date>-admin-i18n-toggle-implementation.md`（若本次變更量大且需要留 audit trail）
@@ -359,7 +359,7 @@
    - i18n 章節補上「adminLocale 與 routeLocale 分離」的行為描述（含 storage keys：`admin-locale`）
    - 附 evidence paths（例如 `app/[locale]/admin/layout.tsx`, `components/admin/common/AdminSidebar.tsx`）
 2. 更新 specs 狀態：
-   - `doc/specs/proposed/admin-i18n-toggle-spec.md`：維持 stable headings，更新 Status/Last Updated/DoD
+   - `doc/specs/completed/admin-i18n-toggle-spec.md`：維持 stable headings，更新 Status/Last Updated/DoD
    - `doc/specs/README.md`：同步 status（DRAFT → Stable/Implemented；若仍未全覆蓋則保持 DRAFT 並清楚標示 coverage）
 3. 最後一次 drift grep（只針對本次 domain）：
    - `rg -n "pathname\\.replace\\(" "components/admin"`（預期 0 hits）
@@ -383,7 +383,7 @@
 ### Docs updates
 
 - `doc/SPEC.md`（feature 行為/路由/UX）
-- `doc/specs/proposed/admin-i18n-toggle-spec.md`（spec status + coverage）
+- `doc/specs/completed/admin-i18n-toggle-spec.md`（spec status + coverage）
 - `doc/specs/completed/ai-analysis-spec.md` + `doc/specs/completed/AI_ANALYSIS_v2.md`（補 UI contract / 避免 drift）
 - `doc/specs/README.md`（index drift-free）
 

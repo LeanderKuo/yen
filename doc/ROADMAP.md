@@ -1,68 +1,68 @@
-# Development Roadmap
+# 開發 Roadmap
 
-> Last Updated: 2026-01-03  
-> Status: Active  
-> Scope: **what/why/status + links only** (no step-by-step, no SQL/commands, no code maps).
+> 最後更新: 2026-01-17  
+> 狀態: Active  
+> 範圍: **只寫 what/why/status + links**（不放 step-by-step、不放 SQL/commands、不放 code maps）
 
-For implemented behavior, see [SPEC.md](SPEC.md).
+已落地行為（SSoT）：見 [SPEC.md](SPEC.md)。
 
-For operational verification (go-live), see [RUNBOOK.md](RUNBOOK.md) → [runbook/go-live.md](runbook/go-live.md).
+上線/運維驗證（go-live）：見 [RUNBOOK.md](RUNBOOK.md) → [runbook/go-live.md](runbook/go-live.md)。
 
-For actionable steps, see [TASKS.md](TASKS.md) (unblocked) and [BLOCKERS.md](BLOCKERS.md) (blocked / external dependencies).  
-For stable technical specs, see [`specs/README.md`](specs/README.md).
-
----
-
-## Priority Definitions
-
-| Priority | Definition                      |
-| -------- | ------------------------------- |
-| P0       | Blocking release                |
-| P1       | Required for production release |
-| P2       | Post-release optimization       |
-| P3       | Nice-to-have / tracking         |
+可立即開工的 steps：見 [TASKS.md](TASKS.md)（unblocked）與 [BLOCKERS.md](BLOCKERS.md)（blocked / external dependencies）。  
+穩定的 technical specs：見 [`specs/README.md`](specs/README.md)。
 
 ---
 
-## P0 - Critical (Blocking Release)
+## Priority 定義
 
-### Production Database Alignment
-
-- **Status**: Pending
-- **Why**: avoid schema/RLS/RPC drift in prod
-- **Links**: `runbook/database-ops.md`, `../uiux_refactor.md` §3.9
-
-### Pre-Release Guardrails
-
-- **Status**: In Progress
-- **Why**: prevent regressions before deploy
-- **Links**: `../uiux_refactor.md` §2 (canonical checklist)
-
-### Theme Console Manual Verification
-
-- **Status**: Pending
-- **Why**: ensure Owner/Editor flows + no public FOUC
-- **Links**: `../uiux_refactor.md` §3.9, `SPEC.md` (Theme System)
+| Priority | 定義 |
+| -------- | ---- |
+| P0       | 阻塞上線 |
+| P1       | 上線必需 |
+| P2       | 上線後優化 |
+| P3       | Nice-to-have / tracking |
 
 ---
 
-## P1 - High (Required for Release)
+## P0 - Critical（阻塞上線）
 
-- (No active P1 roadmap items.)
+### Production DB 對齊
+
+- **狀態**: Pending
+- **原因**: 避免 prod schema/RLS/RPC drift
+- **連結**: `runbook/database-ops.md`、`../uiux_refactor.md` §3.9
+
+### Pre-release Guardrails（上線前守門）
+
+- **狀態**: In Progress
+- **原因**: 部署前避免 regressions
+- **連結**: `../uiux_refactor.md` §2（canonical checklist）
+
+### Theme Console 手動驗證
+
+- **狀態**: Pending
+- **原因**: 確保 Owner/Editor flows 正確 + public 無 FOUC
+- **連結**: `../uiux_refactor.md` §3.9、`SPEC.md`（Theme System）
 
 ---
 
-## P2 - Medium (Post-Release)
+## P1 - High（上線必需）
 
-### Local Dev Environment
-
-- **Status**: Deferred
-- **Why**: safer iteration without touching prod
-- **Links**: `runbook/database-ops.md`
+-（目前無 active P1 項目）
 
 ---
 
-## Tracking Items
+## P2 - Medium（上線後）
+
+### Local 開發環境
+
+- **狀態**: Deferred
+- **原因**: 更安全的迭代（避免直接動 prod）
+- **連結**: `runbook/database-ops.md`
+
+---
+
+## Tracking Items（追蹤項目）
 
 | Item            | Status   | Notes                       |
 | --------------- | -------- | --------------------------- |
@@ -72,7 +72,7 @@ For stable technical specs, see [`specs/README.md`](specs/README.md).
 
 ---
 
-## Risk Registry
+## Risk Registry（風險清單）
 
 | Risk                    | Impact                    | Mitigation                       |
 | ----------------------- | ------------------------- | -------------------------------- |
@@ -80,16 +80,16 @@ For stable technical specs, see [`specs/README.md`](specs/README.md).
 
 ---
 
-## Completed (Archive)
+## Completed（歸檔）
 
 - See [archive/README.md](archive/README.md)
 
 ---
 
-## Related Documents
+## 相關文件
 
-- Docs hub: `README.md`
-- Architecture: `../ARCHITECTURE.md`
-- Implemented behavior: `SPEC.md`
-- Security: `SECURITY.md`
-- Ops runbook: `RUNBOOK.md`
+- Docs hub：`README.md`
+- Architecture：`../ARCHITECTURE.md`
+- Implemented behavior：`SPEC.md`
+- Security：`SECURITY.md`
+- Ops runbook：`RUNBOOK.md`

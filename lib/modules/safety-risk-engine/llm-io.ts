@@ -4,7 +4,7 @@
  * Server-only module for Layer 3 LLM safety assessment.
  * Uses Gemini Native JSON Mode with strict timeout + responseSchema.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §3 (Layer 3)
+ * @see doc/specs/completed/safety-risk-engine-spec.md §3 (Layer 3)
  * @see ARCHITECTURE.md §3.13 - SDK / secrets / client bundle rules
  */
 import 'server-only';
@@ -48,7 +48,7 @@ const SAFETY_MAX_TOKENS = 256;
 /**
  * Gemini response schema for Safety LLM output.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §5.1
+ * @see doc/specs/completed/safety-risk-engine-spec.md §5.1
  */
 const SAFETY_RESPONSE_SCHEMA: ResponseSchema = {
     type: SchemaType.OBJECT,

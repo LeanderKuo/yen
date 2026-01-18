@@ -1,6 +1,6 @@
 ﻿# AI Safety Risk Engine — Spec
 
-> Status: DRAFT  
+> Status: Stable (Implemented)  
 > Last Updated: 2026-01-17  
 > Scope: comment UGC safety risk engine (V1: text only)
 
@@ -599,10 +599,12 @@ interface CommentSafetyAssessment {
 - 既有行為的單一事實來源（SSoT）：`doc/SPEC.md`
 - 本文件：Safety Risk Engine 的設計、資料合約與 schema（供實作與稽核對齊）
 
-### 10.2 升級到 completed（可選）
+### 10.2 已歸檔到 completed（現況）
 
-若要把本規格從 `proposed/` 升級到 `completed/`，建議流程：
+本規格已位於 `doc/specs/completed/safety-risk-engine-spec.md`（已落地；heading 保持穩定供 `@see` 引用）。
 
-1. 移動或複製到 `doc/specs/completed/safety-risk-engine-spec.md`
-2. 更新 `doc/specs/README.md` 的索引列
-3. 更新 `doc/SPEC.md` 中的 spec link（並確保本文件內的章節編號/標題維持穩定，避免破壞 in-code `@see`）
+若要開新提案（V2 / redesign），請：
+
+1. 複製本檔到 `doc/specs/proposed/<new>-spec.md`（或使用 `doc/specs/TEMPLATE.md`）
+2. 在 `doc/ROADMAP.md`（what/why/status）與 `doc/TASKS.md`（steps）分別追蹤
+3. 實作完成後回寫 `doc/SPEC.md`（SSoT）

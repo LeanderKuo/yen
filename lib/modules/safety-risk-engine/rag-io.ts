@@ -4,7 +4,7 @@
  * Server-only module for Layer 2 RAG search against safety corpus.
  * Uses semantic search to find relevant slang/case matches.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §3 (Layer 2)
+ * @see doc/specs/completed/safety-risk-engine-spec.md §3 (Layer 2)
  * @see ARCHITECTURE.md §3.13 - IO boundaries
  */
 import 'server-only';

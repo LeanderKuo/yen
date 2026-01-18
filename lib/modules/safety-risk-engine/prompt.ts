@@ -4,7 +4,7 @@
  * Pure module for composing LLM prompts and parsing JSON responses.
  * Handles the contract between Safety Risk Engine and Gemini.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §5.1
+ * @see doc/specs/completed/safety-risk-engine-spec.md §5.1
  */
 
 import type {

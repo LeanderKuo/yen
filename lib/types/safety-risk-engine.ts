@@ -2,9 +2,9 @@
  * Safety Risk Engine Types
  *
  * Domain types for the Safety Risk Engine module.
- * Aligned with doc/specs/proposed/safety-risk-engine-spec.md §5.2.
+ * Aligned with doc/specs/completed/safety-risk-engine-spec.md §5.2.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md
+ * @see doc/specs/completed/safety-risk-engine-spec.md
  */
 
 // =============================================================================

@@ -6,7 +6,7 @@
  *
  * Implements Fail Closed policy: any error/timeout defaults to HELD.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §3, §4.2.0
+ * @see doc/specs/completed/safety-risk-engine-spec.md §3, §4.2.0
  * @see ARCHITECTURE.md §3.13 - IO boundaries
  */
 import 'server-only';

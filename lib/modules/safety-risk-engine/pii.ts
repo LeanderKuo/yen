@@ -9,7 +9,7 @@
  * (embeddings, LLM) per ARCHITECTURE.md PII constraints.
  *
  * @see ARCHITECTURE.md §2 - AI/PII constraints
- * @see doc/specs/proposed/safety-risk-engine-spec.md §2
+ * @see doc/specs/completed/safety-risk-engine-spec.md §2
  */
 
 import type {

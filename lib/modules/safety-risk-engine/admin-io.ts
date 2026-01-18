@@ -4,7 +4,7 @@
  * Server-only module for assessment persistence and moderation updates.
  * Uses service_role client since comment submit path doesn't have admin JWT.
  *
- * @see doc/specs/proposed/safety-risk-engine-spec.md §9.3
+ * @see doc/specs/completed/safety-risk-engine-spec.md §9.3
  * @see ARCHITECTURE.md §3.13 - IO boundaries
  */
 import 'server-only';

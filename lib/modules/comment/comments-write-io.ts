@@ -6,7 +6,7 @@
  *
  * @module lib/modules/comment/comments-write-io
  * @see ARCHITECTURE.md §3.4 - IO module splitting
- * @see doc/specs/proposed/safety-risk-engine-spec.md §4.2.0 - Spam → Safety pipeline
+ * @see doc/specs/completed/safety-risk-engine-spec.md §4.2.0 - Spam → Safety pipeline
  */
 
 import 'server-only';
