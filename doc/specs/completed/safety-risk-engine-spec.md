@@ -1,7 +1,7 @@
 ﻿# AI Safety Risk Engine — Spec
 
 > Status: Stable (Implemented)  
-> Last Updated: 2026-01-17  
+> Last Updated: 2026-01-19  
 > Scope: comment UGC safety risk engine (V1: text only)
 
 See also:
@@ -75,6 +75,7 @@ See also:
   - Gemini SDK / API 只允許在 server-only `lib/infrastructure/gemini/**`
   - OpenRouter API 只允許在 server-only `lib/infrastructure/openrouter/**`
   - OpenAI SDK 只允許在 `supabase/functions/**`（本功能 V1 不新增新的 OpenAI Edge Function）
+- **Gemini 金鑰**：`GEMINI_API_KEY`（server-only env；例如 Vercel env var；只能由 `lib/infrastructure/gemini/**` 讀取；禁止放入 `NEXT_PUBLIC_*`）
 
 ---
 

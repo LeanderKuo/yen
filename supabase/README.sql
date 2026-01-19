@@ -1,149 +1,116 @@
-﻿-- ============================================
--- QUANTUM NEXUS LNK - Master Database README
--- 資料庫總覽與執行指南
 -- ============================================
--- 
--- 最後更新 Last Updated: 2025-12-23
--- 
+-- Supabase Database Scripts — README
 -- ============================================
--- 目錄結構 DIRECTORY STRUCTURE
+--
+-- 最後更新 Last Updated: 2026-01-19
+--
+-- 目的：
+-- - 提供 DB schema/RLS/seed 的可重跑流程（本專案尚未上線，可安全重建）
+-- - 避免「手動執行順序」造成 drift（以 COMBINED_* 與 npm scripts 為準）
+--
+-- Canonical 操作手冊（建議先看這份）：
+-- - doc/runbook/database-ops.md
+--
+-- ============================================
+-- 目錄結構（Directory Structure）
 -- ============================================
 --
 -- supabase/
--- ├── README.sql                    -- 本檔案：總覽與執行指南
+-- ├── 01_drop/                      -- 刪除（重建用；危險）
+-- │   ├── 01_main.sql
+-- │   ├── 02_comments.sql
+-- │   ├── 03_reports.sql
+-- │   ├── 04_gallery.sql
+-- │   ├── 05_reactions.sql
+-- │   ├── 06_feature_settings.sql
+-- │   ├── 09_landing_sections.sql
+-- │   ├── 10_theme.sql
+-- │   ├── 11_users.sql
+-- │   ├── 12_ai_analysis.sql
+-- │   ├── 13_embeddings.sql
+-- │   ├── 15_ai_analysis_templates.sql
+-- │   ├── 16_page_views.sql
+-- │   ├── 17_ai_analysis_custom_template_refs.sql
+-- │   ├── 18_ai_analysis_report_shares.sql
+-- │   └── 19_safety_risk_engine.sql
 -- │
--- ├── 01_drop/                      -- 步驟 1: 刪除舊表格
--- │   ├── 01_main.sql              -- 刪除主網站表格
--- │   ├── 02_comments.sql          -- 刪除留言系統表格
--- │   ├── 03_reports.sql           -- 刪除報告系統表格
--- │   ├── 04_gallery.sql           -- 刪除畫廊表格
--- │   ├── 05_reactions.sql         -- 刪除反應系統表格
--- │   ├── 06_feature_settings.sql  -- 刪除功能開關設定
--- │   ├── 09_landing_sections.sql  -- 刪除首頁區塊表格
--- │   └── 10_theme.sql             -- 刪除主題配置表格
+-- ├── 02_add/                       -- 建立 schema/RLS（主要入口）
+-- │   ├── 01_main.sql
+-- │   ├── 02_comments.sql
+-- │   ├── 03_reports.sql
+-- │   ├── 04_gallery.sql
+-- │   ├── 05_reactions.sql
+-- │   ├── 06_cross_triggers.sql
+-- │   ├── 06_feature_settings.sql
+-- │   ├── 09_landing_sections.sql
+-- │   ├── 10_theme.sql
+-- │   ├── 11_users.sql
+-- │   ├── 12_ai_analysis.sql
+-- │   ├── 13_embeddings.sql
+-- │   ├── 14_import_export_jobs.sql
+-- │   ├── 15_ai_analysis_templates.sql
+-- │   ├── 16_page_views.sql
+-- │   ├── 17_ai_analysis_custom_template_refs.sql
+-- │   ├── 18_ai_analysis_report_shares.sql
+-- │   └── 19_safety_risk_engine.sql
 -- │
--- ├── 02_add/                       -- 步驟 2: 建立新表格
--- │   ├── 01_main.sql              -- 主網站表格（含 site_admins + JWT trigger）
--- │   ├── 02_comments.sql          -- 留言系統表格
--- │   ├── 03_reports.sql           -- 報告系統表格
--- │   ├── 04_gallery.sql           -- 畫廊表格
--- │   ├── 05_reactions.sql         -- 反應系統表格
--- │   ├── 06_cross_triggers.sql    -- 跨表觸發器
--- │   ├── 06_feature_settings.sql  -- 功能開關設定
--- │   ├── 09_landing_sections.sql  -- 首頁區塊表格
--- │   └── 10_theme.sql             -- 主題配置表格（Singleton）
+-- ├── 03_seed/                      -- 預設資料（idempotent 友善）
+-- │   ├── 01_main.sql
+-- │   ├── 02_comments.sql
+-- │   ├── 04_features_landing.sql
+-- │   ├── 05_gallery.sql
+-- │   ├── 06_blog.sql
+-- │   ├── 07_theme.sql
+-- │   └── 08_safety.sql
 -- │
--- └── 03_seed/                      -- 步驟 3: 插入預設資料
---     ├── 01_main.sql              -- 主網站預設資料
---     ├── 02_comments.sql          -- 留言系統預設資料
---     ├── 04_features_landing.sql  -- 功能開關與 Landing 預設資料
---     ├── 05_gallery.sql           -- 畫廊預設資料
---     ├── 06_blog.sql              -- 部落格預設資料
---     └── 07_theme.sql             -- 主題配置預設資料
+-- ├── functions/                    -- Supabase Edge Functions（OpenAI embeddings/judge 等）
+-- │   └── ...
+-- │
+-- ├── COMBINED_ADD.sql              -- 一次建立（含 tables/functions/RLS/GRANT）
+-- ├── COMBINED_SEED.sql             -- 一次 seed
+-- ├── COMBINED_DROP.sql             -- 一次 drop（危險）
+-- ├── COMBINED_GRANTS.sql           -- （legacy/rare）僅 grants 的合併檔（通常不需要單獨跑）
+-- └── README.sql                    -- 本檔
 --
 -- ============================================
--- 合併檔案 COMBINED FILES
+-- 推薦操作（最少腦力 / 最低 drift）
 -- ============================================
 --
--- 為方便一次性執行，已預先合併所有 SQL 檔案：
+-- ✅ 推薦：用 npm scripts（會呼叫 scripts/db.mjs；psql 單 transaction）
 --
--- - COMBINED_ADD.sql   (~79KB) - 建立所有表格/函數/RLS
--- - COMBINED_DROP.sql  (~8KB)  - 刪除所有表格（重建用）
--- - COMBINED_SEED.sql  (~13KB) - 插入預設資料
+-- 1) 準備環境變數（.env.local；gitignored）
+--    SUPABASE_DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
 --
--- 【全新安裝】只需執行：
---    ① COMBINED_ADD.sql
---    ② COMBINED_SEED.sql
+-- 2) 指令
+--    npm run db:add     -- 建立 schema/RLS/GRANT
+--    npm run db:seed    -- 插入 seed data
+--    npm run db:drop    -- 刪除所有資料表（危險）
+--    npm run db:reset   -- drop → add → seed（本專案尚未上線時最方便）
 --
--- 【重建資料庫】執行順序：
---    ① COMBINED_DROP.sql
---    ② COMBINED_ADD.sql
---    ③ COMBINED_SEED.sql
+-- ✅ 若你一定要在 Supabase Dashboard → SQL Editor 手動跑：
+--    - 重建：COMBINED_DROP.sql → COMBINED_ADD.sql → COMBINED_SEED.sql
+--    - 全新：COMBINED_ADD.sql → COMBINED_SEED.sql
 --
--- ============================================
---  全新安裝 FRESH INSTALL（空資料庫）
--- ============================================
---
--- 請在 Supabase Dashboard > SQL Editor 中，按以下順序執行：
---
--- 【步驟 1 - DROP】跳過（空資料庫不需要）
---
--- 【步驟 2 - ADD】建立新表格（按順序）
---    ① 02_add/01_main.sql
---    ② 02_add/02_comments.sql
---    ③ 02_add/03_reports.sql
---    ④ 02_add/04_gallery.sql
---    ⑤ 02_add/05_reactions.sql
---    ⑥ 02_add/06_cross_triggers.sql
---    ⑦ 02_add/06_feature_settings.sql
---    ⑧ 02_add/09_landing_sections.sql
---    ⑨ 02_add/10_theme.sql
---
--- 【步驟 3 - SEED】插入預設資料（按順序）
---    ① 03_seed/01_main.sql
---    ② 03_seed/02_comments.sql
---    ③ 03_seed/04_features_landing.sql
---    ④ 03_seed/05_gallery.sql
---    ⑤ 03_seed/06_blog.sql
---    ⑥ 03_seed/07_theme.sql
---
--- 【步驟 4 - 新增第一位 Admin】
---    執行以下 SQL（替換 email）：
---
---    INSERT INTO public.site_admins (email, role)
---    VALUES ('your-email@example.com', 'owner');
---
--- ⚠️ 完成後請重新登入網站，角色才會生效！
+-- 詳細 SOP / 驗證 SQL / RBAC 設定請看：
+-- - doc/runbook/database-ops.md
 --
 -- ============================================
--- 🔄 重建資料庫 REBUILD DATABASE（已有資料）
+-- Admin RBAC（必要，否則 RLS 會擋）
 -- ============================================
 --
--- ⚠️ 警告：此操作會刪除所有資料！
+-- 本專案的 RLS 主要依賴 JWT 的 app_metadata.role（owner/editor），
+-- 不依賴 ADMIN_ALLOWED_EMAILS（那只是 UI gate / fallback）。
 --
--- 【步驟 1 - DROP】刪除舊表格（反向順序）
---    ① 01_drop/10_theme.sql
---    ② 01_drop/09_landing_sections.sql
---    ③ 01_drop/06_feature_settings.sql
---    ④ 01_drop/05_reactions.sql
---    ⑤ 01_drop/04_gallery.sql
---    ⑥ 01_drop/03_reports.sql
---    ⑦ 01_drop/02_comments.sql
---    ⑧ 01_drop/01_main.sql
+-- 最小流程：
+-- 1) 先讓 Owner/Editor 帳號登入一次（建立 auth.users）
+-- 2) 在 SQL Editor 執行：
 --
--- 【步驟 2, 3】同上「全新安裝」
+--    insert into public.site_admins (email, role)
+--    values ('owner@example.com', 'owner')
+--    on conflict (email) do update
+--    set role = excluded.role,
+--        updated_at = timezone('utc', now());
 --
-
--- ============================================
--- 依賴關係 DEPENDENCIES
--- ============================================
---
--- 1. comments 依賴 main (需要 posts 表)
--- 2. reports 依賴 comments (需要 site_admins 表)
--- 3. gallery 依賴 comments (需要 site_admins 表)
--- 4. reactions 依賴 gallery, comments
--- 5. cross_triggers 依賴 posts, gallery_items, comments, reactions
--- 6. feature_settings 獨立
--- 7. landing_sections 依賴 gallery (gallery_categories 外鍵)
--- 8. theme 獨立 (Singleton 表，無依賴)
---
--- ⚠️ 請務必按照編號順序執行！
---
--- ============================================
--- RBAC 角色說明 RBAC ROLES
--- ============================================
---
--- site_admins 表支援兩種角色：
--- - owner: 最高權限，可管理網站設定與所有內容
--- - editor: 一般管理員，可管理內容
---
--- 角色透過 JWT app_metadata.role 傳遞，無需每次查詢資料庫。
--- Trigger 會自動同步 site_admins 變更到 auth.users。
---
--- 新增 admin 範例：
--- INSERT INTO public.site_admins (email, role) 
--- VALUES ('you@example.com', 'owner');
---
--- ⚠️ 角色變更需要重新登入後才會生效！
+-- 3) 該使用者登出再登入（刷新 JWT claims）
 --
 -- ============================================

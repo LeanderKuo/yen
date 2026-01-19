@@ -55,8 +55,6 @@ Links:
 export interface AnalysisRequest {
   templateId:
     | "user_behavior"
-    | "sales"
-    | "rfm"
     | "content_recommendation"
     | "custom";
   /** Required when templateId = 'custom' */

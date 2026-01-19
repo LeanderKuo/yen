@@ -91,7 +91,7 @@ DB constraints（see `supabase/02_add/17_ai_analysis_custom_template_refs.sql`�
 ### 4.4 Templates / Data Types（selection contract）
 
 - Template IDs（SSoT types）：`lib/types/ai-analysis.ts` → `AnalysisTemplateId`
-  - built-in: `user_behavior`, `sales`, `rfm`, `content_recommendation`
+  - built-in: `user_behavior`, `content_recommendation`
   - custom: `custom` + `customTemplateId` / `custom_template_id`
 - Required/optional data types（SSoT constants）：
   - `lib/types/ai-analysis.ts` → `ANALYSIS_TEMPLATES`
@@ -123,7 +123,7 @@ DB constraints（see `supabase/02_add/17_ai_analysis_custom_template_refs.sql`�
 
 #### Member Short ID（admin-only display）
 
-- Storage: `customer_profiles.short_id`（DB schema: `supabase/02_add/07_shop.sql`）
+- Storage: `customer_profiles.short_id`（DB schema: `supabase/02_add/11_users.sql`）
 - Format rules (UI/ops contract):
   - Prefix `C` + increasing integer (no zero-padding), e.g. `C1`, `C2`, `C1234`
   - Not reused after deletion (avoid ambiguity)

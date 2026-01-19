@@ -118,6 +118,9 @@ OPENROUTER_MODEL=openai/gpt-4o-mini
 # Optional: OpenRouter `HTTP-Referer` override (server-only; defaults to `http://localhost:3000`)
 SITE_URL=https://your-domain.com
 
+# Safety Risk Engine (Gemini; required if enabling comment safety)
+GEMINI_API_KEY=your_gemini_key
+
 # Optional: Cohere reranker (only if enabled by your preprocessing config)
 COHERE_API_KEY=your_cohere_key
 

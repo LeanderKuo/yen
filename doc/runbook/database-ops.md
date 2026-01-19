@@ -5,7 +5,7 @@
 [Back to RUNBOOK index](../RUNBOOK.md)
 
 > One-click add / seed / drop / reset for Supabase DB
-> Last Updated: 2025-12-31
+> Last Updated: 2026-01-19
 
 This guide covers database schema management using the scripts in `supabase/`.
 
@@ -102,6 +102,7 @@ npm run db -- reset --feature <feature>
 | ai_analysis      | main + users (includes templates)         |
 | embedding        | main + feature_settings + theme + vector  |
 | page_views       | main                                      |
+| safety_risk_engine | main + comments + embedding             |
 
 > Note: `import_export_jobs`（Job History）目前包含在 `supabase/COMBINED_ADD.sql`（`supabase/02_add/14_import_export_jobs.sql`），但尚未在 `scripts/db.mjs` 暴露為獨立 `--feature`。同理，`ai_analysis_templates` 已整合進 `ai_analysis` feature，`page_views` 已作為獨立 feature 暴露。
 
@@ -153,6 +154,15 @@ select feature_key, is_enabled from public.feature_settings order by display_ord
 select section_key, section_type, sort_order, is_visible
 from public.landing_sections
 order by sort_order;
+
+-- Users: short id table must exist (admin-only; used by Users list / AI Analysis deep links)
+select to_regclass('public.customer_profiles') as customer_profiles_table;
+
+-- After at least one user has logged in (creates auth.users → triggers user_directory/customer_profiles):
+select user_id, short_id
+from public.customer_profiles
+order by created_at desc
+limit 5;
 ```
 
 ---

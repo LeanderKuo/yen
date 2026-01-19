@@ -294,7 +294,7 @@ app/[locale]/admin/<module>/
 7. **[ARCHIVED ✅] Supabase AI：Keyword Search（tsvector）與 Hybrid Scoring** → `doc/specs/completed/embeddings-semantic-search-spec.md`
 8. **[ARCHIVED ✅] Supabase AI：Search Analytics（日誌表 + 低品質查詢追蹤）** → `doc/specs/completed/embeddings-semantic-search-spec.md`
 9. **[ARCHIVED ✅] Data Preprocessing：動態配置（DB SSOT + Config Editor）** → `doc/specs/completed/data-preprocessing-pipeline-spec.md`
-10. **[ARCHIVED ✅] Admin i18n Toggle：inline branching / legacy translations island** → `doc/meta/STEP_PLAN.md`
+10. **[ARCHIVED ✅] Admin i18n Toggle：inline branching / legacy translations island** → `doc/archive/2026-01-04-admin-i18n-toggle-step-plan.md`
 11. **[ARCHIVED ✅] Architecture：`lib/modules/*` 模組隔離 drift（移除跨模組 import + 新增 guardrail test）** → `ARCHITECTURE.md`, `tests/architecture-boundaries.test.ts`, `lib/use-cases/**`, `lib/auth/index.ts`, `lib/embeddings/index.ts`
   
   ### 4.1 Admin routes must use `actions.ts`（ARCHIVED; keep for stable `@see`）

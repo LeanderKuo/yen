@@ -1,7 +1,7 @@
 # Deployment (Production Checklist)
 
 > Canonical entry: `../RUNBOOK.md`  
-> Last Updated: 2026-01-03  
+> Last Updated: 2026-01-19  
 > Audience: executor agent / ops
 
 [Back to RUNBOOK index](../RUNBOOK.md)
@@ -20,6 +20,7 @@
 | --- | --- | --- | --- |
 | AI Analysis (OpenRouter) | `OPENROUTER_API_KEY` | Vercel env var | required only if enabling AI Analysis |
 | OpenRouter referer header (optional) | `SITE_URL` | Vercel env var | server-only; used only for OpenRouter `HTTP-Referer` |
+| Safety Risk Engine (Gemini) | `GEMINI_API_KEY` | Vercel env var | server-only; required only if enabling comment safety (`lib/infrastructure/gemini/**`) |
 | Embeddings / Judge (Edge Functions) | `OPENAI_API_KEY` | Supabase → Edge Functions → Secrets | used only by Supabase Edge Functions |
 | Cron endpoints auth | `CRON_SECRET` | Vercel env var | protects `/api/cron/*` (`doc/SECURITY.md` §3.5) |
 | Worker endpoints auth | `WORKER_SECRET` | Vercel env var | protects `/api/worker/*` (`doc/SECURITY.md` §3.5) |

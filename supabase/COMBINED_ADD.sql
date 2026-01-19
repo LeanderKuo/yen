@@ -1436,6 +1436,7 @@ GRANT UPDATE ON public.site_config TO authenticated;
 --
 -- 包含表格 TABLES:
 -- - user_directory: 使用者目錄（同步 auth.users，SSOT）
+-- - customer_profiles: 使用者短 ID（C1, C2, ...；admin-only display）
 -- - user_admin_profiles: 使用者後台檔案（Owner-only markdown + tags）
 -- - user_appointments: 使用者預約（Owner-only calendar events）
 --
@@ -1467,10 +1468,38 @@ CREATE INDEX IF NOT EXISTS idx_user_directory_created_at ON public.user_director
 
 
 -- ============================================
--- PART 2: Triggers for auth.users sync
+-- PART 2: customer_profiles (Admin-only short ID)
 -- ============================================
 --
--- Sync insert/update/delete from auth.users to user_directory.
+-- Stores a stable, non-PII short id for admin UX (C1, C2, ...).
+-- Relationship: customer_profiles.user_id -> user_directory.user_id (1:1)
+-- so PostgREST can embed `customer_profiles` when selecting from `user_directory`.
+--
+-- ============================================
+
+CREATE SEQUENCE IF NOT EXISTS public.customer_short_id_seq START WITH 1;
+
+CREATE TABLE IF NOT EXISTS public.customer_profiles (
+  user_id UUID PRIMARY KEY REFERENCES public.user_directory(user_id) ON DELETE CASCADE,
+  short_id TEXT NOT NULL UNIQUE
+    DEFAULT ('C' || nextval('public.customer_short_id_seq')::text)
+    CHECK (short_id ~ '^C[1-9][0-9]*$'),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW())
+);
+
+CREATE INDEX IF NOT EXISTS idx_customer_profiles_short_id ON public.customer_profiles(short_id);
+
+-- Backfill for existing users (safe on fresh DB)
+INSERT INTO public.customer_profiles (user_id)
+SELECT user_id FROM public.user_directory
+ON CONFLICT (user_id) DO NOTHING;
+
+-- ============================================
+-- PART 3: Triggers for auth.users sync
+-- ============================================
+--
+-- Sync insert/update/delete from auth.users to user_directory (+ customer_profiles).
 -- SECURITY DEFINER to access auth schema.
 --
 -- ============================================
@@ -1486,6 +1515,12 @@ BEGIN
     INSERT INTO public.user_directory (user_id, email, created_at, updated_at)
     VALUES (NEW.id, NEW.email, COALESCE(NEW.created_at, TIMEZONE('utc', NOW())), TIMEZONE('utc', NOW()))
     ON CONFLICT (user_id) DO NOTHING;
+
+    -- Ensure every user gets a stable short id for admin UX (C1, C2, ...)
+    INSERT INTO public.customer_profiles (user_id)
+    VALUES (NEW.id)
+    ON CONFLICT (user_id) DO NOTHING;
+
     RETURN NEW;
   ELSIF TG_OP = 'UPDATE' THEN
     UPDATE public.user_directory
@@ -1575,6 +1610,7 @@ CREATE INDEX IF NOT EXISTS idx_user_appointments_start_at ON public.user_appoint
 -- ============================================
 
 ALTER TABLE public.user_directory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.customer_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_admin_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_appointments ENABLE ROW LEVEL SECURITY;
 
@@ -1615,6 +1651,21 @@ CREATE POLICY "Owners can manage user admin profiles"
 
 
 -- ============================================
+-- PART 8: RLS Policies - customer_profiles
+-- ============================================
+--
+-- Admin read-only (Owner/Editor can read; no public access)
+-- Writes happen via trigger on auth.users insert.
+--
+-- ============================================
+
+CREATE POLICY "Admins can read customer profiles"
+  ON public.customer_profiles FOR SELECT
+  TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('owner', 'editor'));
+
+
+-- ============================================
 -- PART 8: RLS Policies - user_appointments
 -- ============================================
 --
@@ -1646,6 +1697,9 @@ CREATE POLICY "Owners can manage user appointments"
 
 -- user_directory: admin read only
 GRANT SELECT ON public.user_directory TO authenticated;
+
+-- customer_profiles: admin read only (writes happen via trigger)
+GRANT SELECT ON public.customer_profiles TO authenticated;
 
 -- user_admin_profiles: admin read, owner write (RLS enforces owner-only)
 GRANT SELECT ON public.user_admin_profiles TO authenticated;
@@ -1695,7 +1749,7 @@ GRANT INSERT, UPDATE, DELETE ON public.user_appointments TO authenticated;
 CREATE TABLE IF NOT EXISTS public.ai_analysis_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation')),
+  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'content_recommendation')),
   filters JSONB NOT NULL DEFAULT '{}'::jsonb,
   data_types TEXT[] NOT NULL DEFAULT '{}',
   mode TEXT NOT NULL DEFAULT 'standard' CHECK (mode IN ('standard', 'rag')),
@@ -1864,7 +1918,7 @@ CREATE TABLE IF NOT EXISTS public.ai_analysis_schedules (
   created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   
   -- Analysis configuration (mirrors AnalysisRequest)
-  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation')),
+  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'content_recommendation')),
   data_types TEXT[] NOT NULL DEFAULT '{}',
   mode TEXT NOT NULL DEFAULT 'standard' CHECK (mode IN ('standard', 'rag')),
   model_id TEXT NOT NULL DEFAULT 'openai/gpt-4o-mini',
@@ -3467,7 +3521,7 @@ END$$;
 -- Add new CHECK constraint: allow built-in templates + 'custom'
 ALTER TABLE public.ai_analysis_reports
 ADD CONSTRAINT ai_analysis_reports_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation', 'custom'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation', 'custom'));
 
 -- Add cross-field CHECK: template_id='custom' ↔ custom_template_id IS NOT NULL
 ALTER TABLE public.ai_analysis_reports
@@ -3505,7 +3559,7 @@ END$$;
 -- Add new CHECK constraint: allow built-in templates + 'custom'
 ALTER TABLE public.ai_analysis_schedules
 ADD CONSTRAINT ai_analysis_schedules_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation', 'custom'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation', 'custom'));
 
 -- Add cross-field CHECK: template_id='custom' ↔ custom_template_id IS NOT NULL
 ALTER TABLE public.ai_analysis_schedules

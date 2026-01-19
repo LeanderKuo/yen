@@ -44,7 +44,7 @@ END$$;
 -- Add new CHECK constraint: allow built-in templates + 'custom'
 ALTER TABLE public.ai_analysis_reports
 ADD CONSTRAINT ai_analysis_reports_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation', 'custom'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation', 'custom'));
 
 -- Add cross-field CHECK: template_id='custom' ↔ custom_template_id IS NOT NULL
 ALTER TABLE public.ai_analysis_reports
@@ -82,7 +82,7 @@ END$$;
 -- Add new CHECK constraint: allow built-in templates + 'custom'
 ALTER TABLE public.ai_analysis_schedules
 ADD CONSTRAINT ai_analysis_schedules_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation', 'custom'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation', 'custom'));
 
 -- Add cross-field CHECK: template_id='custom' ↔ custom_template_id IS NOT NULL
 ALTER TABLE public.ai_analysis_schedules

@@ -5,6 +5,7 @@
 
 ## Quick Navigation
 
+- [E2E Acceptance](#e2e-acceptance)
 - [Go-Live (P0)](#go-live)
 - [Deployment](#deployment)
 - [Database Operations](#database-ops)
@@ -13,6 +14,14 @@
 - [Safety Queue](#safety-queue)
 - [Error Monitoring](#error-monitoring)
 - [References](#references)
+
+---
+
+<a id="e2e-acceptance"></a>
+
+## E2E Acceptance（Local / Pre-release）
+
+Canonical checklist: [`runbook/e2e-acceptance.md`](runbook/e2e-acceptance.md)
 
 ---
 

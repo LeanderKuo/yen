@@ -1,7 +1,7 @@
 # Security Guidelines
 
 > 安全策略、RLS 規則、認證流程、敏感資料處理
-> Last Updated: 2026-01-11
+> Last Updated: 2026-01-19
 > Status: Enforced
 
 ---
@@ -106,8 +106,10 @@
 
 - **OpenRouter**（AI Analysis）：`OPENROUTER_API_KEY` 只能放在 server 環境變數，禁止進 client bundle。
 - **OpenAI**（Embeddings / Judge）：`OPENAI_API_KEY` 存於 Supabase Edge Functions Secrets，僅 Edge Functions 可讀取。
+- **Gemini**（Safety Risk Engine）：`GEMINI_API_KEY` 只能放在 Next.js server runtime 的環境變數（例如 Vercel env var），禁止進 client bundle。
 - **送往 LLM 的資料必須去識別化**（避免 PII 外洩；具體約束與守門測試見 `ARCHITECTURE.md` 與 `tests/architecture-boundaries.test.ts`）。
 - SDK 位置硬性約束：
+  - Gemini SDK / API access：只允許在 `lib/infrastructure/gemini/**`（server-only）
   - OpenRouter API access：只允許在 `lib/infrastructure/openrouter/**`（server-only）
   - OpenAI SDK：只允許在 `supabase/functions/**`（Edge Functions；與 Next.js runtime 隔離）
 

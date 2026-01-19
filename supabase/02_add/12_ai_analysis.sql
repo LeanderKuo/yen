@@ -33,7 +33,7 @@
 CREATE TABLE IF NOT EXISTS public.ai_analysis_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation')),
+  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'content_recommendation')),
   filters JSONB NOT NULL DEFAULT '{}'::jsonb,
   data_types TEXT[] NOT NULL DEFAULT '{}',
   mode TEXT NOT NULL DEFAULT 'standard' CHECK (mode IN ('standard', 'rag')),
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS public.ai_analysis_schedules (
   created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   
   -- Analysis configuration (mirrors AnalysisRequest)
-  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation')),
+  template_id TEXT NOT NULL CHECK (template_id IN ('user_behavior', 'content_recommendation')),
   data_types TEXT[] NOT NULL DEFAULT '{}',
   mode TEXT NOT NULL DEFAULT 'standard' CHECK (mode IN ('standard', 'rag')),
   model_id TEXT NOT NULL DEFAULT 'openai/gpt-4o-mini',

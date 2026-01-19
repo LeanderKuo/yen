@@ -1,7 +1,7 @@
 # Admin i18n Toggle — Spec
 
 > Status: Stable (Implemented)  
-> Last Updated: 2026-01-04  
+> Last Updated: 2026-01-19  
 > Scope: admin bilingual toggle (EN / zh-Hant) + 翻譯檔 routing
 
 背景：本 spec 原本與 Admin Error Log UX spec 一起撰寫；為了保持單一責任已拆分（需要可查 git history）。
@@ -35,7 +35,7 @@
 
 需支援中英文切換的 UI 元素：
 
-- 側邊欄導航選單（Dashboard、Blog、Shop、Gallery 等所有項目）
+- 側邊欄導航選單（Dashboard、Blog、Gallery 等所有項目）
 - Admin Panel 主內容區（頁面標題/副標題、卡片/區塊標題、說明文字、placeholder、validation/error 文案、toast、modal/dialog）
 - Data Intelligence 相關頁面（Control Center、AI Analysis、Preprocessing Pipeline、Embeddings、Import/Export）所有 UI 文字
 - 頁面標題與副標題

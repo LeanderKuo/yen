@@ -12,6 +12,7 @@
 ## Reading Paths (Start Here)
 
 - Want to **ship / go-live**: `RUNBOOK.md` → `runbook/go-live.md` (also see `runbook/deployment.md`, `runbook/database-ops.md`, `runbook/embeddings-preprocessing.md`)
+- Want to **E2E 驗收（本機 / pre-release）**: `RUNBOOK.md` → `runbook/e2e-acceptance.md`
 - Want to **implement/change a feature**: `../ARCHITECTURE.md` → `SPEC.md` (and `SECURITY.md` if touching auth/RLS/secrets)
 - Want to **turn a PRD into a step-by-step plan**: `meta/AGENT_PROMPT__STEP_PLAN.md` → `meta/STEP_PLAN.md`
 - Want to **draft an active PRD** (agent input): `PRD_ACTIVE.md` (then run `meta/AGENT_PROMPT__STEP_PLAN.md`)

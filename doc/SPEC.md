@@ -220,9 +220,9 @@
 
 ### 已知限制（V1）
 
-- Tag filtering 目前可透過 `/admin/users?tag=...` 在 server-side 生效，但尚未提供 tag selection UI（需手動 URL）
+- Tag filtering 已落地：提供 Tag Filter Bar UI（點選即切換 `?tag=`），並在 server-side 生效
 - Users list 的 search/pagination 尚未實作
-- Admin notes 以 Markdown 存放；view mode 預設 raw text（preview optional；LLM/ETL 需把 Markdown normalize 成 plain text，避免分析 HTML）
+- Admin notes 以 Markdown 存放；預設 Raw 顯示，可選 Preview（`?notesPreview=1`；server-side 轉 HTML）。LLM/ETL 需把 Markdown normalize 成 plain text，避免分析 HTML
 
 ### 實作備註
 

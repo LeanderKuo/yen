@@ -327,6 +327,10 @@ DROP TABLE IF EXISTS public.user_appointments CASCADE;
 -- 使用者後台檔案（無外部依賴）
 DROP TABLE IF EXISTS public.user_admin_profiles CASCADE;
 
+-- 使用者短 ID（依賴 user_directory）
+DROP TABLE IF EXISTS public.customer_profiles CASCADE;
+DROP SEQUENCE IF EXISTS public.customer_short_id_seq;
+
 -- 使用者目錄（被其他表參照，最後刪除）
 DROP TABLE IF EXISTS public.user_directory CASCADE;
 
@@ -443,7 +447,7 @@ DROP CONSTRAINT IF EXISTS ai_analysis_reports_template_id_check;
 -- Restore original CHECK (built-in templates only)
 ALTER TABLE public.ai_analysis_reports
 ADD CONSTRAINT ai_analysis_reports_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation'));
 
 -- Drop cross-field CHECK
 ALTER TABLE public.ai_analysis_schedules
@@ -463,7 +467,7 @@ DROP CONSTRAINT IF EXISTS ai_analysis_schedules_template_id_check;
 -- Restore original CHECK (built-in templates only)
 ALTER TABLE public.ai_analysis_schedules
 ADD CONSTRAINT ai_analysis_schedules_template_id_check 
-CHECK (template_id IN ('user_behavior', 'sales', 'rfm', 'content_recommendation'));
+CHECK (template_id IN ('user_behavior', 'content_recommendation'));
 
 -- ============================================
 -- 完成 DONE - AI Analysis Custom Template References

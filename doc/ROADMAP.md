@@ -60,6 +60,24 @@
 - **原因**: 更安全的迭代（避免直接動 prod）
 - **連結**: `runbook/database-ops.md`
 
+### Users 後台：搜尋 / 分頁
+
+- **狀態**: Pending
+- **原因**: 使用者數量成長後可用性/性能會明顯下降（目前一次載入全部 users）。決策：`q` 支援 `short_id`（僅 `^C\\d+$` 精準查詢）；`pageSize` 預設 50（allowlist：20/50/100）
+- **連結**: `SPEC.md#users-admin`（已知限制）、`meta/STEP_PLAN.md`（可拆 PR 的詳細 steps）
+
+### AI Analysis：Custom Templates 後台 UI（Owner CRUD + selection）
+
+- **狀態**: Pending
+- **原因**: custom templates backend 已落地，但尚無 Owner 可管理/選用的 UI（目前僅內建模板）。決策：採獨立 route 管理頁（see `meta/STEP_PLAN.md`）
+- **連結**: `SPEC.md#known-gaps-roadmap-links`、`specs/completed/ai-analysis-spec.md`、`meta/STEP_PLAN.md`
+
+### Analytics：Dashboard UI（Page Views）
+
+- **狀態**: Pending
+- **原因**: page view tracking 已落地（寫入 + 驗證），但缺少 admin dashboard（視覺化/趨勢/篩選）。決策：V1 先做 totals + table；locale 預設 `all`（合併）+ filter（`all|zh|en`）
+- **連結**: `SPEC.md#known-gaps-roadmap-links`、`specs/completed/page-views-analytics-spec.md`、`meta/STEP_PLAN.md`
+
 ---
 
 ## Tracking Items（追蹤項目）

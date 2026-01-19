@@ -28,6 +28,10 @@ DROP TABLE IF EXISTS public.user_appointments CASCADE;
 -- 使用者後台檔案（無外部依賴）
 DROP TABLE IF EXISTS public.user_admin_profiles CASCADE;
 
+-- 使用者短 ID（依賴 user_directory）
+DROP TABLE IF EXISTS public.customer_profiles CASCADE;
+DROP SEQUENCE IF EXISTS public.customer_short_id_seq;
+
 -- 使用者目錄（被其他表參照，最後刪除）
 DROP TABLE IF EXISTS public.user_directory CASCADE;
 

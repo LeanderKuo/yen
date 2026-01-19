@@ -1,18 +1,18 @@
-# Archive - Completed Tasks
+# Archive（已完成 / 歷史記錄）
 
-> Historical records of completed refactoring, fixes, and implementation steps.
-> These documents are kept for reference and audit trail.
+> 已完成的重構、修復、實作紀錄（保留作為參考與稽核軌跡）
 
 ---
 
 Template: `TEMPLATE.md`
 
-## Document List
+## 文件清單
 
 <!-- AUTO-GENERATED:ARCHIVE:START -->
 
 | File | Date | Status | Title |
 | --- | --- | --- | --- |
+| [2026-01-17-step-plan-safety-risk-engine-v1.md](2026-01-17-step-plan-safety-risk-engine-v1.md) | 2026-01-17 | **COMPLETE ✅ (Maintenance Mode)** | Step-by-Step Execution Plan — AI Safety Risk Engine (Comments) V1 |
 | [2026-01-12-scope-reduction-remove-shop-payments-step-plan.md](2026-01-12-scope-reduction-remove-shop-payments-step-plan.md) | 2026-01-12 | **ARCHIVED / COMPLETE** | Step-by-Step Execution Plan — Scope Reduction (Remove Shop/Payments) |
 | [2026-01-04-step-plan-admin-i18n-lib-refactor.md](2026-01-04-step-plan-admin-i18n-lib-refactor.md) | 2026-01-04 | **ARCHIVED / COMPLETE** | [ARCHIVED] Step-by-Step Execution Plan — Drift Cleanup (Admin i18n gaps) + `lib/` Restructure |
 | [2026-01-04-lib-modules-migration-step-plan.md](2026-01-04-lib-modules-migration-step-plan.md) | 2026-01-04 | **ARCHIVED / COMPLETE** | [ARCHIVED] Step-by-Step Execution Plan — `lib/modules/*` Business Modules Migration |

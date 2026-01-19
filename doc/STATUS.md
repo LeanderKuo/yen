@@ -36,6 +36,12 @@
 
 - （目前無 P1 項目）
 
+### P2（上線後）
+
+- Users 後台：搜尋 / 分頁：Pending → `doc/ROADMAP.md`（P2）+ `doc/meta/STEP_PLAN.md`
+- AI Analysis：Custom Templates 後台 UI：Pending → `doc/specs/completed/ai-analysis-spec.md` + `doc/meta/STEP_PLAN.md`
+- Analytics：Page Views Dashboard UI：Pending → `doc/specs/completed/page-views-analytics-spec.md` + `doc/meta/STEP_PLAN.md`
+
 ---
 
 ## 3) Drift（文件 / 規則 / 程式碼不一致）
