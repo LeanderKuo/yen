@@ -1,7 +1,7 @@
 # 功能規格（已實作行為 / SSoT）
 
 > 已落地功能與技術細節（Single Source of Truth）  
-> 最後更新: 2026-01-17  
+> 最後更新: 2026-01-20  
 > 狀態: Active
 
 本文件描述「**已實作**」的行為與其技術細節（以本檔為準）。
@@ -221,7 +221,9 @@
 ### 已知限制（V1）
 
 - Tag filtering 已落地：提供 Tag Filter Bar UI（點選即切換 `?tag=`），並在 server-side 生效
-- Users list 的 search/pagination 尚未實作
+- Users list 的 search/pagination 已落地：
+  - `?q=`：文字搜尋（`email`/`user_id`）或短碼精準查詢（`^C\\d+$` → `short_id`）
+  - `?page=` / `?pageSize=`：server-side pagination（pageSize allowlist：20/50/100）
 - Admin notes 以 Markdown 存放；預設 Raw 顯示，可選 Preview（`?notesPreview=1`；server-side 轉 HTML）。LLM/ETL 需把 Markdown normalize 成 plain text，避免分析 HTML
 
 ### 實作備註
@@ -494,14 +496,14 @@
 ### Data Intelligence（後台）
 
 - Data Intelligence Platform：
-  - Module B（AI Analysis）：reports/schedules + share links 已落地；custom templates backend 已落地（DB/worker），Admin UI（Owner CRUD + selection）待補（see `doc/specs/completed/ai-analysis-spec.md`）
+  - Module B（AI Analysis）：reports/schedules + share links 已落地；custom templates backend + Admin UI（Owner CRUD + selection + analysis selection）已落地（see `doc/specs/completed/ai-analysis-spec.md`）
   - Module C / Module C Extension：Phase 7+（Hybrid Search / 可配置 pipeline 等）以 `doc/ROADMAP.md` 為準
   - 入口（localized）：`/[locale]/admin/(data)/import-export`, `/[locale]/admin/(data)/ai-analysis`, `/[locale]/admin/(data)/control-center`, `/[locale]/admin/(data)/embeddings`, `/[locale]/admin/(data)/preprocessing`（AI Analysis 需啟用 cron 或使用 owner-only manual processing）
 
 ### Analytics（分析）
 
 - Page view tracking（ingestion + privacy-first aggregation）已落地：`specs/completed/page-views-analytics-spec.md`
-- Dashboard UI 尚未實作（目前僅做到寫入 + 驗證）
+- Dashboard UI 已落地（Admin-only, read-only）：`/[locale]/admin/analytics/pageviews`
 
 ---
 

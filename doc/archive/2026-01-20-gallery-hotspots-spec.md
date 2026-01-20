@@ -1,8 +1,9 @@
-# Gallery Hotspots（圖上 Pin）+ Home Hero 選圖 - Spec
+# Gallery Hotspots（圖上 Pin）+ Home Hero 選圖 - Spec（Archived）
 
-> Status: DRAFT  
-> Last Updated: 2026-01-19  
-> Note: if referenced by in-code `@see`, keep headings stable (avoid renumbering/moving sections).
+> Status: ARCHIVED (Merged)  
+> Merged Into: `doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md`（Implementation Contract）  
+> Last Updated: 2026-01-20  
+> Note: This file is kept for historical reference only; do not treat as SSoT.
 
 ## 1. Purpose
 
@@ -17,6 +18,9 @@
   - `supabase/COMBINED_ADD.sql`（mirror changes）
 - App endpoints (admin routes / server actions):
   - `app/[locale]/admin/gallery/**`（hero selection + hotspots CRUD/reorder；exact routes TBD by UI）
+- Public routes (canonical; see PRD for URL rules):
+  - `app/[locale]/page.tsx`（Home Hero pins render）
+  - `app/[locale]/gallery/items/[category]/[slug]/page.tsx`（Gallery item main image hotspots render）
 - IO modules:
   - `lib/modules/gallery/gallery-pins-io.ts`（public reads; already exists）
   - `lib/modules/gallery/pins-admin-io.ts`（admin writes; extend for surface=`hero`）
@@ -164,7 +168,6 @@
 ## 7. Related Docs
 
 - PRD: `doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md`
-- Constraints: `doc/ARCHITECTURE.md`
+- Constraints: `../../../ARCHITECTURE.md`
 - UIUX SSoT: `uiux/` + https://pond-bulk-99292481.figma.site/
-- Specs index: `doc/specs/README.md`
-
+- Specs index: `../README.md`

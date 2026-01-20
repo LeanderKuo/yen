@@ -35,3 +35,6 @@ export {
   getVisibleGalleryItemsByCategoryId,
   getVisibleGalleryItemsBySurface,
 } from '@/lib/modules/gallery/gallery-items-landing-io';
+
+// Re-export hotspots operations (PR-5)
+export { getHotspotsByItemId } from '@/lib/modules/gallery/gallery-hotspots-io';

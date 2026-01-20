@@ -646,6 +646,14 @@
       "jpegDefault": "JPEG（預設）",
       "pngTransparency": "PNG（透明背景）"
     },
+    "hotspots": {
+      "viewMaterialsList": "查看媒材清單",
+      "close": "關閉",
+      "readMore": "延伸閱讀",
+      "usageAndTexture": "使用方式 / 觸感",
+      "symbolism": "象徵意涵",
+      "materialLabel": "媒材標記"
+    },
     "content": {
       "title": "網站內容管理",
       "description": "管理網站各區塊的文字內容",

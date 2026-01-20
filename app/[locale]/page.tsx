@@ -1,40 +1,19 @@
 import type { Metadata } from 'next';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import {
-  getPublishedSiteContentCached,
-  getVisiblePortfolioItemsCached,
-  getVisibleServicesCached,
-  getCompanySettingsCached
-} from '@/lib/modules/content/cached';
-import { getVisibleLandingSectionsCached } from '@/lib/modules/landing/cached';
-import { fetchGalleryDataForSectionsCached } from '@/lib/use-cases/landing/cached';
 import { getTranslations } from 'next-intl/server';
 import { getMetadataAlternates, SITE_URL } from '@/lib/seo';
 import { generateHomePageJsonLd } from '@/lib/seo/jsonld';
+import { HomePageV2 } from '@/components/home';
+import {
+  getPublishedSiteContentCached,
+  getVisibleServicesCached,
+  getCompanySettingsCached
+} from '@/lib/modules/content/cached';
 import type { SiteContent, CompanySetting } from '@/lib/types/content';
-import { SectionRenderer } from '@/components/sections';
-import { ThemeScope } from '@/components/theme/ThemeScope';
 import { pickLocaleContent } from '@/lib/i18n/pick-locale';
 
 // Helper to get setting value
 function getSetting(settings: CompanySetting[], key: string): string {
   return settings.find(s => s.key === key)?.value || '';
-}
-
-// Build UI labels for sections (server-only helper)
-function buildHomeLabels() {
-  return {
-    portfolio: {
-      title: '精選作品',
-      intro: '打造有影響力的解決方案，解決社群和個人面臨的真實挑戰。',
-      visit: '了解更多',
-      inDevelopment: '開發中',
-    },
-    services: {
-      title: '我們的建構項目',
-    },
-  };
 }
 
 export async function generateMetadata({
@@ -78,46 +57,16 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
 
-  // Fetch visible landing sections first
-  const sections = await getVisibleLandingSectionsCached();
-
-  // Determine what data we need based on sections
-  const needsServices = sections.some(s => s.section_key === 'services');
-  const needsPortfolio = sections.some(s => s.section_key === 'portfolio');
-  const needsCompanyMeta = sections.some(s =>
-    ['hero', 'about', 'contact'].includes(s.section_key)
-  );
-  const needsGallery = sections.some(
-    s => s.section_key === 'product_design' || s.section_type === 'gallery'
-  );
-
-  // Fetch data based on actual section usage (parallel)
-  const [siteContents, services, portfolioItems, settings, galleryData] = await Promise.all([
-    getPublishedSiteContentCached(),
-    needsServices ? getVisibleServicesCached() : Promise.resolve([]),
-    needsPortfolio ? getVisiblePortfolioItemsCached() : Promise.resolve([]),
-    needsCompanyMeta ? getCompanySettingsCached() : Promise.resolve([]),
-    needsGallery ? fetchGalleryDataForSectionsCached(sections) : Promise.resolve({}),
+  // Fetch data needed for JSON-LD (SEO)
+  const [settings, services] = await Promise.all([
+    getCompanySettingsCached(),
+    getVisibleServicesCached(),
   ]);
-
-  // Build company metadata for sections that need it
-  const companyMeta = needsCompanyMeta
-    ? {
-        emailAddress: getSetting(settings, 'email'),
-        githubUrl: getSetting(settings, 'github_url'),
-        domainUrl: getSetting(settings, 'domain'),
-        founderName: getSetting(settings, 'founder_name'),
-        founderGithub: getSetting(settings, 'founder_github'),
-      }
-    : null;
-
-  // Build UI labels
-  const uiLabels = buildHomeLabels();
 
   // JSON-LD for SEO (Organization + WebSite + Services + FAQ + Breadcrumb)
   const siteUrl = SITE_URL;
-  const emailAddress = companyMeta?.emailAddress || '';
-  const githubUrl = companyMeta?.githubUrl || '';
+  const emailAddress = getSetting(settings, 'email');
+  const githubUrl = getSetting(settings, 'github_url');
 
   // Build FAQ list from services/features
   const faqs = [
@@ -132,8 +81,7 @@ export default async function HomePage({
   ];
 
   // Get siteName from settings or use locale-aware fallback
-  const siteName = getSetting(settings, 'company_name_short') || 
-    'QN LNK';
+  const siteName = getSetting(settings, 'company_name_short') || 'QN LNK';
 
   const jsonLd = generateHomePageJsonLd({
     siteName,
@@ -151,32 +99,13 @@ export default async function HomePage({
     breadcrumbs,
   });
 
-
   return (
-    <ThemeScope scope="home">
-      <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <Header locale={locale} />
-        <main className="pt-24 md:pt-32 pb-16">
-          {sections.map((section) => (
-            <SectionRenderer
-              key={section.id}
-              section={section}
-              locale={locale}
-              siteContents={siteContents}
-              services={services}
-              portfolioItems={portfolioItems}
-              companyMeta={companyMeta}
-              uiLabels={uiLabels}
-              galleryData={galleryData}
-            />
-          ))}
-        </main>
-        <Footer locale={locale} />
-      </>
-    </ThemeScope>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HomePageV2 locale={locale} />
+    </>
   );
 }

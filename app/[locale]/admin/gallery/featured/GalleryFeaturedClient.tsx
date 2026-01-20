@@ -42,6 +42,7 @@ export default function GalleryFeaturedClient({
   const [pinsByTab, setPinsByTab] = useState<Record<GalleryPinSurface, PinWithItem[]>>({
     home: initialPins.home,
     gallery: initialPins.gallery,
+    hero: [], // Hero is managed per-item, not shown here
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);

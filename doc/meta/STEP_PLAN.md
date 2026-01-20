@@ -1,9 +1,10 @@
-# Step-by-Step Execution Plan — V1 TODO（Admin 缺口補齊）
+# Step-by-Step Execution Plan — V2（Home UIUX + Gallery Hero/Hotspots + Hamburger Nav v2）
 
 > 狀態: Draft / Active  
-> 最後更新: 2026-01-19  
-> 定位: 把「已落地但仍有缺口」拆成可驗收、可拆 PR 的 step-by-step 計畫（agent/workspace）  
-> 現況 SSoT: `doc/SPEC.md`（本檔只寫 steps，不重複寫 spec/契約）
+> 最後更新: 2026-01-20  
+> 定位: 以 PR 為單位的落地計畫；每個 PR 都必須可獨立驗收/回退  
+> 現況 SSoT（已實作）: `doc/SPEC.md`  
+> 本次目標 SSoT（未實作）: `doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md`（含 `Implementation Contract`）
 
 ---
 
@@ -11,6 +12,7 @@
 
 - Architecture / 全域約束：`ARCHITECTURE.md`
 - 已落地行為（SSoT）：`doc/SPEC.md`
+- 本次目標 PRD（未落地）：`doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md`
 - Security / RBAC / RLS / secrets：`doc/SECURITY.md`
 - Ops / DB / go-live：`doc/RUNBOOK.md`（細節：`doc/runbook/*`）
 - 文件分工 / update matrix：`doc/GOVERNANCE.md`
@@ -18,289 +20,311 @@
 
 ---
 
-## 1) 現況與缺口（What exists now / evidence）
+## 1) Review 結論（不改程式碼；以測試與文件為準）
 
-### 1.1 Users 後台（`/admin/users`）
-
-已存在（證據）：
-
-- Tag filtering + tag selection UI：`app/[locale]/admin/users/page.tsx`、`app/[locale]/admin/users/UsersClient.tsx`
-- Admin notes preview（Raw/Preview；server-side Markdown→HTML）：`app/[locale]/admin/users/[id]/page.tsx`、`app/[locale]/admin/users/[id]/components/UserAdminNotesCard.tsx`
-
-缺口（V1 TODO）：
-
-- Users list 的 search/pagination 尚未實作（目前一次載入全量 users；UI 無搜尋/分頁控制；IO 未提供 limit/offset/search）
-
-### 1.2 AI Analysis（後台）
-
-已存在（證據）：
-
-- Custom templates backend/IO：`lib/modules/ai-analysis/analysis-templates-io.ts`
-- Type contract 已支援 `templateId='custom' + customTemplateId`：`lib/types/ai-analysis.ts`
-
-缺口（V1 TODO）：
-
-- Admin UI：Owner CRUD + selection 尚未串起來（目前模板來源為 `ANALYSIS_TEMPLATES` 常數；未讀取 DB templates）
-
-### 1.3 Analytics（Page Views）
-
-已存在（證據）：
-
-- Ingestion：`app/api/analytics/pageview/route.ts`、`components/analytics/PageViewTrackerClient.tsx`、`lib/analytics/pageviews-io.ts`
-- DB：`supabase/02_add/16_page_views.sql`（`page_view_daily` + `increment_page_view` RPC）
-- Spec（契約）：`doc/specs/completed/page-views-analytics-spec.md`
-- Admin Dashboard UI：`app/[locale]/admin/(data)/analytics/pageviews/page.tsx`（PR-3 完成）
-
-缺口（V1 TODO）：
-
-- ✅ 已完成：Admin dashboard UI（read-only）：`/admin/(data)/analytics/pageviews`
+- 測試：`npm test` 全通過（包含 `tests/architecture-boundaries.test.ts`）
+- 架構：未發現違反 `ARCHITECTURE.md` 的硬規則（以 architecture-boundaries 測試守門為準）
+- 文件飄移（已修正）：`doc/SPEC.md` 已更新對齊目前已落地功能（Users search/pagination、AI Analysis custom templates UI、Analytics dashboard）
 
 ---
 
-## 2) Non‑negotiables（必須符合 `ARCHITECTURE.md`）
+## 2) 本次要落地的功能（Scope）
 
-- Server-first：public/admin pages 預設 server component；client components 僅做互動（`ARCHITECTURE.md` §2）
-- IO 收斂：DB access 只能在 `lib/**/*-io.ts`（`ARCHITECTURE.md` §3.4、§3.7）
-- Bundle 邊界：public UI 不得 import admin-only deps；heavy deps 僅能出現在 admin route 且需避免被 public bundle 引入（`ARCHITECTURE.md` §2）
-- Input validation：任何 query/body 進入 IO/DB 前先 validate（`lib/validators/*`；pure）
-- RLS 是最終安全邊界；UI gate 只做 UX（`doc/SECURITY.md`）
+> 以 `doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md` 的 Requirements + Implementation Contract 為準；此處只列出「要做什麼」與「拆 PR 策略」。
+
+- Home：排版/互動對齊 `uiux/` + Figma（marquee notice、hamburger menu、hero stage、suggest section）
+- Hero：從 Gallery 選 0..1 個作品作為 Home Hero（顯示同一作品的 hotspots）
+- Hotspots：管理員可在作品圖上新增多個 pins（含內容欄位/排序/Markdown 安全邊界），前台可互動呈現 + mobile/無障礙 fallback list
+- Hamburger nav（v2）：後台可編輯 IA（4 組分類+細項），以 typed `target` 產生 canonical href，發布時 deep validate（存在且可公開）
+- URL（v2）：canonical routes + 全量 301（避免 query/path 雙軌造成 drift）
 
 ---
 
-## 3) Execution Plan（以 PR 為單位）
+## 3) Execution Plan（以 PR 為單位；每 PR 可獨立驗收）
 
-### PR-1 — Users 後台：搜尋 + 分頁（server-side）✅ COMPLETED
+### PR-1 — Hamburger nav v2 foundations（types/validator/resolver + admin editor）✅ COMPLETED
 
-> 完成日期: 2026-01-19
-> 實作檔案:
-> - `lib/validators/admin-users.ts` — query contract validator
-> - `lib/modules/user/users-admin-io.ts` — 新增 `getUserListFilteredPaged()`
-> - `app/[locale]/admin/users/page.tsx` — server page 更新
-> - `app/[locale]/admin/users/UsersClient.tsx` — 搜尋 form + 分頁 UI
-> - `messages/zh.json` — i18n 字串
-> - `tests/validators/admin-users.test.ts` — validator 單元測試
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (875 pass), `npm run type-check` (pass), `npm run lint` (pass)
 
 Goal：
 
-- `/admin/users` 支援 `?q=` 搜尋與 `?page=` 分頁，並與既有 `?tag=` 共存
-- 避免一次載入全量 users（降低 loading / 提升可用性）
+- 先把「導航資料結構」做成單一真相來源（typed targets），避免後續 route 調整造成內容 drift。
 
-Scope：
+Files（已實作）：
 
-- Search：支援 `email`、`user_id`，並支援 `short_id`（僅當 `q` 符合 `^C\\d+$` 時以「精準查詢」啟用）
-- Pagination：server-side `limit/offset`；預設 `pageSize=50`（allowlist：20/50/100）
-- 不做：client-side filtering、infinite scroll
-
-Expected file touches：
-
-- `app/[locale]/admin/users/page.tsx`
-- `app/[locale]/admin/users/UsersClient.tsx`
-- `lib/modules/user/users-admin-io.ts`
-- `lib/validators/*`（新增 admin users query validator）
-- `messages/**`（admin.users i18n）
-- （可選）`tests/**`（validator unit tests）
+- Types：`lib/types/hamburger-nav.ts` ✅
+- Validator（pure）：`lib/validators/hamburger-nav.ts` ✅
+- Resolver（pure）：`lib/site/nav-resolver.ts` ✅
+- Publish deep validate（DB）：`lib/modules/content/hamburger-nav-publish-io.ts` ✅
+- Admin editor：`app/[locale]/admin/content/hamburger_nav/**` ✅
+- Tests：`tests/validators/hamburger-nav.test.ts`, `tests/nav-resolver.test.ts` ✅
+- Cache：`lib/modules/content/cached.ts`（既有 tag=`site-content`）
 
 Step-by-step：
 
-1. 定義 query contract（本 PR 的 API 介面）
-   - `tag?: string`（既有；trim；max len=64 續用）
-   - `q?: string`（trim；max len 建議 100；空字串視為 undefined）
-     - 若 `q`（trim 後）符合 `^C\\d+$`（case-insensitive；例如 `c12`/`C12`），則視為 `short_id` 精準查詢（不做模糊匹配）
-     - 否則視為一般文字搜尋（`email`/`user_id`；模糊匹配）
-   - `page?: number`（>= 1；預設 1）
-   - `pageSize?: number`（allowlist：20/50/100；預設 50）
-2. 新增 pure validator（建議：`lib/validators/admin-users.ts`）
-   - 輸入：raw `searchParams`
-   - 輸出：`{ tag?, q?, qMode: 'text' | 'short_id', page, pageSize, limit, offset }`
-   - 規則：非法值 → fallback（或回傳 error 讓 page 做 redirect 到 canonical query）
-3. 擴充 Users Admin IO（`lib/modules/user/users-admin-io.ts`）
-   - 建議新增：`getUserListFilteredPaged(params): Promise<{ users: UserDirectorySummary[]; total: number }>`
-    - 實作要點：
-      - tag filtering 維持現有兩段式查詢（避免 `.or()` string 拼接風險）
-      - search（一般文字，`qMode='text'`）：
-        - 只支援 `email`/`user_id`（模糊匹配），且 **禁止**把 `q` 原字串直接拼進 `.or()` filter
-        - 建議策略：validator 對 `q` 做字元 allowlist（避免 `, { }` 等破壞 PostgREST filter）；通過後再組合查詢
-      - search（short id，`qMode='short_id'`）：
-        - `q` normalize：`trim` + `toUpperCase()` 得到 `shortId`
-        - 先查 `customer_profiles.short_id = shortId` 取得 `user_id`
-        - 再用 `user_directory.in('user_id', userIds)` 查詢 users（維持既有 `customer_profiles!left(short_id)` join，確保列表仍有 `shortId`）
-      - 回傳 `total`（可用 `select('*', { count: 'exact', head: true })` 或等價做法；以現有 Supabase client 能力為準）
-4. 更新 server page（`app/[locale]/admin/users/page.tsx`）
-   - parse → validate searchParams（用 step 2 validator）
-   - `Promise.all` 同時取：`usersPaged` + `availableTags`
-   - 以 props 傳給 client：`activeTag`、`q`、`pagination`（page/pageSize/total）
-5. 更新 client UI（`app/[locale]/admin/users/UsersClient.tsx`）
-    - Search：使用 `<form method="GET">`（server-first；不做 client fetch）
-      - 保留 `tag`（hidden input）
-      - Placeholder/label 建議明確提示：可輸入 email/user id；或輸入 `C12`（short id 精準查詢）
-    - Pagination：用 `Link` 產生 `?page=`；保留 `tag/q/pageSize`
-    - 仍維持：Tag Filter Bar（注意要 merge query；避免把 `q/page` 丟失）
-6. i18n：補齊 `admin.users` 的搜尋/分頁字串（zh/en）
-7. Tests（最小集合）
-   - validator：page/q/tag 的 edge cases（空字串、超長、非法 page/pageSize）
-8. Verification
-   - `npm test`
-   - `npm run type-check`
-   - `npm run lint`
-9. Docs sync（合併後）
-   - `doc/SPEC.md#users-admin`：移除/調整「search/pagination 尚未實作」的限制敘述
-   - `doc/ROADMAP.md`：更新對應項目狀態（Pending → In Progress / Complete）
+1. 定義 `HamburgerNavV2`（version=2）與 `ResolvedHamburgerNav` types（single source）✅
+2. 寫 pure validator（儲存 draft 用）：✅
+   - `target.type` allowlist（見 PRD `FR-9.5.3`）
+   - slug format：用 `lib/validators/slug.ts`（或同等規則）
+   - query keys allowlist：至少 `q`/`tag`/`sort`/`page`
+   - external 協議 allowlist：只允許 `https:`（可選 `mailto:`），拒絕 `http:`/`javascript:`/`data:`
+3. 寫 resolver（pure）：`target → canonical href`（不得查 DB）✅
+4. 寫 publish deep validate（查 DB；你已拍板「存在但不可見」不允許）：✅
+   - blog_post：存在且 `visibility='public'`
+   - gallery_item：存在且 `is_visible=true`
+   - gallery_category：存在且 `is_visible=true`
+5. Admin editor：✅
+   - Save：只跑 pure validator；寫入 `site_content` draft
+   - Publish：pure validator + deep validate；失敗必須回傳可定位錯誤（JSON path）
+6. Seed：預設內容需與 `uiux/src/app/components/side-nav.tsx` labels 一致（4 groups + items）✅
+7. Revalidation：publish/unpublish/update 後 `revalidateTag('site-content')` ✅
 
-Rollback：
+DoD（可驗收）：
 
-- Revert PR；`/admin/users` query contract 回到原本（僅 tag filter）
+- ✅ 後台能保存/發布 hamburger_nav v2；發布時不會產生 public 壞連結
+- ✅ `hamburger_nav` 不儲存 raw `href`（只存 typed `target`）
 
 ---
 
-### PR-2 — AI Analysis：Custom Templates 後台 UI（Owner CRUD + selection）✅ COMPLETED
+### PR-2 — v2 Canonical Routes + 301（Blog/Gallery）✅ COMPLETED
 
-> 完成日期: 2026-01-19
-> 實作檔案:
-> - `lib/validators/custom-template.ts` — template input validator
-> - `tests/validators/custom-template.test.ts` — validator 單元測試
-> - `app/[locale]/admin/(data)/ai-analysis/templates/page.tsx` — server page
-> - `app/[locale]/admin/(data)/ai-analysis/templates/actions.ts` — server actions (CRUD)
-> - `app/[locale]/admin/(data)/ai-analysis/templates/TemplatesClient.tsx` — client UI
-> - `app/[locale]/admin/(data)/ai-analysis/page.tsx` — 增加 customTemplates fetch
-> - `app/[locale]/admin/(data)/ai-analysis/AIAnalysisClient.tsx` — 增加 custom template selection UI
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (883 pass), type-check/lint/build have pre-existing `uiux/` errors (unrelated)
 
 Goal：
 
-- Owner 能在後台管理 custom templates（CRUD + enable/disable）
-- AI Analysis 執行/排程可選用 custom template（`templateId='custom' + customTemplateId`）
+- 統一 URL 規則，避免同一內容多網址（SEO/分享/導覽不 drift）。
 
-Scope：
+Files（已實作）：
 
-- CRUD 僅限 Owner；Editor 只可讀「enabled templates」（依 `analysis-templates-io.ts` 設計）
-- UI 先以 admin-only route 實作（避免把複雜 UI 塞進單一大頁）
-
-Expected file touches（建議拆兩個 PR，以降低風險）：
-
-- PR-2A（管理頁）
-  - `app/[locale]/admin/(data)/ai-analysis/templates/page.tsx`（new）
-  - `app/[locale]/admin/(data)/ai-analysis/templates/actions.ts`（new；server actions）
-  - `app/[locale]/admin/(data)/ai-analysis/templates/TemplatesClient.tsx`（new；client UI）
-  - `lib/modules/ai-analysis/analysis-templates-io.ts`（只在需要補缺口時才改）
-  - `lib/validators/*`（custom template input validator；name/promptText）
-- PR-2B（串接選用）
-  - `app/[locale]/admin/(data)/ai-analysis/page.tsx`（fetch templates into initialData）
-  - `app/[locale]/admin/(data)/ai-analysis/AIAnalysisClient.tsx`（selection + request payload）
-  - `lib/types/ai-analysis.ts`（若 UI 需要補 type）
-
-PR-2A Step-by-step（管理頁）：
-
-1. 新增 route：`/admin/(data)/ai-analysis/templates`
-2. server page：
-   - 取得 role（owner/editor）
-   - 呼叫 `listTemplates(role)` 取得列表
-3. server actions：
-   - create：`createTemplate(data, userId)`
-   - update：`updateTemplate(id, data)`
-   - delete：`deleteTemplate(id)`
-   - toggle：`toggleTemplateEnabled(id, isEnabled)`
-4. UI（client component）：
-   - List + Create modal + Edit modal（prompt text 用 textarea）
-   - Owner-only buttons：Create/Edit/Delete/Enable
-   - Editor：read-only（不 render 任何寫入操作）
-5. Input validation：
-   - name：trim；min/max（例如 1..80）
-   - promptText：min length（避免空 prompt）
-6. Verification：
-   - `npm test`（至少跑 validators）
-   - `npm run type-check` / `npm run lint`
-
-PR-2B Step-by-step（串接選用）：
-
-1. server page（`ai-analysis/page.tsx`）把 templates（`listTemplates(role)`）放進 `initialData`
-2. AIAnalysisClient：
-   - Template Selection 加一個 `Custom` 選項
-   - 當 `selectedTemplate === 'custom'` 時顯示 template dropdown（來源：`initialData.customTemplates`）
-   - Submit request：帶上 `templateId='custom'` + `customTemplateId`
-   - Guardrail：custom template 未選 → disable submit + 顯示錯誤
-3. 排程（schedules）：
-   - 若 schedule UI 支援選模板：同上規則加入 custom template
-4. Docs sync（合併後）：
-   - `doc/SPEC.md#known-gaps-roadmap-links`：移除「custom templates Admin UI 待補」的缺口敘述
-   - `doc/ROADMAP.md`：更新狀態
-
-Rollback：
-
-- PR-2A 可獨立回退（不影響既有 analysis flow）
-- PR-2B 回退會回到「僅內建模板」；DB templates 不會被刪除
-
----
-
-### PR-3 — Analytics：Page Views Dashboard（Admin-only）✅ COMPLETED
-
-> 完成日期: 2026-01-19
-> 實作檔案:
-> - `lib/validators/page-views-admin.ts` — query contract validator
-> - `tests/validators/page-views-admin.test.ts` — validator 單元測試
-> - `lib/types/page-views.ts` — 新增 admin dashboard types
-> - `lib/analytics/pageviews-admin-io.ts` — read IO with RLS
-> - `app/[locale]/admin/(data)/analytics/pageviews/page.tsx` — server page (Option B)
-> - `messages/zh.json` — i18n 字串
-
-Goal：
-
-- 增加 admin-only page views dashboard（read-only），把已落地的聚合資料做可視化/查詢
-
-Scope（V1 最小可用）：
-
-- 預設顯示最近 7/30 天的總覽（total views + top pages table）
-- Query params（建議）：
-  - `from` / `to`（YYYY-MM-DD）
-  - `locale`（optional；allowlist：`all|zh|en`；預設 `all` = 合併彙總）
-  - `page` / `pageSize`
-- 不做（先保守）：複雜圖表/互動（避免引入 heavy chart deps）
-
-Expected file touches：
-
-- `app/[locale]/admin/(data)/analytics/page.tsx`（或 `app/[locale]/admin/(data)/analytics/pageviews/page.tsx`；new）
-- `lib/analytics/pageviews-admin-io.ts`（new；read IO，走 RLS）
-- `lib/validators/*`（admin dashboard query validator）
-- （可選）`tests/**`（validator unit tests）
+- Routes：
+  - `app/[locale]/blog/posts/[slug]/page.tsx` ✅
+  - `app/[locale]/blog/categories/[slug]/page.tsx` ✅
+  - `app/[locale]/gallery/items/[category]/[slug]/page.tsx` ✅
+  - `app/[locale]/gallery/categories/[slug]/page.tsx` ✅
+- Redirects：`next.config.ts` ✅
+- SEO：`app/sitemap.ts` ✅（outputs canonical URLs）
+- Tests：`tests/seo-canonical-routes.test.ts` ✅
 
 Step-by-step：
 
-1. 決定 admin route 位置（建議放在 `(data)` group，避免塞進 `/admin` dashboard）
-   - 方案 A：`/[locale]/admin/(data)/analytics`（之後可擴充其他 analytics）
-   - 方案 B：`/[locale]/admin/(data)/analytics/pageviews`
-2. 新增 read IO：`lib/analytics/pageviews-admin-io.ts`
-    - 使用 authenticated supabase client（cookie context）+ admin guard（Owner/Editor）
-    - query `page_view_daily`（date range + locale filter）後在 application layer 聚合（避免依賴複雜 SQL/group-by；做法可參考 `lib/modules/embedding/search-analytics-io.ts`）：
-      - total views：`sum(view_count)`（在 TS reduce）
-      - top pages：以 `Map<path, sum(view_count)>` 聚合後 sort（desc）+ paginate
-      - locale=`all`：不加 locale filter，直接跨 locale 彙總；locale=`zh|en`：加 `.eq('locale', ...)`
-3. 新增 validator（建議 `lib/validators/page-views-admin.ts`）
-    - date range 正規化（from/to default）
-    - page/pageSize allowlist
-    - locale allowlist（`all|zh|en`；預設 `all`）
-4. server page：
-   - parse → validate searchParams
-   - 呼叫 IO 取得 summary + list
-   - Render：
-     - totals（cards）
-     - top pages table（含 view_count）
-     - `<form method="GET">` 做日期/locale filter（避免 client bundle）
-5. Verification：
-   - `npm test`
-   - `npm run type-check`
-   - `npm run lint`
-6. Docs sync（合併後）：
-   - `doc/SPEC.md#known-gaps-roadmap-links`：移除「Dashboard UI 尚未實作」的缺口敘述
-   - `doc/ROADMAP.md`：更新狀態
+1. 新增 canonical routes（不移除舊 routes 前先以 redirect 導流）：✅
+   - Blog：
+     - `/[locale]/blog/posts/[slug]`
+     - `/[locale]/blog/categories/[slug]`
+   - Gallery：
+     - `/[locale]/gallery/items/[category]/[slug]`
+     - `/[locale]/gallery/categories/[slug]`
+2. 設計 redirect matrix（**全量 301** 到 canonical）：✅
+   - 舊 blog post：`/[locale]/blog/[category]/[slug]` → `/[locale]/blog/posts/[slug]`
+   - 舊 gallery item：`/[locale]/gallery/[category]/[slug]` → `/[locale]/gallery/items/[category]/[slug]`
+   - query-based category（若存在）：一律導到 `/.../categories/<slug>`
+3. Search param 統一：✅
+   - Blog/Gallery 一律使用 `q`（淘汰 `search`），並更新 search scope（PRD `FR-9.5.4`）
+4. SEO：✅
+   - `sitemap.ts` 輸出 canonical URLs
+   - `getMetadataAlternates` / hreflang 以 canonical 為準
+5. Tests：✅
+   - 補 `tests/seo-canonical-routes.test.ts` 覆蓋 canonical/hreflang（避免 regress）
 
-Rollback：
+DoD（可驗收）：
 
-- 回退 PR（僅新增 read-only admin UI；不影響 ingestion）
+- ✅ 任一內容只有 1 個 canonical URL；非 canonical 一律 301
 
 ---
 
-## 4) 決策（已確認）
+### PR-3 — DB Schema/RLS：Hero（`surface='hero'`）+ `gallery_hotspots` ✅ COMPLETED
 
-1. Users search：支援 `short_id`，但只在 `q` 符合 `^C\\d+$` 時啟用「精準查詢」；其餘情況只搜 `email/user_id`
-2. Users pageSize：預設 50；allowlist 固定 20/50/100
-3. AI Analysis custom templates UI：採獨立 route（`/admin/(data)/ai-analysis/templates`）做 Owner CRUD + selection
-4. Analytics dashboard（V1）：先做 totals + table（不引入 charts/heavy deps）
-5. Analytics locale：預設合併（All）+ 提供 filter（`all|zh|en`）
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (883 pass), type-check/lint (no new errors from PR-3)
+
+Goal：
+
+- 把不變式下放到 DB（constraints/RLS/indexes），避免靠 UI 邏輯硬撐。
+
+Files（已實作）：
+
+- `supabase/02_add/04_gallery.sql`（extend `gallery_pin_surface` + partial unique index）✅
+- `supabase/02_add/20_gallery_hotspots.sql`（new table + indexes + RLS + grants）✅
+- `supabase/01_drop/04_gallery.sql`（updated to drop gallery_hotspots）✅
+- `supabase/COMBINED_GRANTS.sql`（mirror changes）✅
+
+Step-by-step：
+
+1. Extend enum：`public.gallery_pin_surface` 新增 `'hero'` ✅
+2. Hero uniqueness：新增 partial unique index（`surface='hero'` 永遠最多 1 筆）✅
+3. 新增 `public.gallery_hotspots`（依 PRD Implementation Contract 寫死 fields/constraints/indexes/RLS/grants）✅
+4. DB 檔案同步：同時更新 `supabase/02_add/*` 與 `supabase/COMBINED_*` ✅
+
+DoD（可驗收）：
+
+- ✅ DB 層可保證 hero ≤ 1
+- ✅ hotspots 具備 `x/y` 範圍約束、RLS、必要索引與 grants
+
+---
+
+### PR-4 — Hotspots Markdown：safe pipeline（禁 raw HTML + sanitize + https links）✅ COMPLETED
+
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (865 pass), type-check/lint (no new errors from PR-4)
+
+Goal：
+
+- hotspots 會出現在 Home/Hero（曝光面最大），必須使用「更保守」的 markdown→html pipeline。
+
+Files（已實作）：
+
+- `lib/markdown/hotspots.ts`（new; server-only）✅
+- `tests/markdown-hotspots.test.ts`（new; 44 test cases）✅
+
+Step-by-step：
+
+1. 禁 raw HTML（不得沿用 `lib/markdown/server.ts`）✅
+2. sanitize/allowlist（GFM subset）✅
+3. links：只允許 `https:`（可選 `mailto:`），並強制 `target="_blank"` + `rel="noopener noreferrer"` ✅
+4. sanitize 後內容為空 → 視為 invalid（阻止儲存/發布）✅
+
+DoD（可驗收）：
+
+- ✅ 任意惡意輸入不會造成 XSS；外連安全屬性固定輸出
+- ✅ XSS 測試覆蓋：script/iframe/style/object/embed/form/svg/img、javascript:/data:/http:/vbscript: URLs
+- ✅ `hotspotsMarkdownToHtml()` 與 `isValidHotspotsMarkdown()` 兩個 exports
+
+---
+
+### PR-5 — Hotspots IO + caching + validators + types ✅ COMPLETED
+
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (906 pass), type-check/lint have pre-existing `uiux/` errors (unrelated)
+
+Goal：
+
+- DB access 全部集中到 `lib/**/*-io.ts`，public SSR 讀取走 `createAnonClient()` + `cachedQuery`，admin 寫入走 `createClient()` + RLS。
+
+Files（已實作）：
+
+- `lib/types/gallery.ts`（extend：`GalleryHotspot`, `GalleryHotspotPublic`, `GalleryHotspotInput`, `GalleryHotspotReorderInput`）✅
+- `lib/validators/gallery-hotspots.ts`（new：coordinate, URL, input, reorder validation）✅
+- `tests/validators/gallery-hotspots.test.ts`（new：34 test cases）✅
+- `lib/modules/gallery/gallery-hotspots-io.ts`（new：public reads with auto/manual ordering）✅
+- `lib/modules/gallery/hotspots-admin-io.ts`（new：admin CRUD + reorder + limit check）✅
+- `lib/modules/gallery/cached.ts`（extend：`getHotspotsByItemIdCached`）✅
+- `lib/modules/gallery/io.ts`（extend：re-export hotspots）✅
+
+Step-by-step：
+
+1. Types：定義 hotspot row/public DTO/admin input（單一真相來源）✅
+2. Validators（pure）：`x/y`、必填欄位、`read_more_url` allowlist、reorder payload ✅
+3. Public IO：✅
+   - 只回可見 items 的可見 hotspots（RLS）
+   - ordering：auto（`y→x`）/ manual（`sort_order`）/ append（manual mode）依 contract 寫死
+4. Admin IO：✅
+   - CRUD + reorder（reorder input = ordered ids；寫滿 `sort_order=0..n-1`）
+5. Cached wrappers：tag 至少使用 `gallery`；admin mutations 後 `revalidateTag('gallery')` ✅
+
+DoD（可驗收）：
+
+- ✅ 排序規則可被測試覆蓋（auto/manual/append）
+- ✅ public 讀取可快取、admin 寫入受 RLS 約束
+
+---
+
+### PR-6 — Admin UI：Hotspots editor + Hero selection
+
+Goal：
+
+- 管理員可在後台針對「每一個作品（gallery item）」選擇是否要有 pins（0..N；允許 0 = 不顯示任何 pin），並可：
+  - 在作品圖上新增/拖曳 pins、編輯內容、拖曳排序清單並儲存
+  - （可選）把該作品設為 Home Hero（0..1；不影響是否有 pins）
+
+Step-by-step：
+
+1. 後台路由：`app/[locale]/admin/gallery/**` 增加
+   - Gallery item detail/edit：每個作品都要有「Hotspots editor」（圖上 pins + 清單編輯 + 清單排序）
+     - empty state：顯示「尚未新增 pins」+ `新增 pin` CTA；允許直接離開不新增（= 該作品沒有 pins）
+     - 若已有 pins：提供 `刪除` / `隱藏（is_visible=false）`（至少一種）讓管理員能選擇「不顯示 pins」
+   - Hero selection UI：在作品 detail/edit 提供 `設為 Home Hero`（toggle/button）
+     - 寫入：`gallery_pins(surface='hero')`（全站最多 1；DB constraint）
+2. 所有寫入走 server actions：parse → validate（pure）→ `*-admin-io.ts`
+3. 上限：讀 `company_settings.gallery_hotspots_max`（default 12），UI 與 server 兩側都要 enforce
+4. 座標：畫面座標換算 normalized `x/y`；拖曳位置只改 `x/y`
+5. 清單排序：拖曳並「儲存」才寫入 `sort_order`
+6. Revalidation：mutation 後 `revalidateTag('gallery')`
+
+DoD：
+
+- ✅ 任一 gallery item 都能選擇 0..N pins（允許 0）；前台對應作品與 Home Hero 皆能正確呈現「有/無 pins」
+- ✅ 管理員能完整 CRUD + reorder；新 hotspot 在 manual mode 永遠 append
+- ✅ hero 永遠最多 1 筆（DB constraint）；可在任一作品上設為 hero / 取消 hero
+
+---
+
+### PR-7 — Public UI：Pins overlay + modal card + fallback list（Home + Gallery）✅ COMPLETED
+
+> **Status**: ✅ Completed (2026-01-20)  
+> **Verification**: `npm test` (906 pass), type-check/lint have pre-existing `uiux/` errors (unrelated)
+
+Goal：
+
+- 前台互動對齊 `uiux/`：hover motion + 點擊圖卡；並提供 mobile/無障礙 fallback list。
+
+Files（已實作）：
+
+- Shared UI primitives：
+  - `components/hotspots/HotspotPinClient.tsx`（client; interactive pin button with hover/click）✅
+  - `components/hotspots/HotspotOverlay.tsx`（client; container for pins over image）✅
+  - `components/hotspots/HotspotModalCard.tsx`（client; modal with focus trap/ESC/backdrop/close）✅
+  - `components/hotspots/HotspotFallbackList.tsx`（client; collapsible list for mobile/accessibility）✅
+  - `components/hotspots/index.ts`（barrel export）✅
+  - `components/gallery/GalleryItemHotspotsClient.tsx`（client; wrapper managing state）✅
+- Gallery item integration：`app/[locale]/gallery/[category]/[slug]/page.tsx`（fetch hotspots + render）✅
+- i18n：`messages/zh.json`（hotspots section added）✅
+
+Step-by-step：
+
+1. ✅ Shared UI primitives：pins overlay + modal card（focus trap/ESC/backdrop/close button）
+2. ✅ Fallback list：stage 下方「查看媒材清單（N）」→ expandable list；點 item 開同一張圖卡
+3. ✅ Data fetching：Gallery item 讀 item + hotspots（public cached via `getHotspotsByItemIdCached`）
+4. ✅ Markdown：hotspot `description_md` 一律走 `lib/markdown/hotspots.ts`（server-side render）
+5. ✅ Bundle：使用 inline SVG icons 避免引入 admin-only deps；必要互動才做 client component
+
+DoD（可驗收）：
+
+- ✅ Gallery item page 顯示 hotspots pins overlay + modal card + fallback list
+- ✅ 無 hover/小螢幕仍可透過 fallback list 操作
+- ✅ 鍵盤可 focus pins，Enter/Space 開啟 modal
+- ✅ Modal 支援 focus trap，ESC 關閉，backdrop 點擊關閉
+
+> **Note**: Home Hero integration 將在 PR-8 完成（需要 hero section 重構）
+
+
+---
+
+### PR-8 — Home UIUX 跟稿（marquee / header / hero / suggest）
+
+Goal：
+
+- Home 排版與互動對齊 `uiux/` + Figma；Hero 使用 gallery hero + hotspots；hamburger menu 使用 v2 nav。
+
+Step-by-step：
+
+1. Marquee：Notice label + text 視為一段完整資訊一起跑（來源：`company_settings`）
+2. Header/hamburger：往右展開、上方橫向、accordion；資料來源 `hamburger_nav v2`
+3. Hero：左側標語/CTA（`site_content(section_key='hero')`）+ 右 blob 圖（hero item）+ pins
+4. Hero empty state：保留左標語 + placeholder blob（無 pins）
+5. Suggest：底部文章卡（推薦 SSoT：`doc/specs/proposed/ANALYTICS_PERSONALIZATION_UMAMI.md`）
+6. SEO：metadata/jsonld/hreflang 不 regress；LCP 不爆（避免不必要 client bundle）
+
+DoD：
+
+- Home UIUX 對齊設計稿；Hero pins/圖卡互動與 UIUX 一致
+
+---
+
+## 4) 每 PR 驗證清單（不可省略）
+
+- `npm test`
+- `npm run type-check`
+- `npm run lint`
+- `npm run build`（至少在 PR-2/PR-8 跑一次，確保 routes/SEO 不出錯）

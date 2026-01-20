@@ -67,6 +67,26 @@ export async function getAllGalleryItemsForAdmin(): Promise<GalleryItemWithCateg
 }
 
 /**
+ * Get a single gallery item by ID for admin
+ * Returns item with its category relation
+ */
+export async function getGalleryItemByIdForAdmin(itemId: string): Promise<GalleryItemWithCategory | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('gallery_items')
+    .select('*, category:gallery_categories(*)')
+    .eq('id', itemId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching gallery item:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+/**
  * Search gallery items for featured pins selection
  * Returns visible items that match the query, limited to 20 results
  */

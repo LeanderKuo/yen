@@ -75,7 +75,7 @@ export interface GalleryPin {
   item?: GalleryItem;
 }
 
-export type GalleryPinSurface = 'home' | 'gallery';
+export type GalleryPinSurface = 'home' | 'gallery' | 'hero';
 
 export type GalleryListSort = 'newest' | 'popular' | 'featured';
 
@@ -114,4 +114,66 @@ export interface GalleryItemsApiResponse {
   nextOffset: number;
   hasMore: boolean;
   total: number;
+}
+
+// =============================================================================
+// Gallery Hotspots Types (PR-5)
+// =============================================================================
+
+/**
+ * Hotspot row from DB (gallery_hotspots table)
+ * Normalized coordinates x/y in range [0, 1]
+ */
+export interface GalleryHotspot {
+  id: string;
+  item_id: string;
+  x: number;
+  y: number;
+  media: string;
+  preview: string | null;
+  symbolism: string | null;
+  description_md: string;
+  read_more_url: string | null;
+  sort_order: number | null;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Public DTO for hotspots (excludes admin-only fields)
+ * Used in public pages (Home Hero, Gallery item detail)
+ */
+export interface GalleryHotspotPublic {
+  id: string;
+  x: number;
+  y: number;
+  media: string;
+  preview: string | null;
+  symbolism: string | null;
+  description_md: string;
+  read_more_url: string | null;
+}
+
+/**
+ * Admin input for create/update hotspot
+ */
+export interface GalleryHotspotInput {
+  x: number;
+  y: number;
+  media: string;
+  preview?: string | null;
+  symbolism?: string | null;
+  description_md: string;
+  read_more_url?: string | null;
+  is_visible?: boolean;
+}
+
+/**
+ * Reorder input for admin reorder operation
+ * ordered_ids: complete list of hotspot IDs in desired order
+ */
+export interface GalleryHotspotReorderInput {
+  item_id: string;
+  ordered_ids: string[];
 }

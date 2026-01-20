@@ -147,9 +147,6 @@ export async function removeFeaturedPinAdmin(
   return { success: true };
 }
 
-/**
- * Save featured pin order
- */
 export async function saveFeaturedPinOrderAdmin(
   orderedPinIds: string[]
 ): Promise<{ success: true } | { error: string }> {
@@ -166,3 +163,94 @@ export async function saveFeaturedPinOrderAdmin(
 
   return { success: true };
 }
+
+// =============================================================================
+// Hero Operations (surface='hero'; max 1 per site)
+// =============================================================================
+
+/**
+ * Get current hero pin (if any)
+ * Returns the single hero pin with joined item data, or null if none set
+ */
+export async function getHeroPin(): Promise<PinWithItem | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('gallery_pins')
+    .select(`
+      *,
+      item:gallery_items(*, category:gallery_categories(*))
+    `)
+    .eq('surface', 'hero')
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching hero pin:', error);
+    return null;
+  }
+
+  // Return null if no hero or item is deleted
+  if (!data || !data.item) {
+    return null;
+  }
+
+  return data as PinWithItem;
+}
+
+/**
+ * Set an item as the Home Hero
+ * Clears any existing hero first (DB constraint ensures max 1)
+ * @param itemId - Gallery item ID to set as hero
+ */
+export async function setHeroAdmin(
+  itemId: string
+): Promise<{ success: true } | { error: string }> {
+  const supabase = await createClient();
+
+  // Clear existing hero first (there can be only one)
+  const { error: deleteError } = await supabase
+    .from('gallery_pins')
+    .delete()
+    .eq('surface', 'hero');
+
+  if (deleteError) {
+    console.error('Error clearing existing hero:', deleteError);
+    return { error: deleteError.message };
+  }
+
+  // Insert new hero
+  const { error: insertError } = await supabase.from('gallery_pins').insert({
+    surface: 'hero',
+    item_id: itemId,
+    sort_order: 0, // Fixed for hero (no ordering semantic)
+  });
+
+  if (insertError) {
+    // Handle duplicate key (shouldn't happen after delete, but safety first)
+    if (insertError.code === '23505') {
+      return { error: '此作品已設為主視覺。' };
+    }
+    return { error: insertError.message };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Clear the current Home Hero selection
+ */
+export async function clearHeroAdmin(): Promise<{ success: true } | { error: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('gallery_pins')
+    .delete()
+    .eq('surface', 'hero');
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+

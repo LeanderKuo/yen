@@ -6,7 +6,7 @@
  */
 
 import { cachedQuery } from '@/lib/cache/wrapper';
-import type { GalleryCategory, GalleryItem, GalleryListParams, GalleryListResult, GalleryPin, GalleryPinSurface } from '@/lib/types/gallery';
+import type { GalleryCategory, GalleryItem, GalleryListParams, GalleryListResult, GalleryPin, GalleryPinSurface, GalleryHotspotPublic } from '@/lib/types/gallery';
 import {
   getGalleryItemBySlug,
   getGalleryItemsPage,
@@ -17,6 +17,7 @@ import {
   getVisibleGalleryItemsBySurface,
   findVisibleGalleryItemsBySlug,
 } from '@/lib/modules/gallery/io';
+import { getHotspotsByItemId } from '@/lib/modules/gallery/gallery-hotspots-io';
 
 const CACHE_REVALIDATE_SECONDS = 60;
 
@@ -87,6 +88,17 @@ export const getVisibleGalleryItemsBySurfaceCached = cachedQuery(
   async (surface: 'home' | 'gallery', limit: number = 12): Promise<GalleryItem[]> =>
     getVisibleGalleryItemsBySurface(surface, limit),
   ['visible-gallery-items-by-surface'],
+  ['gallery'],
+  CACHE_REVALIDATE_SECONDS
+);
+
+// ============================================
+// Hotspots (PR-5)
+// ============================================
+
+export const getHotspotsByItemIdCached = cachedQuery(
+  async (itemId: string): Promise<GalleryHotspotPublic[]> => getHotspotsByItemId(itemId),
+  ['gallery-hotspots-by-item'],
   ['gallery'],
   CACHE_REVALIDATE_SECONDS
 );

@@ -2,6 +2,7 @@
  * Gallery Item Detail Page
  * 
  * Displays a single gallery item with image, description, tags, likes, and comments.
+ * Supports hotspots overlay for material annotations (PR-7).
  */
 
 import { notFound, redirect } from 'next/navigation';
@@ -9,17 +10,23 @@ import { Metadata } from 'next';
 import { getMessages } from 'next-intl/server';
 import Image from 'next/image';
 import { cookies } from 'next/headers';
-import { findVisibleGalleryItemsBySlugCached, getVisibleGalleryItemBySlugCached } from '@/lib/modules/gallery/cached';
+import { 
+  findVisibleGalleryItemsBySlugCached, 
+  getVisibleGalleryItemBySlugCached,
+  getHotspotsByItemIdCached,
+} from '@/lib/modules/gallery/cached';
 import { isGalleryEnabledCached } from '@/lib/features/cached';
 import { getMetadataAlternates } from '@/lib/seo/hreflang';
 import { toWebp, toOgImage } from '@/lib/utils/cloudinary-url';
 import { getLikedGalleryItemIds } from '@/lib/modules/gallery/liked-by-me-io';
 import { ANON_ID_COOKIE_NAME } from '@/lib/utils/anon-id';
+import { hotspotsMarkdownToHtml } from '@/lib/markdown/hotspots';
 import LikeButton from '@/components/reactions/LikeButton';
 import ClientCommentSection from '@/components/blog/ClientCommentSection';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SimilarGalleryItems from '@/components/gallery/SimilarGalleryItems';
+import GalleryItemHotspotsClient from '@/components/gallery/GalleryItemHotspotsClient';
 
 interface PageProps {
   params: Promise<{ locale: string; category: string; slug: string }>;
@@ -92,12 +99,23 @@ export default async function GalleryItemPage({ params }: PageProps) {
     notFound();
   }
   
-  // Get liked status for this item
+  // Get liked status and hotspots for this item in parallel
   const cookieStore = await cookies();
   const anonId = cookieStore.get(ANON_ID_COOKIE_NAME)?.value;
   
-  const likedItemIds = await getLikedGalleryItemIds(anonId, [item.id]);
+  const [likedItemIds, hotspots] = await Promise.all([
+    getLikedGalleryItemIds(anonId, [item.id]),
+    getHotspotsByItemIdCached(item.id),
+  ]);
   const likedByMe = likedItemIds.has(item.id);
+  
+  // Process hotspots markdown to HTML on server (safe pipeline)
+  const hotspotsWithHtml = await Promise.all(
+    hotspots.map(async (hotspot) => ({
+      ...hotspot,
+      description_html: await hotspotsMarkdownToHtml(hotspot.description_md),
+    }))
+  );
   
   // Get scoped messages for comment section (P1 optimization: only 'comments' namespace)
   const allMessages = await getMessages({ locale });
@@ -113,6 +131,15 @@ export default async function GalleryItemPage({ params }: PageProps) {
   
   // Convert image to WebP
   const imageUrl = toWebp(item.image_url);
+
+  // Hotspot UI labels
+  const hotspotLabels = {
+    viewMaterialsList: '查看媒材清單',
+    close: '關閉',
+    readMore: '延伸閱讀',
+    usageAndTexture: '使用方式 / 觸感',
+    symbolism: '象徵意涵',
+  };
 
   return (
     <div className="min-h-screen">
@@ -132,17 +159,23 @@ export default async function GalleryItemPage({ params }: PageProps) {
         </nav>
         
         <article className="max-w-4xl mx-auto">
-          {/* Main Image */}
-          <div className="mb-8 rounded-lg overflow-hidden bg-surface-raised">
-            <Image
-              src={imageUrl}
-              alt={imageAlt}
-              width={1200}
-              height={800}
-              className="w-full h-auto object-contain"
-              priority
-              sizes="(max-width: 1024px) 100vw, 1024px"
-            />
+          {/* Main Image with Hotspots Overlay */}
+          <div className="mb-8">
+            <GalleryItemHotspotsClient
+              hotspots={hotspotsWithHtml}
+              labels={hotspotLabels}
+              className="rounded-lg overflow-hidden bg-surface-raised"
+            >
+              <Image
+                src={imageUrl}
+                alt={imageAlt}
+                width={1200}
+                height={800}
+                className="w-full h-auto object-contain"
+                priority
+                sizes="(max-width: 1024px) 100vw, 1024px"
+              />
+            </GalleryItemHotspotsClient>
           </div>
           
           {/* Title and Like */}
