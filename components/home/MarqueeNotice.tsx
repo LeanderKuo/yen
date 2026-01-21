@@ -26,17 +26,14 @@ export function MarqueeNotice({ label, text }: MarqueeNoticeProps) {
 
   // Calculate animation duration based on content width
   useEffect(() => {
-    if (contentRef.current && containerRef.current) {
+    if (contentRef.current) {
       const contentWidth = contentRef.current.scrollWidth;
-      const containerWidth = containerRef.current.offsetWidth;
       // Adjust duration based on content length (pixels per second)
       const pixelsPerSecond = 50;
       const duration = Math.max(15, contentWidth / pixelsPerSecond);
       setAnimationDuration(duration);
     }
   }, [text, label]);
-
-  const fullContent = `${label} ${text}`;
 
   return (
     <div className="w-full overflow-hidden bg-[#EEEBE3] border-b border-[#E5E1D9]">

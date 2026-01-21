@@ -5,7 +5,7 @@
  * Shows all visible gallery items with filtering by category, tag, and search.
  */
 
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { 
@@ -58,6 +58,17 @@ export default async function GalleryPage({ params, searchParams }: PageProps) {
   const isEnabled = await isGalleryEnabledCached();
   if (!isEnabled) {
     notFound();
+  }
+  
+  // PR-6B: Redirect ?category= to canonical /gallery/categories/* path
+  if (query.category) {
+    const redirectParams = new URLSearchParams();
+    if (query.q) redirectParams.set('q', query.q);
+    if (query.tag) redirectParams.set('tag', query.tag);
+    if (query.sort) redirectParams.set('sort', query.sort);
+    const queryString = redirectParams.toString();
+    const canonicalUrl = `/${locale}/gallery/categories/${query.category}${queryString ? `?${queryString}` : ''}`;
+    redirect(canonicalUrl);
   }
   
   // Load initial data

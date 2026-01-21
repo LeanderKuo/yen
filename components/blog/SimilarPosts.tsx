@@ -40,7 +40,6 @@ export default async function SimilarPosts({ postId, locale }: SimilarPostsProps
         {similarPosts.map((post) => {
           const title = post.titleZh || '（無標題）';
           const excerpt = post.excerptZh || '';
-          const categorySlug = post.category?.slug || 'uncategorized';
           const categoryName = post.category
             ? post.category.nameZh
             : null;
@@ -56,9 +55,9 @@ export default async function SimilarPosts({ postId, locale }: SimilarPostsProps
                 </span>
               )}
 
-              {/* Title - Clear anchor text */}
+              {/* Title - Clear anchor text with v2 canonical URL */}
               <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                <a href={`/${locale}/blog/${categorySlug}/${post.slug}`}>
+                <a href={`/${locale}/blog/posts/${post.slug}`}>
                   {title}
                 </a>
               </h3>

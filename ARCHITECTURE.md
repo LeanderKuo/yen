@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-> Last Updated: 2026-01-20
+> Last Updated: 2026-01-21
 > Status: Enforced
 > Role: Single source of truth for architecture and global constraints.
 
@@ -16,7 +16,7 @@
 - Next.js 16 (App Router) + React 19
 - TypeScript strict
 - Tailwind CSS 3.4.x (system fonts only; upgrade → 4.x planned)
-- next-intl (en/zh)
+- next-intl（目前 single-locale：`zh`；唯一來源：`lib/i18n/locales.ts`）
 - Supabase (PostgreSQL + Auth + RLS)
 - Cloudinary
 - Vercel
@@ -361,7 +361,7 @@ interface ApiErrorResponse {
 ## 8. i18n
 
 - `lib/i18n/locales.ts` 是唯一 locale 來源，禁止硬編。
-- 主要路由以 `/[locale]/*` 為準；預設 `en`。
+- 主要路由以 `/[locale]/*` 為準；預設以 `lib/i18n/locales.ts` 的 `DEFAULT_LOCALE` 為準（目前 `zh`）。
 
 ## 9. UI 組成與導覽
 

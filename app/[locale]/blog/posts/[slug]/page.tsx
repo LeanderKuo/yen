@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getTranslations, getMessages } from 'next-intl/server';
 import { getPostBySlugWithCategoryCached, getRelatedPostsCached, getAuthorInfo } from '@/lib/modules/blog/cached';
 import { getMetadataAlternates, getCanonicalUrl } from '@/lib/seo';
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps) {
   
   const title = post.title_zh || '（無標題）';
   const description = post.excerpt_zh || undefined;
-  const categorySlug = post.category?.slug || 'uncategorized';
+
   
   // Select cover image based on locale (with fallback)
   const coverImage = post.cover_image_url_zh || post.cover_image_url;

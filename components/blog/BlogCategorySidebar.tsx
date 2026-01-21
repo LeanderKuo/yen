@@ -10,6 +10,7 @@ interface BlogCategorySidebarProps {
   locale: string;
   currentCategorySlug?: string;
   searchQuery?: string;
+  sortQuery?: string;
 }
 
 export default function BlogCategorySidebar({
@@ -18,6 +19,7 @@ export default function BlogCategorySidebar({
   locale,
   currentCategorySlug,
   searchQuery,
+  sortQuery,
 }: BlogCategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(categories.map((c) => c.id))
@@ -33,11 +35,18 @@ export default function BlogCategorySidebar({
     setExpandedCategories(newExpanded);
   };
 
+  // PR-6A: Build canonical URLs (path-based, not query-based)
   const buildUrl = (categorySlug?: string) => {
     const params = new URLSearchParams();
-    if (categorySlug) params.set('category', categorySlug);
     if (searchQuery) params.set('q', searchQuery);
+    if (sortQuery) params.set('sort', sortQuery);
     const query = params.toString();
+    
+    if (categorySlug) {
+      // v2 canonical: /blog/categories/{slug}
+      return `/${locale}/blog/categories/${categorySlug}${query ? `?${query}` : ''}`;
+    }
+    // All posts: /blog
     return `/${locale}/blog${query ? `?${query}` : ''}`;
   };
 

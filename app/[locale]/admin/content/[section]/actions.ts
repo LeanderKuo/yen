@@ -12,7 +12,7 @@ import { createClient } from '@/lib/infrastructure/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { parseHamburgerNav } from '@/lib/validators/hamburger-nav';
 import { deepValidateHamburgerNav } from '@/lib/modules/content/hamburger-nav-publish-io';
-import type { NavValidationError, NavDeepValidationError } from '@/lib/types/hamburger-nav';
+
 
 interface SaveResult {
   success: boolean;

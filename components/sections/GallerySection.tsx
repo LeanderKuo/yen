@@ -60,7 +60,7 @@ export default function GallerySection({
             return (
               <Link
                 key={item.id}
-                href={`/${locale}/gallery/${categorySlug}/${item.slug}`}
+                href={`/${locale}/gallery/items/${categorySlug}/${item.slug}`}
                 className="group relative block rounded-xl overflow-hidden bg-surface"
               >
                 <div style={{ aspectRatio }} className="relative">

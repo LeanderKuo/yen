@@ -32,7 +32,7 @@ async function validateBlogPost(
     const supabase = await createClient();
 
     const { data, error } = await supabase
-        .from('blog_posts')
+        .from('posts')
         .select('id, visibility')
         .eq('slug', postSlug)
         .maybeSingle();
@@ -77,7 +77,7 @@ async function validateBlogCategory(
     const supabase = await createClient();
 
     const { data, error } = await supabase
-        .from('blog_categories')
+        .from('categories')
         .select('id')
         .eq('slug', categorySlug)
         .maybeSingle();

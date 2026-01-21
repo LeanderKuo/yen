@@ -34,7 +34,8 @@ export default async function SimilarGalleryItems({
         {similarItems.map((item) => {
           const title = item.titleZh;
           const categorySlug = item.category?.slug || 'uncategorized';
-          const href = `/${locale}/gallery/${categorySlug}/${item.slug}`;
+          // PR-6B: Use v2 canonical URL for gallery items
+          const href = `/${locale}/gallery/items/${categorySlug}/${item.slug}`;
 
           return (
             <Link

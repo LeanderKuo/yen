@@ -17,9 +17,9 @@ import {
 } from '@/lib/validators/custom-template';
 
 const {
-    MIN_NAME_LENGTH,
+    MIN_NAME_LENGTH: _MIN_NAME_LENGTH,
     MAX_NAME_LENGTH,
-    MIN_PROMPT_LENGTH,
+    MIN_PROMPT_LENGTH: _MIN_PROMPT_LENGTH,
     MAX_PROMPT_LENGTH,
     validateName,
     validatePromptText,

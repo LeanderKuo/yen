@@ -1,7 +1,7 @@
 # 功能規格（已實作行為 / SSoT）
 
 > 已落地功能與技術細節（Single Source of Truth）  
-> 最後更新: 2026-01-20  
+> 最後更新: 2026-01-21  
 > 狀態: Active
 
 本文件描述「**已實作**」的行為與其技術細節（以本檔為準）。
@@ -79,8 +79,10 @@
 
 | 路由                               | 說明 |
 | ---------------------------------- | ------------- |
-| `/[locale]/blog`                   | 部落格列表（支援 `?category=<slug>&search=<q>&sort=<...>`） |
-| `/[locale]/blog/[category]/[slug]` | 文章頁（canonical URL 會包含 category segment） |
+| `/[locale]/blog`                   | 部落格列表（支援 `?q=<q>&sort=<...>`；legacy `?category=<slug>` 仍可用） |
+| `/[locale]/blog/categories/[slug]` | 分類列表（支援 `?q=<q>&sort=<...>`） |
+| `/[locale]/blog/posts/[slug]`      | 文章頁（v2 canonical） |
+| `/[locale]/blog/[category]/[slug]` | legacy（301 → `/[locale]/blog/posts/[slug]`） |
 
 ### 資料模型
 
@@ -90,6 +92,7 @@
 ### 實作備註
 
 - Admin posts create/update/delete 已走 server actions（`app/[locale]/admin/(blog)/posts/actions.ts`）；client form 僅負責互動，IO 由 `lib/modules/blog/admin-io.ts`。
+- Public canonical URL 以 `/blog/posts/[slug]` 為準；舊路徑由 `next.config.ts` 做 301（見 `doc/meta/STEP_PLAN.md` PR-6）。
 - 實作入口對照：見 [模組清單](#module-inventory-single-source)。
 
 ---
@@ -113,8 +116,10 @@
 | 路由                                  | 說明 |
 | ------------------------------------- | ------------- |
 | `/[locale]/gallery`                   | 圖庫列表 |
-| `/[locale]/gallery/[category]`        | 分類列表 |
-| `/[locale]/gallery/[category]/[slug]` | 單一作品頁 |
+| `/[locale]/gallery/categories/[slug]` | 分類列表（v2 canonical） |
+| `/[locale]/gallery/items/[category]/[slug]` | 單一作品頁（v2 canonical） |
+| `/[locale]/gallery/[category]`        | legacy（目前仍可公開；應 301 → `/[locale]/gallery/categories/[slug]`；見 `doc/meta/STEP_PLAN.md` PR-6） |
+| `/[locale]/gallery/[category]/[slug]` | legacy（301 → `/[locale]/gallery/items/[category]/[slug]`） |
 
 ### API 端點
 
@@ -138,7 +143,7 @@
 ### 實作備註
 
 - 實作入口對照：見 [模組清單](#module-inventory-single-source)。
-- Gallery item hotspots render：`app/[locale]/gallery/[category]/[slug]/page.tsx`（server fetch + server markdown render + client overlay）
+- Gallery item hotspots render（canonical）：`app/[locale]/gallery/items/[category]/[slug]/page.tsx`（server fetch + server markdown render + client overlay）
 - Home Hero pins render：`components/home/HomePageV2.tsx`（讀 `gallery_pins(surface='hero')` + hotspots）
 
 ### Hero / Hotspots（Home + Gallery）
@@ -554,16 +559,8 @@
 
 ### Home UIUX / Navigation
 
-- Hamburger nav v2 的 resolver/contract 與現行 Blog/Gallery 路由仍有漂移（v2 canonical URLs 尚未全量落地）。
-- `hamburger_nav` publish deep validation（存在且可公開）尚未接到 admin publish flow（見 `doc/meta/STEP_PLAN.md`）。
-
-### Gallery Hero/Hotspots（DB scripts sync）
-
-- Repo 的 Supabase scripts 尚未同步 `gallery_pins(surface='hero')` 與 `gallery_hotspots` 的 schema/RLS/grants（見 `doc/meta/STEP_PLAN.md`）。
-
-### CI gates
-
-- `npm run type-check` / `npm run lint` 目前為紅燈（原因與修復方案見 `doc/meta/STEP_PLAN.md`）。
+- v2 canonical routes 已存在，但 Blog/Gallery list 仍保留 query-based category 與部分 internal links 仍產出 legacy URLs（造成 redirect chain / 雙軌內容）；修復方案見 `doc/meta/STEP_PLAN.md`（PR-6）。
+- `hamburger_nav` publish flow 已接上 deep validate，但 Blog targets 的 table mapping 與 DB SSoT 不一致（`blog_posts/blog_categories` vs `posts/categories`），會導致 publish fail；修復方案見 `doc/meta/STEP_PLAN.md`（PR-7）。
 
 ### Data Intelligence（後台）
 

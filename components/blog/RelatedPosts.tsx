@@ -30,7 +30,6 @@ export default async function RelatedPosts({ posts, locale }: RelatedPostsProps)
         {posts.slice(0, 4).map((post) => {
           const title = post.title_zh || '（無標題）';
           const excerpt = post.excerpt_zh || '';
-          const categorySlug = post.category?.slug || 'uncategorized';
           const categoryName = post.category
             ? post.category.name_zh
             : null;
@@ -46,9 +45,9 @@ export default async function RelatedPosts({ posts, locale }: RelatedPostsProps)
                 </span>
               )}
               
-              {/* Title - Clear anchor text */}
+              {/* Title - Clear anchor text with v2 canonical URL */}
               <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                <a href={`/${locale}/blog/${categorySlug}/${post.slug}`}>
+                <a href={`/${locale}/blog/posts/${post.slug}`}>
                   {title}
                 </a>
               </h3>

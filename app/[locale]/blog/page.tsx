@@ -1,8 +1,9 @@
 import { getTranslations } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getPublicPostsCached, getCategoriesWithCountsCached } from '@/lib/modules/blog/cached';
 import { isBlogEnabledCached } from '@/lib/features/cached';
 import { getMetadataAlternates } from '@/lib/seo';
+import { buildBlogPostUrl, buildBlogCategoryUrl } from '@/lib/seo/url-builders';
 import BlogCard from '@/components/blog/BlogCard';
 import BlogSearch from '@/components/blog/BlogSearch';
 import BlogCategorySidebar from '@/components/blog/BlogCategorySidebar';
@@ -41,6 +42,13 @@ export default async function BlogPage({
   }
   
   const { category: categorySlug, q, sort } = await searchParams;
+  
+  // PR-6A: Redirect ?category= to canonical /blog/categories/* path
+  if (categorySlug) {
+    const canonicalUrl = buildBlogCategoryUrl(locale, categorySlug, { q, sort });
+    redirect(canonicalUrl);
+  }
+  
   const t = await getTranslations({ locale, namespace: 'blog' });
   
   // Pass locale, q (search query), and sort to filter posts
@@ -85,6 +93,7 @@ export default async function BlogPage({
                 locale={locale}
                 currentCategorySlug={categorySlug}
                 searchQuery={q}
+                sortQuery={sort}
               />
             </div>
             
@@ -106,7 +115,7 @@ export default async function BlogPage({
                   {categories.map((cat) => (
                     <a
                       key={cat.id}
-                      href={`/${locale}/blog?category=${cat.slug}${q ? `&q=${q}` : ''}`}
+                      href={buildBlogCategoryUrl(locale, cat.slug, { q, sort })}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                         categorySlug === cat.slug
                           ? 'bg-primary text-white'
@@ -147,8 +156,8 @@ export default async function BlogPage({
                       ? format(new Date(post.published_at), 'PPP', { locale: dateLocale })
                       : null;
                     const imageAlt = post.cover_image_alt_zh || title;
-                    const postCategorySlug = post.category?.slug || 'uncategorized';
-                    const postUrl = `/${locale}/blog/${postCategorySlug}/${post.slug}`;
+                    // PR-6A: Use v2 canonical URL for blog posts
+                    const postUrl = buildBlogPostUrl(locale, post.slug);
 
                     return (
                       <BlogCard

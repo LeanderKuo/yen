@@ -10,9 +10,6 @@
 
 import type {
     HamburgerNavV2,
-    HamburgerNavGroup,
-    HamburgerNavItem,
-    NavTarget,
     NavTargetType,
     NavValidationError,
     NavValidationResult,

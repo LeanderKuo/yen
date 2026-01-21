@@ -28,8 +28,8 @@ export default function GalleryCard({ item, locale }: GalleryCardProps) {
   const categorySlug = item.category?.slug || '';
   const imageAlt = item.image_alt_zh || title;
   
-  // Build the link to the item detail page
-  const href = `/${locale}/gallery/${categorySlug}/${item.slug}`;
+  // PR-6B: Build v2 canonical URL for gallery item
+  const href = `/${locale}/gallery/items/${categorySlug}/${item.slug}`;
   
   // Convert image URL to WebP for optimal delivery
   const imageUrl = toWebp(item.image_url);
