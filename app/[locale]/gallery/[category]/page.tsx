@@ -1,15 +1,17 @@
 /**
- * Gallery Category Page (Redirect-Only)
- * 
- * PR-6B: This legacy v1 route (/gallery/[category]) is now redirect-only.
- * All requests are 301 redirected to the v2 canonical path (/gallery/categories/[slug]).
- * 
- * This eliminates duplicate content and ensures consistent URLs.
+ * Legacy Gallery Category Redirect
+ *
+ * Redirects legacy /gallery/[category] to canonical /gallery/categories/[slug]
+ * Uses permanentRedirect (308) to preserve SEO value.
+ *
+ * @see STEP_PLAN.md PR-32
+ * @see ARCHITECTURE.md §3.11 (v2 canonical path builders)
  */
 
-import { permanentRedirect } from 'next/navigation';
+import { permanentRedirect } from "next/navigation";
+import { buildGalleryCategoryUrl } from "@/lib/seo/url-builders";
 
-interface PageProps {
+interface LegacyRedirectProps {
   params: Promise<{ locale: string; category: string }>;
   searchParams: Promise<{
     q?: string;
@@ -18,20 +20,19 @@ interface PageProps {
   }>;
 }
 
-// No metadata export - this page only redirects
-
-export default async function GalleryCategoryPage({ params, searchParams }: PageProps) {
+export default async function LegacyGalleryCategoryRedirect({
+  params,
+  searchParams,
+}: LegacyRedirectProps) {
   const { locale, category: categorySlug } = await params;
-  const query = await searchParams;
-  
-  // Build canonical URL with preserved query params
-  const redirectParams = new URLSearchParams();
-  if (query.q) redirectParams.set('q', query.q);
-  if (query.tag) redirectParams.set('tag', query.tag);
-  if (query.sort) redirectParams.set('sort', query.sort);
-  const queryString = redirectParams.toString();
-  
-  // PR-6B: Redirect to v2 canonical path
-  const canonicalUrl = `/${locale}/gallery/categories/${categorySlug}${queryString ? `?${queryString}` : ''}`;
+  const { q, tag, sort } = await searchParams;
+
+  // Redirect to v2 canonical URL
+  const canonicalUrl = buildGalleryCategoryUrl(locale, categorySlug, {
+    q,
+    tag,
+    sort,
+  });
+
   permanentRedirect(canonicalUrl);
 }

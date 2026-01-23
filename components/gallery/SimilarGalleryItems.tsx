@@ -9,6 +9,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getResolvedSimilarGalleryItems } from '@/lib/modules/embedding/similar-items-public-io';
+import { buildGalleryItemUrl } from '@/lib/seo/url-builders';
 
 interface SimilarGalleryItemsProps {
   galleryItemId: string;
@@ -34,8 +35,8 @@ export default async function SimilarGalleryItems({
         {similarItems.map((item) => {
           const title = item.titleZh;
           const categorySlug = item.category?.slug || 'uncategorized';
-          // PR-6B: Use v2 canonical URL for gallery items
-          const href = `/${locale}/gallery/items/${categorySlug}/${item.slug}`;
+          // PR-30: Use v2 canonical URL builder for gallery items
+          const href = buildGalleryItemUrl(locale, categorySlug, item.slug);
 
           return (
             <Link

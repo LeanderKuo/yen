@@ -30,6 +30,7 @@ import {
   type ActionResult,
 } from '@/lib/types/action-result';
 import { isValidSlug } from '@/lib/validators/slug';
+import { buildBlogListUrl, buildBlogPostUrl } from '@/lib/seo/url-builders';
 import type { PostInput, Post, Visibility } from '@/lib/types/blog';
 
 // ============================================================================
@@ -163,7 +164,7 @@ export async function createPostAction(
     // 4. Revalidate cache/SEO
     revalidateTag('blog', { expire: 0 });
     revalidatePath(`/${locale}/admin/posts`);
-    revalidatePath(`/${locale}/blog`);
+    revalidatePath(buildBlogListUrl(locale));
     revalidatePath('/sitemap.xml');
 
     return actionSuccess(post);
@@ -216,16 +217,16 @@ export async function updatePostAction(
     // 5. Revalidate cache/SEO (including old and new detail pages)
     revalidateTag('blog', { expire: 0 });
     revalidatePath(`/${locale}/admin/posts`);
-    revalidatePath(`/${locale}/blog`);
+    revalidatePath(buildBlogListUrl(locale));
     revalidatePath('/sitemap.xml');
 
     // Revalidate old post detail page (if slug changed)
     if (existingPost.slug) {
-      revalidatePath(`/${locale}/blog/posts/${existingPost.slug}`);
+      revalidatePath(buildBlogPostUrl(locale, existingPost.slug));
     }
     // Revalidate new post detail page
     if (post.slug) {
-      revalidatePath(`/${locale}/blog/posts/${post.slug}`);
+      revalidatePath(buildBlogPostUrl(locale, post.slug));
     }
 
     return actionSuccess(post);
@@ -265,7 +266,7 @@ export async function deletePostAction(
     // 4. Revalidate cache/SEO
     revalidateTag('blog', { expire: 0 });
     revalidatePath(`/${locale}/admin/posts`);
-    revalidatePath(`/${locale}/blog`);
+    revalidatePath(buildBlogListUrl(locale));
     revalidatePath('/sitemap.xml');
 
     return actionSuccess();

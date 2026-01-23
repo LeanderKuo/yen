@@ -17,6 +17,11 @@ import {
 } from "@/lib/modules/gallery/cached";
 import { isGalleryEnabledCached } from "@/lib/features/cached";
 import { getMetadataAlternates } from "@/lib/seo/hreflang";
+import {
+  buildGalleryItemUrl,
+  buildGalleryListUrl,
+  buildGalleryCategoryUrl,
+} from "@/lib/seo/url-builders";
 import { toWebp, toOgImage } from "@/lib/utils/cloudinary-url";
 import { getLikedGalleryItemIds } from "@/lib/modules/gallery/liked-by-me-io";
 import { ANON_ID_COOKIE_NAME } from "@/lib/utils/anon-id";
@@ -102,7 +107,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
     const matches = await findVisibleGalleryItemsBySlugCached(slug);
     if (matches.length === 1 && matches[0].category.slug !== categorySlug) {
       permanentRedirect(
-        `/${locale}/gallery/items/${matches[0].category.slug}/${slug}`,
+        buildGalleryItemUrl(locale, matches[0].category.slug, slug),
       );
     }
     notFound();
@@ -157,13 +162,13 @@ export default async function GalleryItemPage({ params }: PageProps) {
         {/* Breadcrumb (v2 canonical) */}
         <nav className="mb-4 text-sm text-secondary">
           <a
-            href={`/${locale}/gallery`}
+            href={buildGalleryListUrl(locale)}
             className="hover:text-primary transition-colors">
             畫廊
           </a>
           <span className="mx-2">/</span>
           <a
-            href={`/${locale}/gallery/categories/${categorySlug}`}
+            href={buildGalleryCategoryUrl(locale, categorySlug)}
             className="hover:text-primary transition-colors">
             {categoryName}
           </a>
@@ -233,7 +238,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
                 {tags.map((tag, index) => (
                   <a
                     key={index}
-                    href={`/${locale}/gallery?tag=${encodeURIComponent(tag)}`}
+                    href={buildGalleryListUrl(locale, { tag })}
                     className="px-3 py-1 text-sm bg-surface-raised text-secondary rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                     {tag}
                   </a>
@@ -245,7 +250,7 @@ export default async function GalleryItemPage({ params }: PageProps) {
           {/* Metadata */}
           <div className="flex items-center gap-4 text-sm text-secondary border-t border-border-light pt-4 mb-12">
             <a
-              href={`/${locale}/gallery/categories/${categorySlug}`}
+              href={buildGalleryCategoryUrl(locale, categorySlug)}
               className="hover:text-primary transition-colors">
               {categoryName}
             </a>

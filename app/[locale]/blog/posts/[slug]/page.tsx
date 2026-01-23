@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, getMessages } from 'next-intl/server';
 import { getPostBySlugWithCategoryCached, getRelatedPostsCached, getAuthorInfo } from '@/lib/modules/blog/cached';
 import { getMetadataAlternates, getCanonicalUrl } from '@/lib/seo';
+import { buildBlogListUrl, buildBlogCategoryUrl } from '@/lib/seo/url-builders';
 import { calculateReadingTimeMinutes } from '@/lib/utils/reading-time';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -98,8 +99,8 @@ export default async function BlogPostPage({ params }: PageProps) {
   
   // Build breadcrumb items (v2 canonical paths)
   const breadcrumbItems = [
-    { label: tBreadcrumb('blog'), href: `/${locale}/blog` },
-    ...(categoryName ? [{ label: categoryName, href: `/${locale}/blog/categories/${actualCategorySlug}` }] : []),
+    { label: tBreadcrumb('blog'), href: buildBlogListUrl(locale) },
+    ...(categoryName ? [{ label: categoryName, href: buildBlogCategoryUrl(locale, actualCategorySlug) }] : []),
     { label: title },
   ];
   
@@ -146,7 +147,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* Category */}
             {categoryName && (
               <a 
-                href={`/${locale}/blog/categories/${actualCategorySlug}`}
+                href={buildBlogCategoryUrl(locale, actualCategorySlug)}
                 className="inline-block px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full mb-4 hover:bg-primary/20 transition-colors"
               >
                 {categoryName}

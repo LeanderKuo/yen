@@ -10,6 +10,7 @@
 import { updateSiteContent, togglePublishSiteContent, getSiteContent } from '@/lib/modules/content/io';
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { buildGalleryListUrl } from '@/lib/seo/url-builders';
 import { parseHamburgerNav } from '@/lib/validators/hamburger-nav';
 import { deepValidateHamburgerNav } from '@/lib/modules/content/hamburger-nav-publish-io';
 
@@ -69,7 +70,7 @@ export async function saveSiteContent(
 
     // Gallery-specific revalidation
     if (sectionKey === 'gallery') {
-      revalidatePath(`/${locale}/gallery`);
+      revalidatePath(buildGalleryListUrl(locale));
       revalidatePath('/sitemap.xml');
     }
 
@@ -146,7 +147,7 @@ export async function publishSiteContent(
 
     // Gallery-specific revalidation
     if (sectionKey === 'gallery') {
-      revalidatePath(`/${locale}/gallery`);
+      revalidatePath(buildGalleryListUrl(locale));
       revalidatePath('/sitemap.xml');
     }
 
@@ -188,7 +189,7 @@ export async function unpublishSiteContent(
 
     // Gallery-specific revalidation
     if (sectionKey === 'gallery') {
-      revalidatePath(`/${locale}/gallery`);
+      revalidatePath(buildGalleryListUrl(locale));
       revalidatePath('/sitemap.xml');
     }
 

@@ -1,14 +1,16 @@
 # 功能規格（已實作行為 / SSoT）
 
 > 已落地功能與技術細節（Single Source of Truth）  
-> 最後更新: 2026-01-21  
+> 最後更新: 2026-01-22  
 > 狀態: Active
 
 本文件描述「**已實作**」的行為與其技術細節（以本檔為準）。
 
 - 架構與全域約束：`../ARCHITECTURE.md`
+- Owner dashboard（只看未完成與 drift）：`STATUS.md`
 - 單一功能契約 / 流程（穩定 specs）：`specs/README.md`
 - Drift 追蹤與修復手冊：`../uiux_refactor.md`（stable `@see` index + active drift tracker）
+- Drift repair steps（active plan；completed snapshots → `archive/*`）：`meta/STEP_PLAN.md`
 - 歷史實作記錄 / code maps：`archive/README.md`
 - 待辦/計畫（what/why/status）：`ROADMAP.md`
 - 刻意保留的不完整 / gated（避免把「implemented」誤看成「fully complete」）：見 [已知缺口](#known-gaps-roadmap-links)
@@ -122,10 +124,10 @@
 
 | 路由                                        | 說明                                                            |
 | ------------------------------------------- | --------------------------------------------------------------- |
-| `/[locale]/gallery`                         | 圖庫列表                                                        |
-| `/[locale]/gallery/categories/[slug]`       | 分類列表（v2 canonical）                                        |
-| `/[locale]/gallery/items/[category]/[slug]` | 單一作品頁（v2 canonical）                                      |
-| `/[locale]/gallery/[category]`              | legacy（redirect-only → `/[locale]/gallery/categories/[slug]`） |
+| `/[locale]/gallery`                         | 圖庫列表（支援 `?q=<q>&tag=<tag>&sort=<...>`；legacy `?category=<slug>` 會 redirect 到 `/[locale]/gallery/categories/[slug]`） |
+| `/[locale]/gallery/categories/[slug]`       | 分類列表（v2 canonical；支援 `?q=<q>&tag=<tag>&sort=<...>`） |
+| `/[locale]/gallery/items/[category]/[slug]` | 單一作品頁（v2 canonical） |
+| `/[locale]/gallery/[category]`              | legacy（308 → `/[locale]/gallery/categories/[slug]`） |
 | `/[locale]/gallery/[category]/[slug]`       | legacy（301 → `/[locale]/gallery/items/[category]/[slug]`）     |
 
 ### API 端點
@@ -592,6 +594,11 @@
 
 - Page view tracking（ingestion + privacy-first aggregation）已落地：`specs/completed/page-views-analytics-spec.md`
 - Dashboard UI 已落地（Admin-only, read-only）：`/[locale]/admin/analytics/pageviews`
+
+### Security / Hardening（已知風險；修復追蹤：`meta/STEP_PLAN.md`）
+
+- ~~P0 Build/Availability：Gallery list/category/legacy routes 的 page modules 目前為空，導致 `npm run build` 失敗~~ → ✅ 已修復（PR-32：2026-01-22）
+- SEO drift：Blog/Gallery internal links 未全面使用 `lib/seo/url-builders.ts`（避免 SEO drift）→ `meta/STEP_PLAN.md`（PR-30, PR-33）
 
 ---
 

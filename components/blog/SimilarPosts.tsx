@@ -11,6 +11,7 @@ import { getTranslations } from 'next-intl/server';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import { getResolvedSimilarPosts } from '@/lib/modules/embedding/similar-items-public-io';
+import { buildBlogPostUrl } from '@/lib/seo/url-builders';
 
 interface SimilarPostsProps {
   postId: string;
@@ -57,7 +58,7 @@ export default async function SimilarPosts({ postId, locale }: SimilarPostsProps
 
               {/* Title - Clear anchor text with v2 canonical URL */}
               <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                <a href={`/${locale}/blog/posts/${post.slug}`}>
+                <a href={buildBlogPostUrl(locale, post.slug)}>
                   {title}
                 </a>
               </h3>

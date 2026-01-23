@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { getPublicPostsCached, getCategoriesWithCountsCached } from '@/lib/modules/blog/cached';
 import { isBlogEnabledCached } from '@/lib/features/cached';
 import { getMetadataAlternates } from '@/lib/seo';
-import { buildBlogPostUrl, buildBlogCategoryUrl } from '@/lib/seo/url-builders';
+import { buildBlogListUrl, buildBlogPostUrl, buildBlogCategoryUrl } from '@/lib/seo/url-builders';
 import BlogCard from '@/components/blog/BlogCard';
 import BlogSearch from '@/components/blog/BlogSearch';
 import BlogCategorySidebar from '@/components/blog/BlogCategorySidebar';
@@ -103,7 +103,7 @@ export default async function BlogPage({
               {categories.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-2 mb-6 lg:hidden">
                   <a
-                    href={`/${locale}/blog${q ? `?q=${q}` : ''}`}
+                    href={buildBlogListUrl(locale, { q })}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       !categorySlug
                         ? 'bg-primary text-white'

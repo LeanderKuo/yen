@@ -15,7 +15,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { fetchSharedReport } from '@/lib/modules/ai-analysis/report-shares-io';
-import { markdownToHtml } from '@/lib/markdown/server';
+import { untrustedMarkdownToHtml } from '@/lib/markdown/untrusted';
 import { SHARE_TOKEN_REGEX } from '@/lib/types/ai-analysis';
 
 // Force dynamic rendering to prevent stale cache after revocation
@@ -57,7 +57,7 @@ export default async function SharedReportPage({ params }: PageProps) {
 
   // Convert markdown to HTML
   const resultHtml = report.result
-    ? await markdownToHtml(report.result)
+    ? await untrustedMarkdownToHtml(report.result)
     : null;
 
   // Format dates for display

@@ -6,6 +6,7 @@
  */
 
 import 'server-only';
+import { unstable_cache, revalidateTag } from 'next/cache';
 import { createAdminClient } from '@/lib/infrastructure/supabase/admin';
 
 /**
@@ -49,8 +50,24 @@ export async function getGlobalCacheVersion(): Promise<number> {
 }
 
 /**
+ * Short-TTL cached version of getGlobalCacheVersion().
+ * Uses unstable_cache with 5s TTL to reduce DB reads from N per request to ≤1.
+ * The 'cache-version' tag allows instant invalidation via revalidateTag().
+ */
+export const getGlobalCacheVersionCached = unstable_cache(
+  async () => getGlobalCacheVersion(),
+  ['global-cache-version'],
+  {
+    revalidate: 5,
+    tags: ['global-system', 'cache-version'],
+  }
+);
+
+/**
  * Increment the global cache version and return the new value.
  * This effectively invalidates all cached queries using cachedQuery().
+ * Also revalidates the cache-version tag to ensure getGlobalCacheVersionCached()
+ * returns the new value immediately.
  */
 export async function incrementGlobalCacheVersion(): Promise<number> {
   const supabase = createAdminClient();
@@ -82,6 +99,8 @@ export async function incrementGlobalCacheVersion(): Promise<number> {
       throw new Error('Failed to increment cache version: ' + updateError.message);
     }
 
+    // Revalidate the cached version lookup
+    revalidateTag('cache-version', { expire: 0 });
     return newVersion;
   }
 
@@ -89,5 +108,8 @@ export async function incrementGlobalCacheVersion(): Promise<number> {
     throw new Error('Failed to increment cache version: ' + error.message);
   }
 
+  // Revalidate the cached version lookup
+  revalidateTag('cache-version', { expire: 0 });
   return (data as { cache_version: number })?.cache_version ?? 1;
 }
+

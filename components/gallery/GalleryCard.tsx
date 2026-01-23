@@ -12,6 +12,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toWebp } from '@/lib/utils/cloudinary-url';
+import { buildGalleryItemUrl } from '@/lib/seo/url-builders';
 import type { GalleryItem, GalleryCategory } from '@/lib/types/gallery';
 import GalleryCardClient from './GalleryCardClient';
 
@@ -28,8 +29,8 @@ export default function GalleryCard({ item, locale }: GalleryCardProps) {
   const categorySlug = item.category?.slug || '';
   const imageAlt = item.image_alt_zh || title;
   
-  // PR-6B: Build v2 canonical URL for gallery item
-  const href = `/${locale}/gallery/items/${categorySlug}/${item.slug}`;
+  // PR-30: Build v2 canonical URL using URL builder
+  const href = buildGalleryItemUrl(locale, categorySlug, item.slug);
   
   // Convert image URL to WebP for optimal delivery
   const imageUrl = toWebp(item.image_url);

@@ -10,6 +10,7 @@
  */
 
 import Link from 'next/link';
+import { buildBlogPostUrl } from '@/lib/seo/url-builders';
 
 interface ArticleCard {
   id: string;
@@ -77,7 +78,7 @@ function ArticleCardComponent({ article, locale }: { article: ArticleCard; local
 
   return (
     <Link
-      href={`/${locale}/blog/posts/${article.slug}`}
+      href={buildBlogPostUrl(locale, article.slug)}
       className="relative block w-full h-64 bg-[#EEEBE3] rounded-3xl overflow-hidden group transition-transform duration-200 hover:-translate-y-1"
     >
       <div className="absolute inset-0 shadow-[0_4px_16px_rgba(0,0,0,0.06)] group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] transition-shadow duration-200" />

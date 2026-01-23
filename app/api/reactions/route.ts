@@ -17,7 +17,7 @@ import { cookies } from 'next/headers';
 import { getClientIP, hashIP } from '@/lib/security/ip';
 import { ANON_ID_COOKIE_NAME, isValidAnonId, generateAnonId } from '@/lib/utils/anon-id';
 import { checkReactionRateLimit, toggleReaction } from '@/lib/reactions/io';
-import { isGalleryEnabled } from '@/lib/features/io';
+import { isGalleryEnabledCached } from '@/lib/features/cached';
 import { validateReactionToggleRequest } from '@/lib/validators/reactions';
 
 export async function POST(request: NextRequest) {
@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
 
     const { targetType, targetId } = validation.data!;
 
-    // Feature gate: check if the corresponding feature is enabled
+    // Feature gate: check if the corresponding feature is enabled (cached to reduce DB pressure)
     if (targetType === 'gallery_item') {
-      const galleryEnabled = await isGalleryEnabled();
+      const galleryEnabled = await isGalleryEnabledCached();
       if (!galleryEnabled) {
         return NextResponse.json(
           { error: 'Gallery feature is not available' },

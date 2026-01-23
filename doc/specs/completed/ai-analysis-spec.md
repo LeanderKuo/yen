@@ -205,6 +205,8 @@ Enablement + smoke test: `doc/runbook/ai-analysis.md`
 3. Public viewer opens `/<locale>/ai-analysis/share/<token>`
 4. Page validates token format and calls `get_shared_ai_report`
 5. Viewer renders report markdown (read-only, noindex)
+   - Report markdown **must** be rendered via `lib/markdown/untrusted.ts` (sanitized pipeline)
+   - Security: No raw HTML, only https/mailto links, all links open in new tab with `rel="noopener noreferrer"`
 
 ## 6. Idempotency / Concurrency（operational）
 

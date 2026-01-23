@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link';
 import { getPublishedSiteContentCached } from '@/lib/modules/content/cached';
 import { isBlogEnabledCached, isGalleryEnabledCached } from '@/lib/features/cached';
+import { buildBlogListUrl, buildGalleryListUrl } from '@/lib/seo/url-builders';
 import { getVisibleLandingSectionsCached } from '@/lib/modules/landing/cached';
 import { getTranslations } from 'next-intl/server';
 import { pickLocaleContent } from '@/lib/i18n/pick-locale';
@@ -104,12 +105,12 @@ export default async function Header({ locale }: HeaderProps) {
     const pageNavItems = [
       ...(isBlogEnabled ? [{
         key: 'blog',
-        href: `/${locale}/blog`,
+        href: buildBlogListUrl(locale),
         label: nav?.blog || tNav('blog')
       }] : []),
       ...(isGalleryEnabled ? [{ 
         key: 'gallery', 
-        href: `/${locale}/gallery`, 
+        href: buildGalleryListUrl(locale), 
         label: nav?.gallery || tNav('gallery')
       }] : []),
     ];

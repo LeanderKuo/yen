@@ -29,6 +29,7 @@ import {
   type ActionResult,
 } from '@/lib/types/action-result';
 import { isValidSlug } from '@/lib/validators/slug';
+import { buildBlogListUrl } from '@/lib/seo/url-builders';
 import type { CategoryWithCount } from '@/lib/types/blog';
 
 // ============================================================================
@@ -101,7 +102,7 @@ export async function createCategoryAction(
     // Revalidate after successful creation
     revalidateTag('blog', { expire: 0 });
     revalidatePath(`/${locale}/admin/categories`);
-    revalidatePath(`/${locale}/blog`);
+    revalidatePath(buildBlogListUrl(locale));
 
     return actionSuccess();
   } catch (error) {
@@ -137,7 +138,7 @@ export async function deleteCategoryAction(
     // Revalidate after successful deletion
     revalidateTag('blog', { expire: 0 });
     revalidatePath(`/${locale}/admin/categories`);
-    revalidatePath(`/${locale}/blog`);
+    revalidatePath(buildBlogListUrl(locale));
 
     return actionSuccess();
   } catch (error) {

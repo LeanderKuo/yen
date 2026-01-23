@@ -7,15 +7,16 @@
 
 import 'server-only';
 import { unstable_cache } from 'next/cache';
-import { getGlobalCacheVersion } from '@/lib/system/cache-io';
+import { getGlobalCacheVersionCached } from '@/lib/system/cache-io';
 
 /**
  * Get cache version with fallback for build time.
+ * Uses the cached version lookup to reduce DB reads to ≤1 per 5 seconds.
  * During static generation, the service role client may not be available.
  */
 async function getCacheVersionSafe(): Promise<number> {
   try {
-    return await getGlobalCacheVersion();
+    return await getGlobalCacheVersionCached();
   } catch (error) {
     // During build/static generation, fallback to version 1
     console.warn('[cachedQuery] Failed to get cache version, using default:', error);

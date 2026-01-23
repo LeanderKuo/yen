@@ -8,6 +8,7 @@
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { buildGalleryListUrl } from '@/lib/seo/url-builders';
 import {
   saveGalleryItemAdmin,
   deleteGalleryItemAdmin,
@@ -57,7 +58,7 @@ export async function saveGalleryItemAction(
     // Revalidate cache
     revalidateTag('gallery', { expire: 0 });
     revalidatePath(`/${locale}/admin/gallery`);
-    revalidatePath(`/${locale}/gallery`);
+    revalidatePath(buildGalleryListUrl(locale));
 
     return { success: true };
   } catch (error) {
@@ -83,7 +84,7 @@ export async function deleteGalleryItemAction(
     // Revalidate cache
     revalidateTag('gallery', { expire: 0 });
     revalidatePath(`/${locale}/admin/gallery`);
-    revalidatePath(`/${locale}/gallery`);
+    revalidatePath(buildGalleryListUrl(locale));
 
     return { success: true };
   } catch (error) {

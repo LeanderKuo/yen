@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-> Last Updated: 2026-01-21
+> Last Updated: 2026-01-22
 > Status: Enforced
 > Role: Single source of truth for architecture and global constraints.
 
@@ -37,6 +37,7 @@
 - Markdown trust boundaries：
   - Trusted admin markdown：`lib/markdown/server.ts`（posts / site_content 等管理員內容）。
   - High-exposure hotspots markdown：`lib/markdown/hotspots.ts`（`gallery_hotspots.description_md`；禁 raw HTML + sanitize + https/mailto links）。
+  - Untrusted markdown（LLM output / share links / 非 admin 來源）：**必須**使用 `lib/markdown/untrusted.ts`（禁 raw HTML + sanitize + https/mailto links）。
 - Public UI 不得 import `components/admin/*` 或 admin-only dependencies。
 - Feature visibility (blog/gallery) 必須走 `feature_settings` + `lib/features/cached.ts`。
 - Public SSR 讀取必須使用 `cachedQuery` 包裝的 cached modules（例如 `lib/modules/*/cached.ts`、`lib/features/cached.ts`）。
@@ -202,10 +203,10 @@ interface ApiErrorResponse {
 
 - **一致性原則**：feature disabled 時，UI、sitemap、API 都必須一致收斂。
 - **API routes 必須檢查 feature status**：
-  - `GET /api/gallery/items` → 檢查 `isGalleryEnabled()`
+  - `GET /api/gallery/items` → 檢查 `isGalleryEnabledCached()`
   - `POST /api/reactions` → 根據 `targetType` 檢查對應 feature（`gallery_item` → gallery gate）
 - **回應規則**：feature disabled 時回傳 404，不是 403。
-- **使用非快取版本**：API routes 使用 `lib/features/io.ts` 的直接函式（不走 SSR cache）。
+- **使用快取版本**：API routes 使用 `lib/features/cached.ts` 的快取函式（減少 DB 壓力；與 §7 一致）。
 - **Comments 例外**：`comment` 類型的 reactions 不做獨立 feature gate，因為 comments 附屬於 blog/gallery 頁面，已有 UI level 的 gate。
 
 ### 3.11 SEO / URL 單一來源 (Phase 4 完成)
@@ -398,6 +399,7 @@ interface ApiErrorResponse {
   - 使用 `tsconfig.typecheck.json`（extends `tsconfig.json`；exclude：`uiux/`, `.next/`, `.test-dist/`）
   - 若遇到 `.next/types` 相關型別錯誤：以 `npm run build` 為準（必要時先清掉 `.next/` 再 build）
 - `npm run build`（routes/SEO/`.next/types` 相關變更必跑）
+  - 若出現 `is not a module`：優先檢查是否有空檔/缺 export 的 route 檔案（常見：`app/**/page.tsx` 0 bytes）；快速檢查：`Get-ChildItem app -Recurse -File -Include *.ts,*.tsx,*.mts | Where-Object { $_.Length -eq 0 }`
 - `npm run dev`
 - `npm run docs:check-indexes`（有變更 `doc/specs/*` 或 `doc/archive/*` 時必跑）
 - `npm run lint:md-links`（有變更 docs/README/連結時建議跑）
@@ -405,11 +407,13 @@ interface ApiErrorResponse {
 ## 13. Documentation (Links only)
 
 - Docs hub (SRP map + navigation): `doc/README.md`
+- Owner dashboard (drift + not-done only): `doc/STATUS.md`
 - Docs governance / update matrix (agent-facing): `doc/GOVERNANCE.md`
 - Implemented behavior (SSoT): `doc/SPEC.md`
 - Roadmap (what/why/status only): `doc/ROADMAP.md`
 - Ops runbook (index; details in `doc/runbook/*`): `doc/RUNBOOK.md`
 - Drift tracker + playbooks + stable `@see` index: `uiux_refactor.md`
+- Active drift repair steps (keep completed snapshots in archive): `doc/meta/STEP_PLAN.md`
 - Single-feature specs index (stable): `doc/specs/README.md`
 - Home UIUX + Gallery Hero/Hotspots PRD（proposed；Implementation Contract）：`doc/specs/proposed/GALLERY_HERO_IMAGE_AND_HOTSPOTS.md`
 
@@ -430,9 +434,11 @@ lib/
 ├── infrastructure/    # 外部服務 (SDK wrappers, API clients)
 │   ├── supabase/      # Supabase client factories
 │   ├── openrouter/    # OpenRouter LLM client
-│   ├── cloudinary/    # Cloudinary SDK (placeholder)
+│   ├── gemini/        # Gemini SDK wrapper (server-only)
+│   ├── cloudinary/    # Cloudinary SDK
 │   ├── akismet/       # Akismet spam API
-│   └── sentry/        # Sentry monitoring
+│   ├── sentry/        # Sentry monitoring
+│   └── stripe/        # Stripe SDK (placeholder; scope-reduced)
 ├── markdown/          # Markdown helpers
 ├── modules/           # 業務領域模組
 │   ├── blog/          # 部落格文章
@@ -443,6 +449,7 @@ lib/
 │   ├── preprocessing/ # 資料前處理 pipeline
 │   ├── import-export/ # 資料匯入匯出
 │   ├── comment/       # 留言與審核
+│   ├── safety-risk-engine/ # Safety Risk Engine（comments moderation）
 │   ├── content/       # CMS 內容區塊
 │   ├── user/          # 使用者資料
 │   ├── landing/       # 首頁區塊

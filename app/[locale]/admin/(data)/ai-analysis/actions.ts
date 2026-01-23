@@ -20,7 +20,7 @@ import {
   ADMIN_ERROR_CODES,
 } from '@/lib/types/action-result';
 import { validateAnalysisRequest } from '@/lib/validators/ai-analysis';
-import { markdownToHtml } from '@/lib/markdown/server';
+import { untrustedMarkdownToHtml } from '@/lib/markdown/untrusted';
 import type {
   AnalysisReport,
   AnalysisReportListItem,
@@ -160,7 +160,7 @@ export async function getAnalysisReportDetail(
   // Convert Markdown result to HTML on server side
   let resultHtml: string | null = null;
   if (report.result) {
-    resultHtml = await markdownToHtml(report.result);
+    resultHtml = await untrustedMarkdownToHtml(report.result);
   }
 
   return actionSuccess({

@@ -3,6 +3,7 @@
 import { togglePublishSiteContent } from '@/lib/modules/content/io';
 import { createClient } from '@/lib/infrastructure/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { buildGalleryListUrl } from '@/lib/seo/url-builders';
 
 export async function toggleSectionVisibility(
   sectionKey: string,
@@ -13,27 +14,27 @@ export async function toggleSectionVisibility(
     // Get current user
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     // Toggle the publish status
     const result = await togglePublishSiteContent(sectionKey, publish, user?.id);
-    
+
     if (!result) {
       return { success: false, error: 'Failed to update section visibility' };
     }
-    
+
     // Invalidate cached site content (Header/Footer/Home rely on unstable_cache tags)
     revalidateTag('site-content', { expire: 0 });
 
     // Revalidate paths
     revalidatePath(`/${locale}/admin/content`);
     revalidatePath(`/${locale}`); // Revalidate homepage
-    
+
     // Gallery-specific revalidations
     if (sectionKey === 'gallery') {
-      revalidatePath(`/${locale}/gallery`);
+      revalidatePath(buildGalleryListUrl(locale));
       revalidatePath('/sitemap.xml');
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error toggling section visibility:', error);

@@ -8,6 +8,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { toWebp } from '@/lib/utils/cloudinary-url';
+import { buildGalleryItemUrl } from '@/lib/seo/url-builders';
 import type { GalleryItem, GalleryCategory } from '@/lib/types/gallery';
 
 interface GallerySectionProps {
@@ -60,7 +61,7 @@ export default function GallerySection({
             return (
               <Link
                 key={item.id}
-                href={`/${locale}/gallery/items/${categorySlug}/${item.slug}`}
+                href={buildGalleryItemUrl(locale, categorySlug, item.slug)}
                 className="group relative block rounded-xl overflow-hidden bg-surface"
               >
                 <div style={{ aspectRatio }} className="relative">

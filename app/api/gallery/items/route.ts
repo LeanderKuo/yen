@@ -16,14 +16,14 @@ import { cookies } from 'next/headers';
 import { ANON_ID_COOKIE_NAME, isValidAnonId } from '@/lib/utils/anon-id';
 import { getGalleryItemsPage } from '@/lib/modules/gallery/io';
 import { getAnonLikedItemIds } from '@/lib/reactions/io';
-import { isGalleryEnabled } from '@/lib/features/io';
+import { isGalleryEnabledCached } from '@/lib/features/cached';
 import { validateGalleryItemsQuery } from '@/lib/validators/gallery-api';
 import type { GalleryItemsApiResponse, GalleryItemWithLikedByMe } from '@/lib/types/gallery';
 
 export async function GET(request: NextRequest): Promise<NextResponse<GalleryItemsApiResponse | { error: string }>> {
   try {
-    // Feature gate: return 404 if gallery is disabled
-    const galleryEnabled = await isGalleryEnabled();
+    // Feature gate: return 404 if gallery is disabled (cached to reduce DB pressure)
+    const galleryEnabled = await isGalleryEnabledCached();
     if (!galleryEnabled) {
       return NextResponse.json(
         { error: 'Gallery feature is not available' },
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<GalleryIte
     }
 
     const { searchParams } = new URL(request.url);
-    
+
     // P0-6: Use centralized validator
     const validation = validateGalleryItemsQuery(searchParams);
     if (!validation.valid) {
@@ -41,9 +41,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<GalleryIte
         { status: 400 }
       );
     }
-    
+
     const { limit, offset, categorySlug, q, tag, sort } = validation.data!;
-    
+
     // Use lib/modules/gallery/io for gallery items
     const { items, total } = await getGalleryItemsPage({
       limit,
@@ -53,27 +53,27 @@ export async function GET(request: NextRequest): Promise<NextResponse<GalleryIte
       tag,
       sort,
     });
-    
+
     // Get liked status using lib/reactions/io
     const cookieStore = await cookies();
     const anonId = cookieStore.get(ANON_ID_COOKIE_NAME)?.value;
     const validAnonId = anonId && isValidAnonId(anonId) ? anonId : undefined;
     const likedItemIds = await getAnonLikedItemIds(
-      validAnonId, 
+      validAnonId,
       'gallery_item',
       items.map(item => item.id)
     );
-    
+
     // Add likedByMe to each item
     const itemsWithLikedByMe: GalleryItemWithLikedByMe[] = items.map(item => ({
       ...item,
       likedByMe: likedItemIds.has(item.id),
     }));
-    
+
     // Calculate pagination info
     const nextOffset = (offset ?? 0) + (limit ?? 24);
     const hasMore = nextOffset < total;
-    
+
     return NextResponse.json({
       items: itemsWithLikedByMe,
       nextOffset,

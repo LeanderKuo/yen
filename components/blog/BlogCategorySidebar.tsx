@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { CategoryWithCount } from '@/lib/types/blog';
+import { buildBlogListUrl, buildBlogCategoryUrl } from '@/lib/seo/url-builders';
 
 interface BlogCategorySidebarProps {
   categories: CategoryWithCount[];
@@ -35,19 +36,14 @@ export default function BlogCategorySidebar({
     setExpandedCategories(newExpanded);
   };
 
-  // PR-6A: Build canonical URLs (path-based, not query-based)
+  // PR-33: Build canonical URLs using URL builders
   const buildUrl = (categorySlug?: string) => {
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('q', searchQuery);
-    if (sortQuery) params.set('sort', sortQuery);
-    const query = params.toString();
-    
     if (categorySlug) {
       // v2 canonical: /blog/categories/{slug}
-      return `/${locale}/blog/categories/${categorySlug}${query ? `?${query}` : ''}`;
+      return buildBlogCategoryUrl(locale, categorySlug, { q: searchQuery, sort: sortQuery });
     }
     // All posts: /blog
-    return `/${locale}/blog${query ? `?${query}` : ''}`;
+    return buildBlogListUrl(locale, { q: searchQuery, sort: sortQuery });
   };
 
   const totalPosts = categories.reduce((sum, cat) => sum + cat.post_count, 0) + uncategorizedCount;

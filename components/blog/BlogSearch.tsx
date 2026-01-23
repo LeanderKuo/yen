@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { buildBlogListUrl } from '@/lib/seo/url-builders';
 
 interface BlogSearchProps {
   placeholder?: string;
@@ -41,8 +42,10 @@ export default function BlogSearch({ placeholder, locale }: BlogSearchProps) {
       }
     });
     
-    const queryString = params.toString();
-    router.push(`/${locale}/blog${queryString ? `?${queryString}` : ''}`);
+    // PR-33: Use URL builder for navigation
+    const q = params.get('q') || undefined;
+    const sortParam = params.get('sort') || undefined;
+    router.push(buildBlogListUrl(locale, { q, sort: sortParam }));
   }, [searchParams, router, locale]);
 
   // Debounce search: only push if local state differs from current URL

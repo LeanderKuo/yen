@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getPublicPostsCached, getCategoriesWithCountsCached } from '@/lib/modules/blog/cached';
 import { isBlogEnabledCached } from '@/lib/features/cached';
 import { getMetadataAlternates } from '@/lib/seo';
+import { buildBlogListUrl, buildBlogCategoryUrl, buildBlogPostUrl } from '@/lib/seo/url-builders';
 import BlogCard from '@/components/blog/BlogCard';
 import BlogSearch from '@/components/blog/BlogSearch';
 import BlogCategorySidebar from '@/components/blog/BlogCategorySidebar';
@@ -90,7 +91,7 @@ export default async function BlogCategoryPage({
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <nav className="mb-4 text-sm text-secondary">
-            <a href={`/${locale}/blog`} className="hover:text-primary transition-colors">
+            <a href={buildBlogListUrl(locale)} className="hover:text-primary transition-colors">
               {t('title')}
             </a>
             <span className="mx-2">/</span>
@@ -129,7 +130,7 @@ export default async function BlogCategoryPage({
               {categories.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-2 mb-6 lg:hidden">
                   <a
-                    href={`/${locale}/blog${q ? `?q=${q}` : ''}`}
+                    href={buildBlogListUrl(locale, { q })}
                     className="px-4 py-2 rounded-full text-sm font-medium transition-colors bg-surface-raised text-secondary hover:bg-surface-raised-hover hover:text-foreground"
                   >
                     {t('allCategories')}
@@ -137,7 +138,7 @@ export default async function BlogCategoryPage({
                   {categories.map((cat) => (
                     <a
                       key={cat.id}
-                      href={`/${locale}/blog/categories/${cat.slug}${q ? `?q=${q}` : ''}`}
+                      href={buildBlogCategoryUrl(locale, cat.slug, { q })}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                         categorySlug === cat.slug
                           ? 'bg-primary text-white'
@@ -177,7 +178,7 @@ export default async function BlogCategoryPage({
                       : null;
                     const imageAlt = post.cover_image_alt_zh || title;
                     // Use v2 canonical URL for post links
-                    const postUrl = `/${locale}/blog/posts/${post.slug}`;
+                    const postUrl = buildBlogPostUrl(locale, post.slug);
 
                     return (
                       <BlogCard

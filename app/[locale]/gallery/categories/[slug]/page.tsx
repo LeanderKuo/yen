@@ -1,28 +1,31 @@
 /**
  * Gallery Category Page (v2 Canonical)
- * 
+ *
  * Displays gallery items filtered by category at /gallery/categories/[slug]
- * with masonry layout and infinite scroll.
+ * with infinite scroll and sorting support.
+ *
+ * @see STEP_PLAN.md PR-32
  */
 
-import { notFound } from 'next/navigation';
-import { Metadata } from 'next';
-import { cookies } from 'next/headers';
-import { 
-  getVisibleGalleryCategoriesCached, 
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import {
+  getVisibleGalleryCategoriesCached,
   getVisibleGalleryPinsCached,
   getVisibleGalleryItemsPageCached,
-} from '@/lib/modules/gallery/cached';
-import { isGalleryEnabledCached } from '@/lib/features/cached';
-import { getMetadataAlternates } from '@/lib/seo/hreflang';
-import { getLikedGalleryItemIds } from '@/lib/modules/gallery/liked-by-me-io';
-import { ANON_ID_COOKIE_NAME } from '@/lib/utils/anon-id';
-import GalleryMasonry from '@/components/gallery/GalleryMasonry';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import type { GalleryListSort, GalleryCategory } from '@/lib/types/gallery';
+} from "@/lib/modules/gallery/cached";
+import { isGalleryEnabledCached } from "@/lib/features/cached";
+import { getMetadataAlternates } from "@/lib/seo/hreflang";
+import { getLikedGalleryItemIds } from "@/lib/modules/gallery/liked-by-me-io";
+import { ANON_ID_COOKIE_NAME } from "@/lib/utils/anon-id";
+import GalleryMasonry from "@/components/gallery/GalleryMasonry";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import type { GalleryListSort } from "@/lib/types/gallery";
 
-interface PageProps {
+interface CategoryPageProps {
   params: Promise<{ locale: string; slug: string }>;
   searchParams: Promise<{
     q?: string;
@@ -31,133 +34,108 @@ interface PageProps {
   }>;
 }
 
-async function getCategoryBySlug(slug: string, categories: GalleryCategory[]): Promise<GalleryCategory | undefined> {
-  return categories.find(c => c.slug === slug);
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
   const { locale, slug: categorySlug } = await params;
-  
-  // Check if gallery is enabled
-  const isEnabled = await isGalleryEnabledCached();
-  if (!isEnabled) {
+
+  const enabled = await isGalleryEnabledCached();
+  if (!enabled) {
     return {};
   }
-  
+
   const categories = await getVisibleGalleryCategoriesCached();
-  const category = await getCategoryBySlug(categorySlug, categories);
-  
+  const category = categories.find((c) => c.slug === categorySlug);
+
   if (!category) {
     return {};
   }
-  
-  const title = category.name_zh;
-  const description = `瀏覽「${category.name_zh}」分類的作品`;
-  
-  // v2 canonical URL
+
+  const t = await getTranslations({ locale, namespace: "gallery" });
+  const categoryName = category.name_zh;
+
   return {
-    title: `${title}｜畫廊`,
-    description,
-    alternates: getMetadataAlternates(`/gallery/categories/${categorySlug}`, locale),
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-    },
+    title: `${categoryName}｜${t("title")}`,
+    description: `${categoryName}分類的作品集`,
+    alternates: getMetadataAlternates(
+      `/gallery/categories/${categorySlug}`,
+      locale
+    ),
   };
 }
 
-export default async function GalleryCategoryPage({ params, searchParams }: PageProps) {
+export default async function GalleryCategoryPage({
+  params,
+  searchParams,
+}: CategoryPageProps) {
   const { locale, slug: categorySlug } = await params;
-  const query = await searchParams;
-  
-  // Check if gallery is enabled
-  const isEnabled = await isGalleryEnabledCached();
-  if (!isEnabled) {
+  const { q, tag, sort: sortParam } = await searchParams;
+
+  // Feature gate
+  const enabled = await isGalleryEnabledCached();
+  if (!enabled) {
     notFound();
   }
-  
-  // Load categories and find the current one
+
+  // Validate category exists
   const categories = await getVisibleGalleryCategoriesCached();
-  const category = await getCategoryBySlug(categorySlug, categories);
-  
-  // If category doesn't exist or isn't visible, return 404
+  const category = categories.find((c) => c.slug === categorySlug);
+
   if (!category) {
     notFound();
   }
-  
-  // Load initial data
-  const [pins, itemsResult] = await Promise.all([
-    getVisibleGalleryPinsCached('gallery'),
+
+  // Parse sort parameter
+  const sort = (sortParam as GalleryListSort) || "newest";
+
+  // Fetch data in parallel
+  const [pins, initialData] = await Promise.all([
+    getVisibleGalleryPinsCached("gallery"),
     getVisibleGalleryItemsPageCached({
+      categorySlug,
       limit: 24,
       offset: 0,
-      categorySlug: categorySlug,
-      q: query.q,
-      tag: query.tag,
-      sort: (query.sort as GalleryListSort) || 'newest',
+      q,
+      tag,
+      sort,
     }),
   ]);
-  
-  // Get liked status for initial items
+
+  const { items: initialItems, total: initialTotal } = initialData;
+
+  // Get liked status for initial items and pins (non-cached, user-specific)
   const cookieStore = await cookies();
   const anonId = cookieStore.get(ANON_ID_COOKIE_NAME)?.value;
-  
-  const pinItemIds = pins
-    .map((p) => p.item?.id)
-    .filter((id): id is string => Boolean(id));
-  const allItemIds = Array.from(new Set([
-    ...itemsResult.items.map((item) => item.id),
-    ...pinItemIds,
-  ]));
 
-  const likedItemIds = await getLikedGalleryItemIds(anonId, allItemIds);
-  
-  // Add likedByMe to items
-  const itemsWithLiked = itemsResult.items.map(item => ({
+  const allItemIds = [
+    ...initialItems.map((item) => item.id),
+    ...pins.filter((pin) => pin.item).map((pin) => pin.item!.id),
+  ];
+
+  const likedIds = await getLikedGalleryItemIds(anonId, allItemIds);
+
+  // Merge likedByMe into items
+  const itemsWithLiked = initialItems.map((item) => ({
     ...item,
-    likedByMe: likedItemIds.has(item.id),
+    likedByMe: likedIds.has(item.id),
   }));
 
-  const pinsWithLiked = pins.map((pin) => {
-    if (!pin.item) return pin;
-    return {
-      ...pin,
-      item: {
-        ...pin.item,
-        likedByMe: likedItemIds.has(pin.item.id),
-      },
-    };
-  });
-  
-  const title = category.name_zh;
-  
+  // Merge likedByMe into pins
+  const pinsWithLiked = pins.map((pin) => ({
+    ...pin,
+    item: pin.item
+      ? { ...pin.item, likedByMe: likedIds.has(pin.item.id) }
+      : undefined,
+  }));
+
   return (
     <div className="min-h-screen">
       <Header locale={locale} />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-24">
-        {/* Breadcrumb (v2 canonical) */}
-        <nav className="mb-4 text-sm text-secondary">
-          <a href={`/${locale}/gallery`} className="hover:text-primary transition-colors">
-            畫廊
-          </a>
-          <span className="mx-2">/</span>
-          <span className="text-foreground">{title}</span>
-        </nav>
-        
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
-          {title}
-        </h1>
-        
+      <main className="pt-24 pb-16">
         <GalleryMasonry
           initialItems={itemsWithLiked}
-          initialTotal={itemsResult.total}
-          initialQuery={{
-            category: categorySlug,
-            q: query.q,
-            tag: query.tag,
-            sort: (query.sort as GalleryListSort) || 'newest',
-          }}
+          initialTotal={initialTotal}
+          initialQuery={{ category: categorySlug, q, tag, sort }}
           categories={categories}
           pins={pinsWithLiked}
           locale={locale}
